@@ -1,0 +1,40 @@
+NIMBO PS5 — gerenciador de downloads do TorBox para PS5 desbloqueado
+=====================================================================
+
+INSTALAÇÃO (PS5 Payload Manager)
+1. Copie a pasta "NimboPS5" para /data/pldmgr/payloads/ no PS5
+   (por FTP ou pelo gerenciador de arquivos do etaHEN).
+2. Abra o PS5 Payload Manager e rode "nimbo-ps5.elf".
+3. Na primeira vez, o Nimbo cria um ícone na aba Mídia da tela inicial
+   e abre a tela dele no navegador do PS5.
+4. Na tela de boas-vindas, aperte "Conectar TorBox com QR code",
+   escaneie com o celular, faça login no TorBox e aprove o código.
+
+Dica: coloque o nimbo-ps5.elf na lista de autoload do Payload Manager
+e desligue "Abrir o navegador ao iniciar" em Ajustes. Assim o Nimbo fica
+sempre rodando e você abre pelo ícone ou pelo celular.
+
+USAR PELO CELULAR
+No Início aparece um QR code. Escaneie com o celular (mesmo Wi-Fi) ou
+abra http://IP-DO-PS5:8090 no navegador do celular.
+
+CONTROLE
+  X       selecionar
+  O       voltar
+  △       opções do item focado
+  L1/R1   trocar de aba
+  Direcional: mover entre os itens
+
+ONDE FICAM AS COISAS
+  Downloads (padrão): /data/Nimbo
+  HD/SSD USB:         /mnt/usb0 ...
+  Configurações:      /data/nimbo/config.json
+  Fila de downloads:  /data/nimbo/jobs.json
+
+OBSERVAÇÕES
+- Mantenha o PS5 ligado enquanto baixa. Por padrão, o Nimbo impede o
+  modo de repouso enquanto há downloads ou extrações em andamento.
+- Extração suporta ZIP (com senha), 7z, RAR e RAR5, inclusive em várias
+  partes. RAR/7z com senha ainda não é suportado nesta versão.
+- Para encerrar: Ajustes > Encerrar o Nimbo. Os downloads retomam de
+  onde pararam quando você abrir de novo.

@@ -1,0 +1,36 @@
+name: Build Nimbo PS5
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependências do sistema
+        run: sudo apt-get update && sudo apt-get install -y clang-18 lld-18 cmake pkg-config python3 zip
+      - name: SDK do PS5 (ps5-payload-sdk)
+        run: |
+          git clone --depth 1 https://github.com/ps5-payload-dev/sdk /tmp/sdk
+          make -C /tmp/sdk -j"$(nproc)"
+          sudo make -C /tmp/sdk install DESTDIR=/opt/ps5-payload-sdk
+      - name: Bibliotecas (zlib, xz, mbedTLS, curl, libarchive)
+        run: sudo -E env "PATH=$PATH" SRC=/tmp ./scripts/build-deps-ps5.sh
+      - name: Compilar
+        run: make ps5
+      - name: Empacotar
+        run: ./scripts/package.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NimboPS5
+          path: dist/*.zip
+      - name: Publicar release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.zip
+            dist/NimboPS5/nimbo-ps5.elf

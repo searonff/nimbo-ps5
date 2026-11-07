@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#121a33">
+<title>Nimbo PS5</title>
+<link rel="icon" href="/icon.png">
+<link rel="apple-touch-icon" href="/icon.png">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="sky" aria-hidden="true"><i></i><i></i><i></i></div>
+<header class="top">
+  <div class="brand"><img src="/icon.png" alt=""><span>Nimbo</span></div>
+  <nav class="tabs" id="tabs">
+    <button data-tab="home" class="tab active" data-nav>Início</button>
+    <button data-tab="cloud" class="tab" data-nav>Nuvem</button>
+    <button data-tab="downloads" class="tab" data-nav>Downloads <b id="badge-dl" class="badge hidden">0</b></button>
+    <button data-tab="add" class="tab" data-nav>Adicionar</button>
+    <button data-tab="files" class="tab" data-nav>Arquivos</button>
+    <button data-tab="storage" class="tab" data-nav>Armazenamento</button>
+    <button data-tab="settings" class="tab" data-nav>Ajustes</button>
+  </nav>
+  <div class="top-stats">
+    <span id="speed-total" class="stat" title="Velocidade total">0 B/s</span>
+    <button id="btn-limit" class="chip" data-nav>Sem limite</button>
+    <button id="btn-qr" class="chip" data-nav>Celular</button>
+    <span id="clock" class="clock"></span>
+  </div>
+</header>
+
+<main>
+  <!-- INÍCIO -->
+  <section id="tab-home" class="panel active">
+    <div id="nokey" class="welcome hidden">
+      <img src="/icon.png" alt="">
+      <h2>Bem-vindo ao Nimbo</h2>
+      <p class="muted">Conecte sua conta do TorBox para ver sua nuvem e baixar direto no PS5.</p>
+      <button class="btn primary big" data-nav data-connect>Conectar TorBox com QR code</button>
+      <p class="muted small">Ou cole sua chave de API em <a href="#" data-goto="settings">Ajustes</a>.</p>
+    </div>
+    <div class="hero" id="hero"></div>
+    <div class="row-head"><h2>Na sua nuvem</h2><button class="btn ghost sm" data-goto="cloud" data-nav>Ver tudo</button></div>
+    <div class="shelf" id="home-cloud"></div>
+    <div class="row-head"><h2>Unidades</h2><button class="btn ghost sm" data-goto="storage" data-nav>Analisar espaço</button></div>
+    <div class="shelf" id="home-drives"></div>
+  </section>
+
+  <!-- DOWNLOADS -->
+  <section id="tab-downloads" class="panel">
+
+    <div class="section-head">
+      <h2>Baixando</h2>
+      <div class="actions">
+        <button class="btn ghost" id="btn-pause-all" data-nav>Pausar tudo</button>
+        <button class="btn ghost" id="btn-resume-all" data-nav>Retomar tudo</button>
+        <button class="btn ghost" id="btn-clear-done" data-nav>Limpar concluídos</button>
+      </div>
+    </div>
+    <div id="watch-list"></div>
+    <div id="job-list" class="list"></div>
+    <div class="section-head"><h2>Extraindo e tarefas</h2>
+      <div class="actions"><button class="btn ghost" id="btn-clear-tasks" data-nav>Limpar concluídas</button></div>
+    </div>
+    <div id="task-list" class="list"></div>
+    <div class="section-head"><h2>Concluídos</h2></div>
+    <div id="done-list" class="list"></div>
+  </section>
+
+  <!-- NUVEM -->
+  <section id="tab-cloud" class="panel">
+    <div class="toolbar">
+      <div class="seg" id="cloud-kind">
+        <button data-kind="torrents" class="active" data-nav>Torrents</button>
+        <button data-kind="webdl" data-nav>Web</button>
+        <button data-kind="usenet" data-nav>Usenet</button>
+      </div>
+      <input id="cloud-search" type="search" placeholder="Buscar na nuvem…" data-nav>
+      <button class="btn" id="btn-cloud-refresh" data-nav>Atualizar</button>
+    </div>
+    <div id="cloud-account" class="muted small"></div>
+    <div id="cloud-list" class="grid"></div>
+  </section>
+
+  <!-- ADICIONAR -->
+  <section id="tab-add" class="panel">
+    <h2>Adicionar links</h2>
+    <p class="muted">Cole um ou mais links (um por linha): magnet, link de hoster/site (vai pelo TorBox) ou link direto.</p>
+    <textarea id="add-links" rows="5" placeholder="magnet:?xt=…&#10;https://…" data-nav></textarea>
+    <div class="seg wide" id="add-mode">
+      <button data-mode="torbox" class="active" data-nav>Pelo TorBox</button>
+      <button data-mode="direct" data-nav>Download direto</button>
+    </div>
+    <label class="check" id="add-auto-wrap"><input type="checkbox" id="add-auto" checked data-nav> Baixar para o PS5 automaticamente quando ficar pronto no TorBox</label>
+    <div class="dest-row">
+      <span class="muted">Destino:</span> <b id="add-dest">—</b>
+      <button class="btn ghost" id="btn-add-dest" data-nav>Trocar</button>
+    </div>
+    <label class="check"><input type="checkbox" id="add-extract" data-nav> Extrair após o download</label>
+    <label class="check"><input type="checkbox" id="add-delarc" data-nav> Apagar o arquivo compactado após extrair</label>
+    <div class="actions"><button class="btn primary big" id="btn-add" data-nav>Adicionar</button></div>
+    <div id="add-result" class="list"></div>
+  </section>
+
+  <!-- ARQUIVOS -->
+  <section id="tab-files" class="panel">
+    <div id="drives" class="drives"></div>
+    <div class="toolbar">
+      <button class="btn ghost" id="btn-fs-up" data-nav>⬆ Voltar</button>
+      <div id="fs-path" class="path"></div>
+      <button class="btn ghost" id="btn-fs-mkdir" data-nav>Nova pasta</button>
+      <button class="btn ghost" id="btn-fs-refresh" data-nav>Atualizar</button>
+    </div>
+    <div id="fs-list" class="list"></div>
+  </section>
+
+  <!-- ARMAZENAMENTO -->
+  <section id="tab-storage" class="panel">
+    <div id="st-drives" class="drives"></div>
+    <div id="st-progress" class="card hidden"></div>
+    <div id="st-result" class="hidden">
+      <div class="card">
+        <div class="section-head"><h3 id="st-title">Uso por tipo</h3><button class="btn ghost sm" id="btn-st-again" data-nav>Analisar de novo</button></div>
+        <div class="catbar" id="st-catbar"></div>
+        <div class="legend" id="st-legend"></div>
+      </div>
+      <div class="card" id="st-sug-card">
+        <h3>Sugestões de limpeza</h3>
+        <div id="st-sug" class="list"></div>
+      </div>
+      <div class="card">
+        <h3>Maiores pastas</h3>
+        <div class="crumbs" id="st-crumbs"></div>
+        <div id="st-dirs" class="list"></div>
+      </div>
+      <div class="card">
+        <h3>Maiores arquivos</h3>
+        <div id="st-top" class="list"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-head"><h3>Jogos e apps instalados</h3><button class="btn ghost sm" id="btn-apps" data-nav>Calcular</button></div>
+      <p class="muted small">Tamanho do jogo + atualizações + DLCs. Somente visualização.</p>
+      <div id="st-apps" class="list"></div>
+    </div>
+  </section>
+
+  <!-- AJUSTES -->
+  <section id="tab-settings" class="panel">
+    <div class="card">
+      <h3>TorBox</h3>
+      <label class="field">Chave de API
+        <input id="cfg-key" type="password" autocomplete="off" placeholder="Cole sua chave do TorBox" data-nav>
+      </label>
+      <div class="actions"><button class="btn primary" data-connect data-nav>Conectar com QR code</button><button class="btn" id="btn-cfg-key" data-nav>Salvar chave</button><button class="btn ghost" id="btn-account" data-nav>Testar conta</button></div>
+      <div id="account-info" class="muted small"></div>
+    </div>
+    <div class="card">
+      <h3>Downloads</h3>
+      <div class="dest-row"><span class="muted">Pasta padrão:</span> <b id="cfg-dest">—</b> <button class="btn ghost" id="btn-cfg-dest" data-nav>Trocar</button></div>
+      <label class="field inline">Downloads ao mesmo tempo <select id="cfg-parallel" data-nav></select></label>
+      <label class="field inline">Conexões por download <select id="cfg-conns" data-nav></select></label>
+      <label class="field inline">Limite de velocidade (KB/s) <input id="cfg-limit" type="number" min="64" step="64" data-nav></label>
+      <label class="check"><input type="checkbox" id="cfg-limit-on" data-nav> Limite de velocidade ligado</label>
+      <label class="check"><input type="checkbox" id="cfg-nosleep" data-nav> Impedir o modo de repouso enquanto baixa ou extrai</label>
+      <label class="check"><input type="checkbox" id="cfg-delcloud" data-nav> Apagar o item do TorBox depois de baixar</label>
+    </div>
+    <div class="card">
+      <h3>Extração</h3>
+      <label class="check"><input type="checkbox" id="cfg-extract" data-nav> Extrair automaticamente após o download</label>
+      <label class="check"><input type="checkbox" id="cfg-delarc" data-nav> Apagar o arquivo compactado após extrair</label>
+      <label class="check"><input type="checkbox" id="cfg-subfolder" data-nav> Extrair numa pasta com o nome do arquivo</label>
+      <h4>Senhas cadastradas</h4>
+      <p class="muted small">O Nimbo tenta todas automaticamente.</p>
+      <div id="pw-list"></div>
+      <div class="row"><input id="pw-new" type="text" placeholder="Nova senha" data-nav><button class="btn" id="btn-pw-add" data-nav>Adicionar</button></div>
+    </div>
+    <div class="card">
+      <h3>PS5</h3>
+      <label class="check"><input type="checkbox" id="cfg-openbrowser" data-nav> Abrir o navegador ao iniciar (desligue se usar autoload)</label>
+      <div class="actions">
+        <button class="btn ghost" id="btn-tile-media" data-nav>Reinstalar atalho na aba Mídia</button>
+        <button class="btn ghost" id="btn-tile-games" data-nav>Reinstalar atalho na aba Jogos</button>
+      </div>
+      <p class="muted small" id="about"></p>
+      <div class="actions"><button class="btn danger" id="btn-quit" data-nav>Encerrar o Nimbo</button></div>
+    </div>
+  </section>
+</main>
+
+<!-- modal genérico -->
+<div id="modal" class="modal hidden">
+  <div class="modal-box">
+    <div class="modal-head"><h3 id="modal-title"></h3><button class="btn ghost" id="modal-close" data-nav>Fechar</button></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+<div id="toast" class="toast hidden"></div>
+<footer class="hints" id="hints">
+  <span><b class="btn-x">✕</b> Selecionar</span>
+  <span><b class="btn-o">○</b> Voltar</span>
+  <span><b class="btn-t">△</b> Opções</span>
+  <span><b class="btn-l">L1</b><b class="btn-l">R1</b> Trocar aba</span>
+</footer>
+
+<script src="/qrcode.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

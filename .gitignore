@@ -1,0 +1,5 @@
+nimbo-pc
+nimbo-ps5.elf
+src/gen/
+dist/
+nimbo-data/
