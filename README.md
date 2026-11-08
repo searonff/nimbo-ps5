@@ -1,57 +1,83 @@
-# Nimbo Downloader (PS5)
+# Nimbo Downloader para PS5
 
-Gerenciador de downloads da nuvem (TorBox) para PS5 desbloqueado, com app nativo na tela inicial e controle pelo celular.
+App nativo para PS5 desbloqueado que baixa da sua nuvem do **TorBox** direto para o SSD interno, USB ou armazenamento estendido. Ele extrai os arquivos, organiza o que foi baixado e mostra o que está ocupando espaço. Você usa pelo controle, na TV, ou pelo celular.
 
-## Versão 2 — app nativo (pasta `nimbo/`)
+![Painel](docs/screens/home.jpg)
 
-App feito com PS5 React (React sobre QuickJS, renderização nativa a 1080p). Instala como um título na tela inicial (ID `PPSA48921`) via etaHEN + ShadowMount+.
+## O que ele faz
 
-- Painel com progresso, velocidade e tempo restante; música lo-fi original e efeitos (desligáveis)
-- Nuvem do TorBox com **busca**, filtros e ordenação; login por **QR code**
-- Downloads com várias conexões, retomada e limite de velocidade; "baixar quando ficar pronto"
-- **Extração** (ZIP com senha, 7z, RAR/RAR5 em partes) com opção de apagar o compactado
-- **Arquivos** com seleção múltipla (copiar, mover, apagar, extrair, renomear)
-- **Armazenamento**: uso por tipo, maiores pastas e arquivos, jogos instalados
-- **Celular**: página com PIN para ver a fila, adicionar links (magnet, hoster, direto) e baixar da nuvem
+| | |
+|---|---|
+| **Nuvem** | Lista torrents, web e usenet do TorBox, com busca (inclusive pelo nome dos arquivos), filtros e ordenação. Baixa só os arquivos marcados e apaga do TorBox. |
+| **Login por QR code** | Conecta o TorBox apontando o celular para a TV, sem digitar token. |
+| **Downloads** | Várias conexões por arquivo, retomada, fila salva, limite de velocidade e "baixar quando ficar pronto" no TorBox. |
+| **Extração** | ZIP (com senha), 7z, RAR e RAR5, inclusive em várias partes. Pode extrair ao terminar e apagar o compactado. |
+| **Arquivos** | Navega por SSD, USB e estendido. Seleção múltipla (□) para copiar, mover, apagar, renomear e extrair; ícones por tipo e ordenação. |
+| **Armazenamento** | Uso por tipo, maiores pastas e arquivos, sugestões de limpeza e o tamanho de cada jogo instalado (jogo, atualização e DLC). |
+| **Celular** | Página com PIN, na mesma rede, para ver a fila, colar links (magnet, hoster, direto) e baixar da nuvem. |
+| **Atualização pelo app** | Aba Sobre: procura a última Release deste repositório, baixa e instala sozinha. |
+| **Clima** | Música lo-fi original e efeitos sonoros (dá para desligar), céu animado e fundo próprio na tela inicial do PS5. |
 
-**Instalar:** copie `PPSA48921` (do `.zip` da release) para `/data/homebrew/` e deixe o ShadowMount+ registrar. Veja `LEIA-ME.txt`.
+<p>
+<img src="docs/screens/cloud.jpg" width="49%"> <img src="docs/screens/files.jpg" width="49%">
+<img src="docs/screens/storage.jpg" width="49%"> <img src="docs/screens/about.jpg" width="49%">
+</p>
 
-**Compilar:** `python3 tools/cli.py build --app-dir nimbo` dentro do PS5 React. Arte e música são geradas por `tools/make_art.py`, `tools/make_keyart.py`, `tools/make_dds.py` e `tools/compose_music.py`.
+## Requisitos
 
-## Versão 1 — payload ELF + navegador
+- PS5 desbloqueado com **etaHEN** e **ShadowMount+**. Testado no firmware 12.40.
+- Conta no TorBox, só para a aba Nuvem. Arquivos, Armazenamento e links diretos funcionam sem conta.
 
-Gerenciador de downloads do **TorBox** para PS5 desbloqueado (payload ELF para etaHEN / PS5 Payload Manager), com interface para a TV e para o celular.
+## Instalar
 
-## Recursos
+1. Baixe o `NimboDownloader-PS5-vX.Y.Z.zip` em [Releases](../../releases).
+2. Copie a pasta `PPSA48921` inteira para `/data/homebrew/` no PS5. O jeito mais fácil é pelo FTP do etaHEN (porta 1337), com FileZilla ou um app de FTP no celular.
+3. Espere o ShadowMount+ registrar o app: o ícone aparece na tela inicial. Se não aparecer, reinicie o PS5 e rode o etaHEN de novo.
+4. Abra o Nimbo e conecte o TorBox pelo QR code.
 
-- **Login por QR code** no TorBox (código de dispositivo), sem digitar token
-- Nuvem do TorBox (torrents, web, usenet) em capas, com selo "Já baixado"
-- Downloads com **várias conexões por arquivo**, retomada, fila salva e limite de velocidade
-- Escolha do destino: SSD interno (`/data`), USB (`/mnt/usbN`), armazenamento estendido
-- **Extração automática** (ZIP com senha, 7z, RAR, RAR5, em várias partes) e opção de apagar o compactado
-- "Baixar quando ficar pronto": manda um magnet pelo celular e o PS5 baixa sozinho
-- **Gerenciador de arquivos**: copiar, mover, renomear, apagar e baixar do PS5 para o celular
-- **Gerenciador de armazenamento**: uso por tipo, maiores pastas/arquivos, sugestões de limpeza e tamanho dos jogos instalados
-- Atalho com ícone na aba Mídia, notificações do PS5 e bloqueio do modo de repouso durante downloads
-- Navegação pelo controle (✕ ○ △, L1/R1) e QR code para abrir no celular
+**Atualizar:** aba **Sobre** > **Procurar atualização** > **Atualizar**. Depois, feche e abra o app.
 
-## Instalação
+## Controles
 
-Baixe o `.zip` em **Releases** e siga o `LEIA-ME.txt`. Em resumo: copie a pasta `NimboPS5` para `/data/pldmgr/payloads/` e rode `nimbo-ps5.elf` pelo PS5 Payload Manager.
+| Botão | Ação |
+|---|---|
+| ✕ | Selecionar |
+| ○ | Voltar / fechar |
+| △ | Atualizar a nuvem |
+| □ | Buscar (Nuvem) · marcar vários (Arquivos) |
+| L1 / R1 | Trocar de aba |
+
+## Estrutura
+
+```
+nimbo/            app V2 (PS5 React): index.jsx, src/, assets/, sce_sys/
+  src/engine.js   fila de downloads, extração e cópias
+  src/torbox.js   API do TorBox
+  src/update.js   atualização pelo GitHub
+  src/phone.js    servidor e página do celular
+tools/            geradores de arte (make_art, make_keyart, make_dds) e música (compose_music)
+src/, web/        V1 (payload ELF + interface no navegador)
+docs/             LEIA-ME e prints
+```
 
 ## Compilar
 
+O app é feito com **PS5 React** (React sobre QuickJS, renderização nativa em 1080p).
+
 ```bash
-# SDK: https://github.com/ps5-payload-dev/sdk  (instalado em /opt/ps5-payload-sdk)
-./scripts/build-deps-ps5.sh   # zlib, xz, mbedTLS, curl, libarchive para PS5
-make ps5                      # gera nimbo-ps5.elf
-./scripts/package.sh          # monta dist/NimboPS5 e o .zip
+# dentro do PS5 React
+python3 tools/cli.py dev   --app-dir /caminho/nimbo-ps5/nimbo   # prévia no PC
+python3 tools/cli.py build --app-dir /caminho/nimbo-ps5/nimbo   # gera dist/PPSA48921
 ```
 
-Para testar no PC (Linux): `make pc` e rode `./nimbo-pc` (variáveis `NIMBO_ROOTS`, `NIMBO_DATA`, `NIMBO_TORBOX_BASE`).
+A arte e a música são geradas pelos scripts em `tools/`. A tela inicial do PS5 usa `sce_sys/pic0.dds` (3840×2160, BC7), criado por `tools/make_dds.py`.
 
-O GitHub Actions compila e publica o `.zip` automaticamente a cada tag `v*`.
+**Publicar uma versão:** troque `APP_VERSION` em `nimbo/src/update.js` e `version` em `nimbo/app.json`, compile e crie uma Release com a tag `vX.Y.Z` e o zip anexado. O nome do zip precisa conter "PS5" e a pasta `PPSA48921` dentro dele, porque é isso que o app procura para se atualizar.
+
+## Versão 1 (legado)
+
+A primeira versão era um payload ELF (`nimbo-ps5.elf`), rodado pelo PS5 Payload Manager, com a interface aberta no navegador do PS5. O código continua em `src/` e `web/`. Para compilar: `./scripts/build-deps-ps5.sh && make ps5 && ./scripts/package.sh` (SDK em `/opt/ps5-payload-sdk`).
 
 ## Licença
 
-GPLv3 (o SDK do PS5 usado na compilação é GPLv3+). Usa cJSON e qrcode-generator (MIT), curl, mbedTLS, libarchive, zlib e xz.
+GPLv3. Fonte Nunito (SIL OFL), qrcode-generator (MIT). A V1 usa cJSON, curl, mbedTLS, libarchive, zlib e xz.

@@ -35,7 +35,8 @@ export async function checkUpdate() {
   if (res.status === 403 || res.status === 429) throw new Error('O GitHub limitou as consultas. Tente de novo mais tarde.');
   if (!res.ok) throw new Error(`O GitHub respondeu com erro ${res.status}.`);
   const rel = await res.json();
-  const asset = (rel.assets || []).find(a => /\.zip$/i.test(a.name) && /ps5/i.test(a.name)) || (rel.assets || []).find(a => /\.zip$/i.test(a.name));
+  const zips = (rel.assets || []).filter(a => /\.zip$/i.test(a.name));
+  const asset = zips.find(a => /^nimbodownloader.*ps5/i.test(a.name)) || zips.find(a => /ps5/i.test(a.name)) || zips[0];
   const version = String(rel.tag_name || rel.name || '').replace(/^v/i, '');
   config.set({updateCheckedAt: Date.now(), updateLatest: version});
   return {
