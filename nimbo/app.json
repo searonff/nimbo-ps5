@@ -1,0 +1,12 @@
+{
+  "titleId": "PPSA48921",
+  "contentId": "UP9000-PPSA48921_00-NIMBOPS500000000",
+  "name": "Nimbo Downloader",
+  "version": "02.000.000",
+  "render": {"width": 1920, "height": 1080},
+  "surface": {"width": 1920, "height": 1080},
+  "refreshRate": 60,
+  "timeoutSeconds": 0,
+  "networking": true,
+  "filesystemAccess": "console"
+}

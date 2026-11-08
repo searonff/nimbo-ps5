@@ -1,4 +1,24 @@
-# Nimbo PS5
+# Nimbo Downloader (PS5)
+
+Gerenciador de downloads da nuvem (TorBox) para PS5 desbloqueado, com app nativo na tela inicial e controle pelo celular.
+
+## Versão 2 — app nativo (pasta `nimbo/`)
+
+App feito com PS5 React (React sobre QuickJS, renderização nativa a 1080p). Instala como um título na tela inicial (ID `PPSA48921`) via etaHEN + ShadowMount+.
+
+- Painel com progresso, velocidade e tempo restante; música lo-fi original e efeitos (desligáveis)
+- Nuvem do TorBox com **busca**, filtros e ordenação; login por **QR code**
+- Downloads com várias conexões, retomada e limite de velocidade; "baixar quando ficar pronto"
+- **Extração** (ZIP com senha, 7z, RAR/RAR5 em partes) com opção de apagar o compactado
+- **Arquivos** com seleção múltipla (copiar, mover, apagar, extrair, renomear)
+- **Armazenamento**: uso por tipo, maiores pastas e arquivos, jogos instalados
+- **Celular**: página com PIN para ver a fila, adicionar links (magnet, hoster, direto) e baixar da nuvem
+
+**Instalar:** copie `PPSA48921` (do `.zip` da release) para `/data/homebrew/` e deixe o ShadowMount+ registrar. Veja `LEIA-ME.txt`.
+
+**Compilar:** `python3 tools/cli.py build --app-dir nimbo` dentro do PS5 React. Arte e música são geradas por `tools/make_art.py`, `tools/make_keyart.py`, `tools/make_dds.py` e `tools/compose_music.py`.
+
+## Versão 1 — payload ELF + navegador
 
 Gerenciador de downloads do **TorBox** para PS5 desbloqueado (payload ELF para etaHEN / PS5 Payload Manager), com interface para a TV e para o celular.
 
