@@ -1,6 +1,6 @@
 // Música de fundo: “Chill lofi inspired”, de omfgdude (CC0, opengameart.org).
 // O mixer do PS5 React toca WAVs de até 10 s e não deixa parar um som já iniciado, então a
-// faixa vem em 20 trechos de ~6 s (mono, 22 kHz) com bordas de 0,35 s em fade cruzado:
+// faixa vem em 14 trechos de ~8,5 s (mono, 22 kHz; trechos longos aguentam o app ocupado sem cortar) com bordas de 0,35 s em fade cruzado:
 // somados, reproduzem a faixa original. Ajustes valem na hora: o trecho que está tocando é
 // abafado pelo volume geral até terminar, e os próximos já saem no volume novo.
 import {useEffect} from 'react';
@@ -20,17 +20,11 @@ import m11 from '../assets/music/music11.wav';
 import m12 from '../assets/music/music12.wav';
 import m13 from '../assets/music/music13.wav';
 import m14 from '../assets/music/music14.wav';
-import m15 from '../assets/music/music15.wav';
-import m16 from '../assets/music/music16.wav';
-import m17 from '../assets/music/music17.wav';
-import m18 from '../assets/music/music18.wav';
-import m19 from '../assets/music/music19.wav';
-import m20 from '../assets/music/music20.wav';
-const FILES = [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16, m17, m18, m19, m20];
+const FILES = [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14];
 
 export const MUSIC_CREDIT = '“Chill lofi inspired”, de omfgdude · CC0 · opengameart.org';
 
-const STEP_MS = 5959.33;          // duração da faixa / 20
+const STEP_MS = 8513.33;          // duração da faixa / 14
 const TAIL_MS = STEP_MS + 700;    // um trecho dura o passo + as duas bordas
 let timer = null, restore = null, index = 0, started = 0, playing = false;
 let lastStart = 0, lastVolume = 0;

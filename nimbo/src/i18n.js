@@ -79,3 +79,20 @@ function matchPattern(l, dict, s) {
 
 // Plural simples: t1(n, '{n} item', '{n} itens').
 export function tn(n, one, many, vars) { return t(n === 1 ? one : many, {n, ...(vars || {})}); }
+
+// Data curta no formato do idioma (sem objetos Date, que o app não tem).
+export function fmtDate(ms) {
+  if (!(ms > 0)) return '';
+  const days = Math.floor(ms / 86400000);
+  // Dias desde 1970 → ano/mês/dia (algoritmo civil de Howard Hinnant).
+  const z = days + 719468, era = Math.floor(z / 146097), doe = z - era * 146097;
+  const yoe = Math.floor((doe - Math.floor(doe / 1460) + Math.floor(doe / 36524) - Math.floor(doe / 146096)) / 365);
+  const doy = doe - (365 * yoe + Math.floor(yoe / 4) - Math.floor(yoe / 100));
+  const mp = Math.floor((5 * doy + 2) / 153);
+  const d = doy - Math.floor((153 * mp + 2) / 5) + 1, m = mp < 10 ? mp + 3 : mp - 9, y = yoe + era * 400 + (m <= 2 ? 1 : 0);
+  const p = n => String(n).padStart(2, '0');
+  const l = lang();
+  if (l === 'en') return `${m}/${d}/${y}`;
+  if (l === 'de') return `${p(d)}.${p(m)}.${y}`;
+  return `${p(d)}/${p(m)}/${y}`;
+}

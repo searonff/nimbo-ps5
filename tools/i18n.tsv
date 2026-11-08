@@ -374,7 +374,7 @@ Confirmar	Confirm	Confirmar	Confirmer	Bestätigen	Conferma
 Restaurando {1}…	Restoring {1}…	Restaurando {1}…	Restauration de {1}…	{1} wird wiederhergestellt…	Ripristino di {1}…
 Instalando {1}…	Installing {1}…	Instalando {1}…	Installation de {1}…	{1} wird installiert…	Installazione di {1}…
 SOM	AUD	AUD	AUD	AUD	AUD
-ARQ	FILE	ARCH	FICH	DATEI	FILE
+ARQ	DOC	ARC	FIC	DAT	FIL
 Não conectado	Not connected	No conectado	Non connecté	Nicht verbunden	Non collegato
 de	of	de	sur	von	di
 pt-BR	en	es	fr	de	it
@@ -411,3 +411,12 @@ Uso de {r}: {b} em {n} arquivos	Usage of {r}: {b} in {n} files	Uso de {r}: {b} e
 {n} extrações na fila (veja em Downloads)	{n} extractions queued (see Downloads)	{n} extracciones en cola (mira Descargas)	{n} extractions en file (voir Téléchargements)	{n} Entpack-Aufträge eingereiht (siehe Downloads)	{n} estrazioni in coda (vedi Download)
 PS5 React, de half144 e colaboradores · fonte Nunito (OFL) · licença GPLv3	PS5 React by half144 and contributors · Nunito font (OFL) · GPLv3 license	PS5 React, de half144 y colaboradores · fuente Nunito (OFL) · licencia GPLv3	PS5 React, par half144 et contributeurs · police Nunito (OFL) · licence GPLv3	PS5 React von half144 und Mitwirkenden · Schrift Nunito (OFL) · Lizenz GPLv3	PS5 React, di half144 e collaboratori · font Nunito (OFL) · licenza GPLv3
 Música: {m} · sons: Google Material Design (CC BY 4.0)	Music: {m} · sounds: Google Material Design (CC BY 4.0)	Música: {m} · sonidos: Google Material Design (CC BY 4.0)	Musique : {m} · sons : Google Material Design (CC BY 4.0)	Musik: {m} · Töne: Google Material Design (CC BY 4.0)	Musica: {m} · suoni: Google Material Design (CC BY 4.0)
+Apagando… o disco fica ocupado até terminar.	Deleting… the drive stays busy until it finishes.	Borrando… el disco queda ocupado hasta terminar.	Suppression… le disque reste occupé jusqu’à la fin.	Wird gelöscht… das Laufwerk ist bis dahin belegt.	Eliminazione… il disco resta occupato fino alla fine.
+modificado em {d}	modified {d}	modificado el {d}	modifié le {d}	geändert am {d}	modificato il {d}
+para apagar	to delete	para borrar	pour supprimer	zum Löschen	per eliminare
+Calculando… {a} de {b}	Calculating… {a} of {b}	Calculando… {a} de {b}	Calcul… {a} sur {b}	Berechne… {a} von {b}	Calcolo… {a} di {b}
+versão {v}	version {v}	versión {v}	version {v}	Version {v}	versione {v}
+instalado em {d}	installed {d}	instalado el {d}	installé le {d}	installiert am {d}	installato il {d}
+jogo {a}	game {a}	juego {a}	jeu {a}	Spiel {a}	gioco {a}
+atualização {a}	update {a}	actualización {a}	mise à jour {a}	Update {a}	aggiornamento {a}
+DLC {a}	DLC {a}	DLC {a}	DLC {a}	DLC {a}	DLC {a}

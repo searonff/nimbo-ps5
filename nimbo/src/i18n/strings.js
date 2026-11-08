@@ -376,7 +376,7 @@ export default {
 "Restaurando {1}…": "Restoring {1}…",
 "Instalando {1}…": "Installing {1}…",
 "SOM": "AUD",
-"ARQ": "FILE",
+"ARQ": "DOC",
 "Não conectado": "Not connected",
 "de": "of",
 "pt-BR": "en",
@@ -412,7 +412,16 @@ export default {
 "{n} extração na fila (veja em Downloads)": "{n} extraction queued (see Downloads)",
 "{n} extrações na fila (veja em Downloads)": "{n} extractions queued (see Downloads)",
 "PS5 React, de half144 e colaboradores · fonte Nunito (OFL) · licença GPLv3": "PS5 React by half144 and contributors · Nunito font (OFL) · GPLv3 license",
-"Música: {m} · sons: Google Material Design (CC BY 4.0)": "Music: {m} · sounds: Google Material Design (CC BY 4.0)"
+"Música: {m} · sons: Google Material Design (CC BY 4.0)": "Music: {m} · sounds: Google Material Design (CC BY 4.0)",
+"Apagando… o disco fica ocupado até terminar.": "Deleting… the drive stays busy until it finishes.",
+"modificado em {d}": "modified {d}",
+"para apagar": "to delete",
+"Calculando… {a} de {b}": "Calculating… {a} of {b}",
+"versão {v}": "version {v}",
+"instalado em {d}": "installed {d}",
+"jogo {a}": "game {a}",
+"atualização {a}": "update {a}",
+"DLC {a}": "DLC {a}"
 },
 "es": {
 "Painel": "Inicio",
@@ -790,7 +799,7 @@ export default {
 "Restaurando {1}…": "Restaurando {1}…",
 "Instalando {1}…": "Instalando {1}…",
 "SOM": "AUD",
-"ARQ": "ARCH",
+"ARQ": "ARC",
 "Não conectado": "No conectado",
 "de": "de",
 "pt-BR": "es",
@@ -826,7 +835,16 @@ export default {
 "{n} extração na fila (veja em Downloads)": "{n} extracción en cola (mira Descargas)",
 "{n} extrações na fila (veja em Downloads)": "{n} extracciones en cola (mira Descargas)",
 "PS5 React, de half144 e colaboradores · fonte Nunito (OFL) · licença GPLv3": "PS5 React, de half144 y colaboradores · fuente Nunito (OFL) · licencia GPLv3",
-"Música: {m} · sons: Google Material Design (CC BY 4.0)": "Música: {m} · sonidos: Google Material Design (CC BY 4.0)"
+"Música: {m} · sons: Google Material Design (CC BY 4.0)": "Música: {m} · sonidos: Google Material Design (CC BY 4.0)",
+"Apagando… o disco fica ocupado até terminar.": "Borrando… el disco queda ocupado hasta terminar.",
+"modificado em {d}": "modificado el {d}",
+"para apagar": "para borrar",
+"Calculando… {a} de {b}": "Calculando… {a} de {b}",
+"versão {v}": "versión {v}",
+"instalado em {d}": "instalado el {d}",
+"jogo {a}": "juego {a}",
+"atualização {a}": "actualización {a}",
+"DLC {a}": "DLC {a}"
 },
 "fr": {
 "Painel": "Accueil",
@@ -1204,7 +1222,7 @@ export default {
 "Restaurando {1}…": "Restauration de {1}…",
 "Instalando {1}…": "Installation de {1}…",
 "SOM": "AUD",
-"ARQ": "FICH",
+"ARQ": "FIC",
 "Não conectado": "Non connecté",
 "de": "sur",
 "pt-BR": "fr",
@@ -1240,7 +1258,16 @@ export default {
 "{n} extração na fila (veja em Downloads)": "{n} extraction en file (voir Téléchargements)",
 "{n} extrações na fila (veja em Downloads)": "{n} extractions en file (voir Téléchargements)",
 "PS5 React, de half144 e colaboradores · fonte Nunito (OFL) · licença GPLv3": "PS5 React, par half144 et contributeurs · police Nunito (OFL) · licence GPLv3",
-"Música: {m} · sons: Google Material Design (CC BY 4.0)": "Musique : {m} · sons : Google Material Design (CC BY 4.0)"
+"Música: {m} · sons: Google Material Design (CC BY 4.0)": "Musique : {m} · sons : Google Material Design (CC BY 4.0)",
+"Apagando… o disco fica ocupado até terminar.": "Suppression… le disque reste occupé jusqu’à la fin.",
+"modificado em {d}": "modifié le {d}",
+"para apagar": "pour supprimer",
+"Calculando… {a} de {b}": "Calcul… {a} sur {b}",
+"versão {v}": "version {v}",
+"instalado em {d}": "installé le {d}",
+"jogo {a}": "jeu {a}",
+"atualização {a}": "mise à jour {a}",
+"DLC {a}": "DLC {a}"
 },
 "de": {
 "Painel": "Start",
@@ -1618,7 +1645,7 @@ export default {
 "Restaurando {1}…": "{1} wird wiederhergestellt…",
 "Instalando {1}…": "{1} wird installiert…",
 "SOM": "AUD",
-"ARQ": "DATEI",
+"ARQ": "DAT",
 "Não conectado": "Nicht verbunden",
 "de": "von",
 "pt-BR": "de",
@@ -1654,7 +1681,16 @@ export default {
 "{n} extração na fila (veja em Downloads)": "{n} Entpacken eingereiht (siehe Downloads)",
 "{n} extrações na fila (veja em Downloads)": "{n} Entpack-Aufträge eingereiht (siehe Downloads)",
 "PS5 React, de half144 e colaboradores · fonte Nunito (OFL) · licença GPLv3": "PS5 React von half144 und Mitwirkenden · Schrift Nunito (OFL) · Lizenz GPLv3",
-"Música: {m} · sons: Google Material Design (CC BY 4.0)": "Musik: {m} · Töne: Google Material Design (CC BY 4.0)"
+"Música: {m} · sons: Google Material Design (CC BY 4.0)": "Musik: {m} · Töne: Google Material Design (CC BY 4.0)",
+"Apagando… o disco fica ocupado até terminar.": "Wird gelöscht… das Laufwerk ist bis dahin belegt.",
+"modificado em {d}": "geändert am {d}",
+"para apagar": "zum Löschen",
+"Calculando… {a} de {b}": "Berechne… {a} von {b}",
+"versão {v}": "Version {v}",
+"instalado em {d}": "installiert am {d}",
+"jogo {a}": "Spiel {a}",
+"atualização {a}": "Update {a}",
+"DLC {a}": "DLC {a}"
 },
 "it": {
 "Painel": "Home",
@@ -2032,7 +2068,7 @@ export default {
 "Restaurando {1}…": "Ripristino di {1}…",
 "Instalando {1}…": "Installazione di {1}…",
 "SOM": "AUD",
-"ARQ": "FILE",
+"ARQ": "FIL",
 "Não conectado": "Non collegato",
 "de": "di",
 "pt-BR": "it",
@@ -2068,6 +2104,15 @@ export default {
 "{n} extração na fila (veja em Downloads)": "{n} estrazione in coda (vedi Download)",
 "{n} extrações na fila (veja em Downloads)": "{n} estrazioni in coda (vedi Download)",
 "PS5 React, de half144 e colaboradores · fonte Nunito (OFL) · licença GPLv3": "PS5 React, di half144 e collaboratori · font Nunito (OFL) · licenza GPLv3",
-"Música: {m} · sons: Google Material Design (CC BY 4.0)": "Musica: {m} · suoni: Google Material Design (CC BY 4.0)"
+"Música: {m} · sons: Google Material Design (CC BY 4.0)": "Musica: {m} · suoni: Google Material Design (CC BY 4.0)",
+"Apagando… o disco fica ocupado até terminar.": "Eliminazione… il disco resta occupato fino alla fine.",
+"modificado em {d}": "modificato il {d}",
+"para apagar": "per eliminare",
+"Calculando… {a} de {b}": "Calcolo… {a} di {b}",
+"versão {v}": "versione {v}",
+"instalado em {d}": "installato il {d}",
+"jogo {a}": "gioco {a}",
+"atualização {a}": "aggiornamento {a}",
+"DLC {a}": "DLC {a}"
 }
 };

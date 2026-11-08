@@ -4,6 +4,7 @@ import {Archives, Downloads, FileSystem, Notifications, Power} from '@ps5-react/
 import {config, queue, ui, nextId, toast} from './store.js';
 import * as torbox from './torbox.js';
 import {provider} from './debrid/index.js';
+import {removeSafely, fsBusy} from './drives.js';
 
 /* ---------- caminhos ---------- */
 export function sanitize(name) {
@@ -195,7 +196,7 @@ export function clearFinished() {
 
 function discardPartial(job) {
   for (const s of ['.part', '.resume']) {
-    try { if (FileSystem.exists(job.path + s)) FileSystem.removeAsync(job.path + s, {background: true}).catch(() => {}); } catch (_) { /* nada */ }
+    try { if (FileSystem.exists(job.path + s)) removeSafely(job.path + s, {background: true}).catch(() => {}); } catch (_) { /* nada */ }
   }
 }
 
@@ -313,7 +314,7 @@ async function runExtract(task) {
     try {
       await handle.done;
       unsub(); current = null;
-      if (task.deleteArchive) for (const s of sources) FileSystem.removeAsync(s, {background: true}).catch(() => {});
+      if (task.deleteArchive) for (const s of sources) removeSafely(s, {background: true}).catch(() => {});
       patchTask(task.id, {state: 'done', result: dest, finished: Date.now()});
       Notifications.show('Extração concluída', basename(dest));
       toast(`Extraído: ${basename(dest)}`, 'ok');
@@ -346,7 +347,7 @@ async function runCopy(task) {
   const unsub = handle.subscribe(p => patchTask(task.id, {written: p.written || 0, total: p.total || 0}));
   try {
     await handle.done;
-    if (task.type === 'move') await FileSystem.removeAsync(task.src);
+    if (task.type === 'move') await removeSafely(task.src);
     patchTask(task.id, {state: 'done', result: target});
     toast(`${task.type === 'move' ? 'Movido' : 'Copiado'}: ${task.name}`, 'ok');
   } catch (error) {
@@ -382,7 +383,7 @@ function step() {
   } else if (ui.get().speed) ui.set({speed: 0});
 
   if (current) { setAwake(true); return; }
-  if (held) return;
+  if (held || fsBusy()) return;   // disco preso numa exclusão: começa depois
   const task = tasks().find(t => t.state === 'queued');
   if (task) { setAwake(true); guard((task.type === 'extract' ? runExtract : runCopy)(task), p => patchTask(task.id, p)); return; }
   const job = jobs().find(j => j.state === 'queued');

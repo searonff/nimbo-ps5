@@ -4,7 +4,7 @@ O código do Nimbo Downloader é GPLv3 (veja `LICENSE`). Ele inclui material de 
 
 | O quê | Autor | Licença | Onde está |
 |---|---|---|---|
-| Música de fundo **“Chill lofi inspired”** | omfgdude | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) (domínio público) | `nimbo/assets/music/` (convertida para WAV mono em 20 trechos) |
+| Música de fundo **“Chill lofi inspired”** | omfgdude | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) (domínio público) | `nimbo/assets/music/` (convertida para WAV mono em 14 trechos) |
 | Sons da interface | Google (Material Design sound resources), adaptados pelo PS5 React | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | `nimbo/assets/sounds/` (veja `NOTICE.txt`) |
 | Fonte **Nunito** | The Nunito Project Authors | [SIL Open Font License 1.1](https://openfontlicense.org) | `nimbo/assets/Nunito-*.ttf` (veja `Nunito-OFL.txt`) |
 | **PS5 React** (framework do app) | half144 e colaboradores · https://github.com/half144/ps5-react | GPLv3 com termo de atribuição | compilado dentro do app |
@@ -15,7 +15,7 @@ O código do Nimbo Downloader é GPLv3 (veja `LICENSE`). Ele inclui material de 
 
 - Página original: https://opengameart.org/content/chill-lofi-inspired
 - Publicada pelo autor no OpenGameArt sob **CC0**: pode ser usada, modificada e redistribuída, inclusive em projetos comerciais, sem pedir permissão e sem obrigação de crédito. O crédito acima é cortesia.
-- No app, a faixa foi convertida para WAV mono 22 kHz e dividida em 20 trechos com fade cruzado (o mixer do PS5 React toca sons de até 10 s). A CC0 permite essa modificação.
+- No app, a faixa foi convertida para WAV mono 22 kHz e dividida em 14 trechos com fade cruzado (o mixer do PS5 React toca sons de até 10 s). A CC0 permite essa modificação.
 
 ## Sons da interface
 

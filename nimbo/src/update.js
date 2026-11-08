@@ -6,7 +6,7 @@ import {Http, Downloads, Archives, FileSystem, Platform} from '@ps5-react/core';
 import {config} from './store.js';
 import {engineBusy, holdEngine} from './engine.js';
 
-export const APP_VERSION = '2.2.0';
+export const APP_VERSION = '2.2.1';
 export const REPO = 'felipezmoraes/nimbo-ps5';
 export const REPO_URL = `https://github.com/${REPO}`;
 const TITLE = 'PPSA48921';

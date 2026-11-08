@@ -154,14 +154,14 @@ export function Cover({name, w, h, radius = 14, big}) {
 }
 
 export function Toast() {
-  const t = useStore(ui, s => s.toast);
+  const msg = useStore(ui, s => s.toast);
   const [visible, setVisible] = useState(null);
   useEffect(() => {
-    if (!t) return undefined;
-    setVisible(t);
-    const timer = setTimeout(() => setVisible(null), t.kind === 'bad' ? 5000 : 3200);
+    if (!msg) return undefined;
+    setVisible(msg);
+    const timer = setTimeout(() => setVisible(null), msg.kind === 'bad' ? 5000 : 3200);
     return () => clearTimeout(timer);
-  }, [t]);
+  }, [msg]);
   if (!visible) return null;
   return (
     <motion.View key={visible.at} initial={{y: 30, opacity: 0}} animate={{y: 0, opacity: 1}} transition={{duration: 0.2}}

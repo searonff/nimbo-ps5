@@ -3,20 +3,23 @@ import {useEffect, useRef, useState} from 'react';
 import {View, Text, ScrollView, FileSystem, Keyboard, Platform, useFocus, FocusScope, Svg, Path} from '@ps5-react/core';
 import {Bar, Button, Pill, ButtonGlyph} from './ui.jsx';
 import {Sheet} from './sheets.jsx';
-import {drives} from './drives.js';
+import {drives, fsBusy, removeSafely} from './drives.js';
 import {config, queue, toast, ui, useStore} from './store.js';
 import {archiveKind, enqueueCopy, enqueueExtract, fmt, firstVolume, stripArchive, basename, dirname} from './engine.js';
-import {t, tn} from './i18n.js';
+import {t, tn, lang, fmtDate} from './i18n.js';
 
+// Enquanto uma exclusão prende o disco, mostra a última listagem em vez de ler de novo.
+const listCache = {};
 function list(path, sort = 'name') {
+  if (fsBusy()) return listCache[`${path}|${sort}`] || [];
   const by = {
     name: (a, b) => a.name.localeCompare(b.name),
     size: (a, b) => (b.size || 0) - (a.size || 0),
     date: (a, b) => (b.modified || 0) - (a.modified || 0),
   }[sort] || ((a, b) => a.name.localeCompare(b.name));
   try {
-    return FileSystem.readDir(path).filter(e => !e.name.startsWith('.') && !/\.(part|resume|partial|complete)$/.test(e.name))
-      .sort((a, b) => (a.isDirectory !== b.isDirectory ? (a.isDirectory ? -1 : 1) : by(a, b)));
+    return (listCache[`${path}|${sort}`] = FileSystem.readDir(path).filter(e => !e.name.startsWith('.') && !/\.(part|resume|partial|complete)$/.test(e.name))
+      .sort((a, b) => (a.isDirectory !== b.isDirectory ? (a.isDirectory ? -1 : 1) : by(a, b))));
   } catch (_) { return null; }
 }
 const SORTS = [['name', 'Nome'], ['date', 'Mais novos'], ['size', 'Maiores']];
@@ -42,6 +45,28 @@ function TypeIcon({entry}) {
     </View>
   );
 }
+
+/* ---------- nomes de jogos (PPSA/CUSA no nome do arquivo) ---------- */
+function appsRoot() { return Platform.OS === 'ps5' ? '/user' : `${FileSystem.dataDir}/fake-user`; }
+const LANG_TAG = {pt: 'pt-BR', en: 'en-US', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', it: 'it-IT'};
+const appCache = {};
+// Título e versão a partir de /user/appmeta/<id>/param.json (SSD interno, rápido).
+function appInfo(id) {
+  if (appCache[id]) return appCache[id];
+  const info = {title: '', version: ''};
+  try {
+    const txt = FileSystem.readFile(`${appsRoot()}/appmeta/${id}/param.json`);
+    const j = JSON.parse(txt.slice(txt.indexOf('{')));
+    const lp = j.localizedParameters || {};
+    const l = lp[LANG_TAG[lang()]] || lp['en-US'] || lp[lp.defaultLanguage] || {};
+    info.title = l.titleName || '';
+    info.version = String(j.contentVersion || j.masterVersion || '').replace(/^0+(\d)/, '$1');
+  } catch (_) { /* jogo de PS4, não instalado ou sem metadados */ }
+  return (appCache[id] = info);
+}
+const ID_RE = /(?:^|[^A-Z0-9])((?:PPSA|CUSA|PPSB|CUSB)\d{5})(?!\d)/;
+export function titleIdOf(name) { const m = ID_RE.exec(name || ''); return m ? m[1] : ''; }
+export function gameTitle(name) { const id = titleIdOf(name); return id ? appInfo(id).title : ''; }
 
 /* ---------- Arquivos ---------- */
 export function Files({pickFolder, confirm}) {
@@ -73,9 +98,10 @@ export function Files({pickFolder, confirm}) {
     setTimeout(() => focus(target), 0);
   }, [path]);
   const tasks = useStore(queue, q => q.tasks);
-  useEffect(() => setTick(t => t + 1), [tasks.length]);
+  const fsTick = useStore(ui, x => x.fsTick || 0);
+  useEffect(() => setTick(n => n + 1), [tasks.length, fsTick]);
   const entries = list(path, sort) || [];
-  const drive = all.filter(d => path === d.path || path.startsWith(`${d.path}/`))[0];
+  const drive = all.filter(d => path === d.path || path.startsWith(`${d.path}/`)).sort((a, b) => b.path.length - a.path.length)[0];
   const up = drive && path !== drive.path ? dirname(path) : null;
   const refresh = () => setTick(t => t + 1);
   const rename = async e => {
@@ -90,7 +116,8 @@ export function Files({pickFolder, confirm}) {
     try { FileSystem.rename(full, `${dirname(full)}/${r.text.replace(/[/\\<>:"|?*]/g, '_')}`); refresh(); } catch (err) { toast(String(err.message || err), 'bad'); }
   };
   const remove = e => confirm('Apagar', `${e.isDirectory ? t('Apagar a pasta “{1}” e tudo dentro dela?', {1: e.name}) : t('Apagar “{1}”?', {1: e.name})} ${t('Não dá para desfazer.')}`, 'Apagar', () => {
-    FileSystem.removeAsync(`${path}/${e.name}`).then(() => { toast(t('Apagado'), 'ok'); refresh(); }, err => toast(String(err.message || err), 'bad'));
+    toast(t('Apagando…'));
+    removeSafely(`${path}/${e.name}`).then(() => { toast(t('Apagado'), 'ok'); refresh(); }, err => toast(String(err.message || err), 'bad'));
   });
   void tick;
   const picked = [...sel.entries()].map(([full, e]) => ({full, ...e}));
@@ -103,7 +130,8 @@ export function Files({pickFolder, confirm}) {
   });
   const batchRemove = () => confirm('Apagar', `${tn(picked.length, 'Apagar {n} item selecionado?', 'Apagar {n} itens selecionados?')}${picked.some(e => e.isDirectory) ? ` ${t('As pastas vão com tudo dentro.')}` : ''} ${t('Não dá para desfazer.')}`, 'Apagar', async () => {
     let fails = 0;
-    for (const e of picked) { try { await FileSystem.removeAsync(e.full); } catch (_) { fails++; } }
+    toast(t('Apagando…'));
+    for (const e of picked) { try { await removeSafely(e.full); } catch (_) { fails++; } }
     toast(fails ? `${fails} não puderam ser apagados` : 'Apagados', fails ? 'bad' : 'ok');
     clearSel(); refresh();
   });
@@ -128,7 +156,7 @@ export function Files({pickFolder, confirm}) {
     <View className="flex-1 px-10 gap-3">
       <View className="flex-row gap-2 items-center">
         {all.map(d => (
-          <View key={d.path} selected={drive === d} onPress={() => setPath(d.path)}
+          <View key={d.path} focusKey={`drive:${d.label}`} selected={drive === d} onPress={() => setPath(d.path)}
             className="px-4 py-2 rounded-xl bg-glass border-[3px] border-transparent selected:border-sky focused:border-sun">
             <Text className="font-heavy text-cap text-cloud">{t(d.label)}</Text>
             <Text className="font-semi text-xs2 text-mist">{t(`${fmt(d.free)} livres`)}</Text>
@@ -161,7 +189,11 @@ export function Files({pickFolder, confirm}) {
                   </View>
                 ) : null}
                 <TypeIcon entry={e} />
-                <View className="flex-1"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{e.name}</Text></View>
+                <View className="flex-1 flex-row items-center gap-3">
+                  <Text className="font-semi text-body text-cloud" numberOfLines={1}>{e.name}</Text>
+                  {gameTitle(e.name) ? <Text className="font-heavy text-cap text-sky" numberOfLines={1}>{gameTitle(e.name)}</Text> : null}
+                </View>
+                {e.isDirectory ? null : <Text className="font-semi text-cap text-mist">{fmtDate(e.modified)}</Text>}
                 {kind === 'first' ? <Pill text={t('Compactado')} tone="warn" /> : null}
                 <Text className="font-semi text-cap text-mist">{e.isDirectory ? t('Pasta') : fmt(e.size)}</Text>
               </View>
@@ -218,6 +250,8 @@ const CATS = [
 const OTHER = ['other', 'Outros', '#6f84a3'];
 function category(name) { for (const c of CATS) if (c[3].test(name)) return c[0]; return 'other'; }
 
+// Leitura do disco em fatias curtas, cedendo a vez para a tela e a música a cada fatia.
+// Durante uma exclusão (disco preso) a análise espera em vez de travar o app.
 function useScan() {
   const [state, setState] = useState(null);
   const job = useRef(null);
@@ -231,8 +265,9 @@ function useScan() {
     const pending = new Set(queue.get().jobs.filter(j => j.state !== 'done').map(j => j.path));
     const step = () => {
       if (me.stop) return;
+      if (fsBusy()) { setTimeout(step, 500); return; }
       const t0 = Date.now();
-      while (stack.length && Date.now() - t0 < 12) {
+      while (stack.length && Date.now() - t0 < 8) {
         const [dir, topName] = stack.pop();
         let entries;
         try { entries = FileSystem.readDir(dir); } catch (_) { continue; }
@@ -244,72 +279,108 @@ function useScan() {
           const c = category(e.name);
           cats[c] = (cats[c] || 0) + e.size;
           dirs[bucket] = (dirs[bucket] || 0) + e.size;
+          const item = {path: full, name: e.name, size: e.size, modified: e.modified, cat: c, bucket};
           if (top.length < 25 || e.size > top[top.length - 1].size) {
-            top.push({path: full, name: e.name, size: e.size});
+            top.push(item);
             top.sort((a, b) => b.size - a.size);
             if (top.length > 25) top.pop();
           }
           if (c === 'partial' && !pending.has(full.replace(/\.(part|partial)$/, ''))) {
-            suggestions.push({path: full, name: e.name, size: e.size, why: 'Download parcial abandonado'});
+            suggestions.push({...item, why: 'Download parcial abandonado'});
           } else if (archiveKind(e.name)) {
             const first = firstVolume(full);
             if (first && FileSystem.exists(`${dirname(full)}/${stripArchive(basename(first))}`)) {
-              suggestions.push({path: full, name: e.name, size: e.size, why: 'Compactado que parece já ter sido extraído'});
+              suggestions.push({...item, why: 'Compactado que parece já ter sido extraído'});
             }
           }
         }
       }
-      setState({root, running: stack.length > 0, files, bytes, cats: {...cats}, top: top.slice(), suggestions: suggestions.slice(0, 40),
+      setState({root, running: stack.length > 0, files, bytes, cats: {...cats}, top: top.slice(), suggestions: suggestions.slice().sort((a, b) => b.size - a.size).slice(0, 40),
         dirs: Object.entries(dirs).sort((a, b) => b[1] - a[1]).slice(0, 12)});
-      if (stack.length) setTimeout(step, 0);
+      if (stack.length) setTimeout(step, 20);
     };
     step();
   };
+  // Tira um arquivo apagado do resultado sem reler o disco inteiro.
+  const drop = item => setState(s => {
+    if (!s) return s;
+    const cats = {...s.cats};
+    if (item.cat) cats[item.cat] = Math.max(0, (cats[item.cat] || 0) - item.size);
+    return {...s, files: Math.max(0, s.files - 1), bytes: Math.max(0, s.bytes - item.size), cats,
+      top: s.top.filter(x => x.path !== item.path), suggestions: s.suggestions.filter(x => x.path !== item.path),
+      dirs: s.dirs.map(([n, v]) => [n, n === item.bucket ? Math.max(0, v - item.size) : v]).sort((a, b) => b[1] - a[1])};
+  });
   useEffect(() => () => { if (job.current) job.current.stop = true; }, []);
-  return [state, start, () => { if (job.current) job.current.stop = true; setState(s => (s ? {...s, running: false} : s)); }];
+  return [state, start, () => { if (job.current) job.current.stop = true; setState(s => (s ? {...s, running: false} : s)); }, drop];
 }
 
-function appsRoot() { return Platform.OS === 'ps5' ? '/user' : `${FileSystem.dataDir}/fake-user`; }
-function dirSize(path, depth = 0) {
-  let s = 0;
-  try {
-    for (const e of FileSystem.readDir(path)) s += e.isDirectory ? (depth < 12 ? dirSize(`${path}/${e.name}`, depth + 1) : 0) : e.size;
-  } catch (_) { /* sem acesso */ }
-  return s;
+// Soma o tamanho de várias pastas em fatias curtas; chama onDone(tamanhos) no fim.
+function sizeLater(paths, onDone, isStopped) {
+  const sizes = paths.map(() => 0);
+  const stack = paths.map((p, i) => [p, i]);
+  const step = () => {
+    if (isStopped()) return;
+    const t0 = Date.now();
+    while (stack.length && Date.now() - t0 < 8) {
+      const [dir, i] = stack.pop();
+      let entries;
+      try { entries = FileSystem.readDir(dir); } catch (_) { continue; }
+      for (const e of entries) { if (e.isDirectory) stack.push([`${dir}/${e.name}`, i]); else sizes[i] += e.size; }
+    }
+    if (stack.length) setTimeout(step, 20); else onDone(sizes);
+  };
+  step();
 }
-function titleOf(id) {
-  const root = appsRoot();
-  try {
-    const txt = FileSystem.readFile(`${root}/appmeta/${id}/param.json`);
-    const j = JSON.parse(txt.slice(txt.indexOf('{')));
-    const lp = j.localizedParameters || {};
-    const l = lp['pt-BR'] || lp[lp.defaultLanguage] || {};
-    if (l.titleName) return l.titleName;
-  } catch (_) { /* jogo de PS4 ou sem metadados */ }
-  return id;
+function statTime(path) { try { const st = FileSystem.stat(path); return st ? st.modified : 0; } catch (_) { return 0; } }
+
+// Segunda linha de um arquivo: nome do jogo (quando o nome tem PPSA/CUSA) e data.
+function FileMeta({item, extra}) {
+  const title = gameTitle(item.name);
+  const parts = [title, extra, item.modified ? t('modificado em {d}', {d: fmtDate(item.modified)}) : ''].filter(Boolean);
+  return parts.length ? <Text className="font-semi text-cap text-mist" numberOfLines={1}>{parts.join(' · ')}</Text> : null;
 }
 
 export function Storage({confirm}) {
   const all = drives();
-  const [scan, start, stop] = useScan();
+  useStore(ui, x => x.fsTick || 0);
+  const busy = useStore(ui, x => (x.fsBusy || 0) > 0);
+  const [scan, start, stop, drop] = useScan();
   const [apps, setApps] = useState(null);
+  const [deleting, setDeleting] = useState({});
+  const appsJob = useRef(null);
+  useEffect(() => () => { if (appsJob.current) appsJob.current.stop = true; }, []);
   const total = scan ? scan.bytes || 1 : 1;
   const remove = s => confirm('Apagar', `${t('Apagar “{1}”?', {1: s.name})} ${t('Não dá para desfazer.')}`, 'Apagar', () => {
-    FileSystem.removeAsync(s.path).then(() => { toast(t('Apagado'), 'ok'); start(scan.root); }, e => toast(String(e.message || e), 'bad'));
+    setDeleting(d => ({...d, [s.path]: true}));
+    removeSafely(s.path).then(() => { toast(t('Apagado'), 'ok'); drop(s); },
+      e => toast(String(e.message || e), 'bad'))
+      .then(() => setDeleting(d => { const n = {...d}; delete n[s.path]; return n; }));
   });
   const loadApps = () => {
-    setApps('loading');
-    setTimeout(() => {
-      const root = appsRoot();
-      let ids = [];
-      try { ids = FileSystem.readDir(`${root}/app`).filter(e => e.isDirectory && /^[A-Z]{4}\d{5}$/.test(e.name)).map(e => e.name); } catch (_) { /* nenhum */ }
-      const out = ids.filter(id => id !== 'PPSA48921').map(id => {
-        const app = dirSize(`${root}/app/${id}`), patch = dirSize(`${root}/patch/${id}`), dlc = dirSize(`${root}/addcont/${id}`);
-        return {id, title: titleOf(id), app, patch, dlc, size: app + patch + dlc};
-      }).sort((a, b) => b.size - a.size);
-      setApps(out);
-    }, 30);
+    if (appsJob.current) appsJob.current.stop = true;
+    const me = {stop: false};
+    appsJob.current = me;
+    const root = appsRoot();
+    let ids = [];
+    try { ids = FileSystem.readDir(`${root}/app`).filter(e => e.isDirectory && /^[A-Z]{4}\d{5}$/.test(e.name)).map(e => e.name); } catch (_) { /* nenhum */ }
+    ids = ids.filter(id => id !== 'PPSA48921');
+    const out = [];
+    setApps({loading: true, done: 0, total: ids.length, list: []});
+    let i = 0;
+    const next = () => {
+      if (me.stop) return;
+      if (i >= ids.length) { setApps({loading: false, list: out.slice().sort((a, b) => b.size - a.size)}); return; }
+      const id = ids[i++];
+      sizeLater([`${root}/app/${id}`, `${root}/patch/${id}`, `${root}/addcont/${id}`], ([app, patch, dlc]) => {
+        const info = appInfo(id);
+        out.push({id, title: info.title || id, version: info.version, installed: statTime(`${root}/app/${id}`), app, patch, dlc, size: app + patch + dlc});
+        setApps({loading: true, done: i, total: ids.length, list: out.slice().sort((a, b) => b.size - a.size)});
+        setTimeout(next, 20);
+      }, () => me.stop);
+    };
+    setTimeout(next, 20);
   };
+  const appList = apps ? apps.list : [];
   return (
     <ScrollView className="flex-1 px-10">
       <View className="gap-4 pb-24">
@@ -324,6 +395,7 @@ export function Storage({confirm}) {
             </View>
           ))}
         </View>
+        {busy ? <Text className="font-semi text-body text-sun">{t('Apagando… o disco fica ocupado até terminar.')}</Text> : null}
         {scan ? (
           <View className="gap-3 rounded-3xl bg-glass px-6 py-5">
             <View className="flex-row items-center gap-3">
@@ -339,66 +411,87 @@ export function Storage({confirm}) {
               {CATS.concat([OTHER]).filter(c => scan.cats[c[0]]).map(c => (
                 <View key={c[0]} className="flex-row items-center gap-2">
                   <View className="w-[16px] h-[16px] rounded-md" style={{backgroundColor: c[2]}} />
-                  <Text className="font-semi text-cap text-cloud">{`${c[1]} · ${fmt(scan.cats[c[0]])}`}</Text>
+                  <Text className="font-semi text-cap text-cloud">{`${t(c[1])} · ${fmt(scan.cats[c[0]])}`}</Text>
                 </View>
               ))}
             </View>
           </View>
         ) : <Text className="font-semi text-body text-mist">{t('Escolha uma unidade e aperte Analisar para ver o que está ocupando espaço.')}</Text>}
         {scan && scan.suggestions.length ? (
-          <View className="gap-2 rounded-3xl bg-glass px-6 py-5">
+          <View className="gap-3 rounded-3xl bg-glass px-6 py-5">
             <Text className="font-heavy text-lead text-cloud">{t(`Sugestões de limpeza · até ${fmt(scan.suggestions.reduce((a, s) => a + s.size, 0))}`)}</Text>
             {scan.suggestions.slice(0, 12).map(s => (
               <View key={s.path} className="flex-row items-center gap-3">
-                <View className="flex-1">
+                <View className="flex-1 gap-1">
                   <Text className="font-semi text-body text-cloud" numberOfLines={1}>{s.name}</Text>
-                  <Text className="font-semi text-cap text-mist">{t(s.why)}</Text>
+                  <FileMeta item={s} extra={t(s.why)} />
                 </View>
                 <Text className="font-heavy text-body text-cloud">{fmt(s.size)}</Text>
-                <Button small danger label={t('Apagar')} onPress={() => remove(s)} />
+                {deleting[s.path] ? <Text className="font-semi text-cap text-sun">{t('Apagando…')}</Text>
+                  : <Button small danger label={t('Apagar')} onPress={() => remove(s)} />}
+              </View>
+            ))}
+          </View>
+        ) : null}
+        {scan && scan.top.length ? (
+          <View className="gap-3 rounded-3xl bg-glass px-6 py-5">
+            <View className="flex-row items-center gap-3">
+              <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{t('Maiores arquivos')}</Text></View>
+              <View className="flex-row items-center gap-2"><ButtonGlyph name="cross" /><Text className="font-semi text-cap text-mist">{t('para apagar')}</Text></View>
+            </View>
+            {scan.top.slice(0, 15).map(f => (
+              <View key={f.path} onPress={() => (deleting[f.path] ? null : remove(f))}
+                className="flex-row items-center gap-4 rounded-xl px-3 py-2 border-2 border-transparent focused:border-bad">
+                <View className="flex-1 gap-1">
+                  <Text className="font-semi text-body text-cloud" numberOfLines={1}>{gameTitle(f.name) || f.name}</Text>
+                  <FileMeta item={gameTitle(f.name) ? {...f, name: ''} : f} extra={gameTitle(f.name) ? f.name : (f.bucket === f.name ? '' : f.bucket)} />
+                </View>
+                <Text className="font-heavy text-body text-cloud">{deleting[f.path] ? t('Apagando…') : fmt(f.size)}</Text>
               </View>
             ))}
           </View>
         ) : null}
         {scan && scan.dirs.length ? (
-          <View className="flex-row gap-4">
-            <View className="flex-1 gap-2 rounded-3xl bg-glass px-6 py-5">
-              <Text className="font-heavy text-lead text-cloud">{t('Maiores pastas')}</Text>
-              {scan.dirs.map(([name, size]) => (
-                <View key={name} className="gap-1">
-                  <View className="flex-row justify-between"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{name}</Text>
-                    <Text className="font-heavy text-body text-cloud">{fmt(size)}</Text></View>
-                  <Bar value={size / scan.dirs[0][1]} h={8} />
+          <View className="gap-2 rounded-3xl bg-glass px-6 py-5">
+            <Text className="font-heavy text-lead text-cloud">{t('Maiores pastas')}</Text>
+            {scan.dirs.map(([name, size]) => (
+              <View key={name} className="gap-1">
+                <View className="flex-row justify-between gap-3">
+                  <View className="flex-1 flex-row items-center gap-3">
+                    <Text className="font-semi text-body text-cloud" numberOfLines={1}>{name}</Text>
+                    {gameTitle(name) ? <Text className="font-heavy text-cap text-sky" numberOfLines={1}>{gameTitle(name)}</Text> : null}
+                  </View>
+                  <Text className="font-heavy text-body text-cloud">{fmt(size)}</Text>
                 </View>
-              ))}
-            </View>
-            <View className="flex-1 gap-2 rounded-3xl bg-glass px-6 py-5">
-              <Text className="font-heavy text-lead text-cloud">{t('Maiores arquivos')}</Text>
-              {scan.top.slice(0, 12).map(f => (
-                <View key={f.path} onPress={() => remove(f)} className="flex-row justify-between rounded-lg px-2 border-2 border-transparent focused:border-bad">
-                  <View className="flex-1"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{f.name}</Text></View>
-                  <Text className="font-heavy text-body text-cloud">{fmt(f.size)}</Text>
-                </View>
-              ))}
-            </View>
+                <Bar value={size / (scan.dirs[0][1] || 1)} h={8} />
+              </View>
+            ))}
           </View>
         ) : null}
-        <View className="gap-2 rounded-3xl bg-glass px-6 py-5">
+        <View className="gap-3 rounded-3xl bg-glass px-6 py-5">
           <View className="flex-row items-center gap-3">
             <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{t('Jogos e apps instalados')}</Text></View>
-            <Button small label={apps === 'loading' ? 'Calculando…' : 'Calcular'} onPress={loadApps} />
+            <Button small label={apps && apps.loading ? t('Calculando… {a} de {b}', {a: apps.done, b: apps.total}) : 'Calcular'} onPress={loadApps} />
           </View>
           <Text className="font-semi text-cap text-mist">{t('Jogo + atualizações + DLCs. Só visualização.')}</Text>
-          {Array.isArray(apps) && !apps.length ? <Text className="font-semi text-body text-mist">{t('Nenhum encontrado.')}</Text> : null}
-          {Array.isArray(apps) ? apps.slice(0, 40).map(a => (
+          {apps && !apps.loading && !appList.length ? <Text className="font-semi text-body text-mist">{t('Nenhum encontrado.')}</Text> : null}
+          {appList.slice(0, 40).map(a => (
             <View key={a.id} className="gap-1">
               <View className="flex-row justify-between gap-3">
-                <View className="flex-1"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{`${a.title}  ·  ${a.id}`}</Text></View>
+                <View className="flex-1"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{a.title}</Text></View>
                 <Text className="font-heavy text-body text-cloud">{fmt(a.size)}</Text>
               </View>
-              <Bar value={a.size / apps[0].size} h={8} color="sky" />
+              <Text className="font-semi text-cap text-mist" numberOfLines={1}>{[
+                a.id,
+                a.version ? t('versão {v}', {v: a.version}) : '',
+                a.installed ? t('instalado em {d}', {d: fmtDate(a.installed)}) : '',
+                t('jogo {a}', {a: fmt(a.app)}),
+                a.patch ? t('atualização {a}', {a: fmt(a.patch)}) : '',
+                a.dlc ? t('DLC {a}', {a: fmt(a.dlc)}) : '',
+              ].filter(Boolean).join(' · ')}</Text>
+              <Bar value={a.size / (appList[0].size || 1)} h={8} color="sky" />
             </View>
-          )) : null}
+          ))}
         </View>
       </View>
     </ScrollView>
