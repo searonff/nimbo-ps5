@@ -78,6 +78,16 @@ A arte e a música são geradas pelos scripts em `tools/`. A tela inicial do PS5
 
 A primeira versão era um payload ELF (`nimbo-ps5.elf`), rodado pelo PS5 Payload Manager, com a interface aberta no navegador do PS5. O código continua em `src/` e `web/`. Para compilar: `./scripts/build-deps-ps5.sh && make ps5 && ./scripts/package.sh` (SDK em `/opt/ps5-payload-sdk`).
 
+## Aviso legal
+
+O Nimbo Downloader é um **gerenciador de downloads e de arquivos**. Ele não fornece, hospeda, indexa nem indica nenhum conteúdo. Ele só transfere arquivos que o próprio usuário guardou na conta dele em um serviço de terceiros, ou links que o próprio usuário informou.
+
+- O app **não foi criado para pirataria** nem para contornar proteção de direitos autorais, e o autor não apoia esse uso. A finalidade é baixar e organizar conteúdo que você tem o direito de usar: seus backups, homebrew, software livre, mídia de domínio público ou conteúdo adquirido legalmente.
+- **A responsabilidade pelo que é baixado é exclusivamente do usuário.** Cabe a ele cumprir as leis do seu país e os termos de uso dos serviços que usa (TorBox e outros).
+- Desbloquear o console pode violar os termos de uso do fabricante, anular a garantia e trazer riscos ao aparelho. Faça isso por sua conta e risco.
+- Projeto pessoal e independente, **sem vínculo** com Sony Interactive Entertainment, PlayStation, TorBox ou qualquer serviço citado. Marcas citadas pertencem aos seus donos.
+- O software é fornecido **"como está", sem garantias**, nos termos da licença GPLv3. O autor não responde por perda de dados, danos ao console ou mau uso.
+
 ## Licença
 
 GPLv3. Fonte Nunito (SIL OFL), qrcode-generator (MIT). A V1 usa cJSON, curl, mbedTLS, libarchive, zlib e xz.
