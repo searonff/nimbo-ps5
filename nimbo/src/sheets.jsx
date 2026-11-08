@@ -192,6 +192,69 @@ export function ServiceBadge({p, big}) {
   );
 }
 
+// Senhas de compactados: o Nimbo tenta cada uma ao extrair. Adicionar, editar, mostrar e apagar.
+export function PasswordsSheet({onClose}) {
+  const list = useStore(config, c => c.passwords || []);
+  const [show, setShow] = useState(false);
+  const [armed, setArmed] = useState('');          // botão "Apagar" aguardando a confirmação
+  const {focus} = useFocus();
+  const save = next => config.set({passwords: next.filter((x, i) => x && next.indexOf(x) === i)});
+  const ask = async (title, text) => {
+    const r = await Keyboard.open({title: t(title), text: text || '', type: 'basic', maxLength: 200});
+    return r.status === 'done' ? r.text : null;
+  };
+  const add = async () => {
+    const v = await ask('Nova senha de arquivo');
+    if (!v) return;
+    if (list.includes(v)) { toast(t('Essa senha já está salva'), 'info'); return; }
+    save(list.concat([v])); toast(t('Senha adicionada'), 'ok');
+  };
+  const edit = async i => {
+    const v = await ask('Editar senha', list[i]);
+    if (!v || v === list[i]) return;
+    save(list.map((x, j) => (j === i ? v : x))); toast(t('Senha alterada'), 'ok');
+  };
+  const del = i => {
+    if (armed !== `one:${i}`) { setArmed(`one:${i}`); return; }
+    setArmed('');
+    save(list.filter((_, j) => j !== i)); toast(t('Senha apagada'), 'ok');
+    setTimeout(() => focus(list.length > 1 ? `pw:${Math.max(0, i - 1)}` : 'pw-add'), 0);
+  };
+  const delAll = () => {
+    if (armed !== 'all') { setArmed('all'); return; }
+    setArmed(''); save([]); toast(t('Senhas apagadas'), 'ok');
+    setTimeout(() => focus('pw-add'), 0);
+  };
+  const mask = v => (show ? v : `${'•'.repeat(Math.min(12, Math.max(4, v.length - 2)))}${v.length > 4 ? v.slice(-2) : ''}`);
+  return (
+    <Sheet title={t('Senhas de arquivos')} onClose={onClose} width={900}>
+      <Text className="font-semi text-body text-mist">{t('Ao extrair um compactado com senha, o Nimbo tenta cada uma destas.')}</Text>
+      <View className="flex-row gap-3">
+        <Button primary focusKey="pw-add" label={t('Adicionar senha')} onPress={add} />
+        {list.length ? <Button label={t(show ? 'Ocultar senhas' : 'Mostrar senhas')} onPress={() => setShow(x => !x)} /> : null}
+      </View>
+      {list.length ? (
+        <ScrollView className="max-h-[330px]">
+          <View className="gap-2">
+            {list.map((v, i) => (
+              <View key={`${i}:${v}`} className="flex-row items-center gap-3 rounded-2xl bg-shade px-4 py-2">
+                <Text className="font-heavy text-cap text-mist">{String(i + 1)}</Text>
+                <View className="flex-1"><Text className="font-semi text-lead text-cloud" numberOfLines={1}>{mask(v)}</Text></View>
+                <Button small focusKey={`pw:${i}`} label={t('Editar')} onPress={() => edit(i)} />
+                <Button small danger label={t(armed === `one:${i}` ? 'Confirmar' : 'Apagar')} onPress={() => del(i)} />
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+      ) : <Text className="font-semi text-body text-mist">{t('Nenhuma senha salva ainda.')}</Text>}
+      <View className="flex-row gap-3">
+        <Button label={t('Fechar')} onPress={onClose} />
+        {list.length > 1 ? <Button danger label={t(armed === 'all' ? 'Confirmar: apagar todas' : 'Apagar todas')} onPress={delAll} /> : null}
+      </View>
+    </Sheet>
+  );
+}
+
 // Idioma do app (o nome de cada um aparece no próprio idioma).
 export function LangSheet({onClose}) {
   const cur = useStore(config, c => c.lang || 'pt');

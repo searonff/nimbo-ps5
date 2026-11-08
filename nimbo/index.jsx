@@ -6,7 +6,7 @@ import icon from './sce_sys/icon0.png';
 import {useInterfaceSounds} from './sounds.js';
 import {config, queue, ui, useStore, toast} from './src/store.js';
 import {Background, Speed, Hints, Ring, Bar, Pill, Button, Cover, Toast, hue, hsl, Flag} from './src/ui.jsx';
-import {ItemSheet, FolderSheet, ConnectSheet, ServicesSheet, ServiceBadge, ConfirmSheet, Sheet, LangSheet} from './src/sheets.jsx';
+import {ItemSheet, FolderSheet, ConnectSheet, ServicesSheet, ServiceBadge, ConfirmSheet, Sheet, LangSheet, PasswordsSheet} from './src/sheets.jsx';
 import {PROVIDERS, provider, linkedProviders, listAll as listClouds, jobOf, itemKey} from './src/debrid/index.js';
 import {QR} from './src/qr.jsx';
 import {Files, Storage} from './src/manage.jsx';
@@ -514,9 +514,9 @@ function About() {
 }
 
 /* ---------- Ajustes ---------- */
-function Row({label, value, onPress}) {
+function Row({label, value, onPress, focusKey}) {
   return (
-    <View onPress={onPress} className="flex-row items-center justify-between rounded-2xl bg-glass px-6 h-[64px] border-[3px] border-transparent focused:border-sun">
+    <View focusKey={focusKey} onPress={onPress} className="flex-row items-center justify-between rounded-2xl bg-glass px-6 h-[64px] border-[3px] border-transparent focused:border-sun">
       <Text className="font-semi text-lead text-cloud">{t(label)}</Text>
       <Text className="font-heavy text-lead text-sun">{t(value)}</Text>
     </View>
@@ -532,7 +532,7 @@ function LangRow({onPress}) {
     </View>
   );
 }
-function Settings({openConnect, pickFolder, confirm, openLang}) {
+function Settings({openConnect, pickFolder, confirm, openLang, openPasswords}) {
   const c = useStore(config);
   const flip = k => () => { config.set({[k]: !c[k]}); if (k === 'speedLimitOn') setTimeout(applyRateLimit, 0); };
   const onOff = v => (v ? 'Ligado' : 'Desligado');
@@ -566,11 +566,7 @@ function Settings({openConnect, pickFolder, confirm, openLang}) {
         <Text className="font-heavy text-h2 text-cloud mt-3">{t('Extração')}</Text>
         <Row label={t('Extrair automaticamente')} value={onOff(c.autoExtract)} onPress={flip('autoExtract')} />
         <Row label={t('Apagar o compactado depois')} value={onOff(c.deleteArchive)} onPress={flip('deleteArchive')} />
-        <Row label={t('Senhas cadastradas')} value={t(`${c.passwords.length} · adicionar`)} onPress={async () => {
-          const r = await Keyboard.open({title: t('Nova senha de arquivo'), type: 'basic', maxLength: 200});
-          if (r.status === 'done' && r.text) { config.set({passwords: [...new Set(c.passwords.concat([r.text]))]}); toast(t('Senha adicionada'), 'ok'); }
-        }} />
-        {c.passwords.length ? <Row label={t('Apagar todas as senhas')} value="Apagar" onPress={() => confirm('Apagar senhas', 'Apagar todas as senhas cadastradas?', 'Apagar', () => config.set({passwords: []}))} /> : null}
+        <Row focusKey="set-passwords" label={t('Senhas de arquivos')} value={c.passwords.length ? tn(c.passwords.length, '{n} salva', '{n} salvas') : t('Adicionar')} onPress={() => openPasswords()} />
         <Text className="font-heavy text-h2 text-cloud mt-3">{t('Som')}</Text>
         <Row label={t('Música de fundo')} value={onOff(c.music)} onPress={flip('music')} />
         <Row label={t('Volume da música')} value={`${Math.round(c.musicVolume * 100)}%`} onPress={() => config.set({musicVolume: Math.round((c.musicVolume || 0) * 10) >= 10 ? 0.1 : (Math.round((c.musicVolume || 0) * 10) + 1) / 10})} />
@@ -637,12 +633,13 @@ function App() {
     startPhone();
     loadCloud();
     setTimeout(autoCheckUpdate, 8000);
+    if (config.get().restoredFromBackup) setTimeout(() => toast(t("Login e ajustes restaurados da cópia de segurança"), "ok"), 1500);
     const upd = setInterval(() => autoCheckUpdate(), 6 * 3600 * 1000);
     // a chave chegou pelo celular (ou outro login): recarrega a nuvem
     let lastRefresh = 0;
     ui.subscribe && ui.subscribe(st => { if (st.cloudRefresh && st.cloudRefresh !== lastRefresh) { lastRefresh = st.cloudRefresh; loadCloud(); } });
-    const t = setInterval(loadCloud, 60000);
-    return () => { clearInterval(t); clearInterval(upd); };
+    const cloudTimer = setInterval(loadCloud, 60000);
+    return () => { clearInterval(cloudTimer); clearInterval(upd); };
   }, []);
 
   const openItem = item => setSheet({type: 'item', item});
@@ -700,7 +697,7 @@ function App() {
             <Screen id={2}><Guard><Downloads /></Guard></Screen>
             <Screen id={3}><Guard><Files pickFolder={pickFolder} confirm={confirm} /></Guard></Screen>
             <Screen id={4}><Guard><Storage confirm={confirm} /></Guard></Screen>
-            <Screen id={5}><Guard><Settings openConnect={openConnect} pickFolder={pickFolder} confirm={confirm} openLang={() => setSheet({type: 'lang'})} /></Guard></Screen>
+            <Screen id={5}><Guard><Settings openConnect={openConnect} pickFolder={pickFolder} confirm={confirm} openLang={() => setSheet({type: 'lang'})} openPasswords={() => setSheet({type: 'passwords'})} /></Guard></Screen>
             <Screen id={6}><Guard><About /></Guard></Screen>
           </Screens>
           </View>
@@ -719,6 +716,7 @@ function App() {
       {sheet && sheet.type === 'connect' ? <ConnectSheet providerId={sheet.provider} onClose={ok => { close(); if (ok) { ui.set({cloud: null}); loadCloud(); } }} /> : null}
       {sheet && sheet.type === 'confirm' ? <ConfirmSheet {...sheet} onClose={close} /> : null}
       {sheet && sheet.type === 'phone' ? <PhoneSheet onClose={close} /> : null}
+      {sheet && sheet.type === 'passwords' ? <PasswordsSheet onClose={() => { close(); setTimeout(() => focus('set-passwords'), 0); }} /> : null}
       {sheet && sheet.type === 'lang' ? <LangSheet onClose={() => { close(); setTimeout(() => focus('set-lang'), 0); }} /> : null}
     </View>
   );

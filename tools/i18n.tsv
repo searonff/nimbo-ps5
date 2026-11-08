@@ -420,3 +420,21 @@ instalado em {d}	installed {d}	instalado el {d}	installé le {d}	installiert am 
 jogo {a}	game {a}	juego {a}	jeu {a}	Spiel {a}	gioco {a}
 atualização {a}	update {a}	actualización {a}	mise à jour {a}	Update {a}	aggiornamento {a}
 DLC {a}	DLC {a}	DLC {a}	DLC {a}	DLC {a}	DLC {a}
+Login e ajustes restaurados da cópia de segurança	Logins and settings restored from backup	Sesiones y ajustes restaurados de la copia de seguridad	Connexions et réglages restaurés depuis la sauvegarde	Anmeldungen und Einstellungen aus der Sicherung wiederhergestellt	Accessi e impostazioni ripristinati dal backup
+Senhas de arquivos	Archive passwords	Contraseñas de archivos	Mots de passe d’archives	Archiv-Passwörter	Password degli archivi
+Ao extrair um compactado com senha, o Nimbo tenta cada uma destas.	When extracting a password-protected archive, Nimbo tries each of these.	Al extraer un comprimido con contraseña, Nimbo prueba cada una de estas.	Pour extraire une archive protégée, Nimbo essaie chacun de ces mots de passe.	Beim Entpacken eines geschützten Archivs probiert Nimbo jedes davon.	Quando estrae un archivio con password, Nimbo prova ognuna di queste.
+Adicionar senha	Add password	Añadir contraseña	Ajouter un mot de passe	Passwort hinzufügen	Aggiungi password
+Mostrar senhas	Show passwords	Mostrar contraseñas	Afficher les mots de passe	Passwörter zeigen	Mostra password
+Ocultar senhas	Hide passwords	Ocultar contraseñas	Masquer les mots de passe	Passwörter verbergen	Nascondi password
+Editar	Edit	Editar	Modifier	Bearbeiten	Modifica
+Editar senha	Edit password	Editar contraseña	Modifier le mot de passe	Passwort bearbeiten	Modifica password
+Essa senha já está salva	That password is already saved	Esa contraseña ya está guardada	Ce mot de passe est déjà enregistré	Dieses Passwort ist schon gespeichert	Questa password è già salvata
+Senha alterada	Password changed	Contraseña cambiada	Mot de passe modifié	Passwort geändert	Password modificata
+Senha apagada	Password deleted	Contraseña borrada	Mot de passe supprimé	Passwort gelöscht	Password eliminata
+Senhas apagadas	Passwords deleted	Contraseñas borradas	Mots de passe supprimés	Passwörter gelöscht	Password eliminate
+Apagar todas	Delete all	Borrar todas	Tout supprimer	Alle löschen	Elimina tutte
+Confirmar: apagar todas	Confirm: delete all	Confirmar: borrar todas	Confirmer : tout supprimer	Bestätigen: alle löschen	Conferma: elimina tutte
+Nenhuma senha salva ainda.	No passwords saved yet.	Aún no hay contraseñas guardadas.	Aucun mot de passe enregistré.	Noch keine Passwörter gespeichert.	Nessuna password salvata.
+{n} salva	{n} saved	{n} guardada	{n} enregistré	{n} gespeichert	{n} salvata
+{n} salvas	{n} saved	{n} guardadas	{n} enregistrés	{n} gespeichert	{n} salvate
+Adicionar	Add	Añadir	Ajouter	Hinzufügen	Aggiungi

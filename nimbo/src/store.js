@@ -1,26 +1,44 @@
 // Estado do app com persistência em JSON no armazenamento do próprio app.
+//
+// Excluir o app pelo menu do PS5 apaga a área de dados dele (dataDir), mesmo com a pasta
+// em /data/homebrew intacta. Por isso cada arquivo também é copiado para BACKUP_DIR, que o
+// sistema não mexe; se o app abrir sem dados, restaura de lá (logins, ajustes e fila).
 import {useEffect, useState} from 'react';
-import {FileSystem} from '@ps5-react/core';
+import {FileSystem, Platform} from '@ps5-react/core';
+
+const BACKUP_DIR = Platform.OS === 'ps5' ? '/data/nimbo-settings' : `${FileSystem.dataDir}/fake-backup`;
+
+function readJson(path) {
+  try { if (FileSystem.exists(path)) return JSON.parse(FileSystem.readFile(path)); } catch (_) { /* corrompido */ }
+  return null;
+}
 
 function load(file, fallback) {
-  try {
-    const path = `${FileSystem.dataDir}/${file}`;
-    if (FileSystem.exists(path)) return {...fallback, ...JSON.parse(FileSystem.readFile(path))};
-  } catch (_) { /* arquivo corrompido: usa o padrão */ }
+  const own = readJson(`${FileSystem.dataDir}/${file}`);
+  if (own) return {...fallback, ...own};
+  const saved = readJson(`${BACKUP_DIR}/${file}`);
+  if (saved) return {...fallback, ...saved, restoredFromBackup: true};
   return fallback;
+}
+
+function writeSafe(path, text) {
+  FileSystem.writeFile(`${path}.tmp`, text, {sync: true});
+  FileSystem.rename(`${path}.tmp`, path);
 }
 
 function createStore(file, initial, persist = true) {
   let value = file ? load(file, initial) : initial;
   const listeners = new Set();
   let saveTimer = null;
+  // Ao abrir, grava uma vez: cria a cópia de segurança (ou repõe os dados restaurados).
+  if (file && persist) saveTimer = setTimeout(() => save(), 1500);
   const save = () => {
     saveTimer = null;
-    try {
-      const path = `${FileSystem.dataDir}/${file}`;
-      FileSystem.writeFile(`${path}.tmp`, JSON.stringify(value), {sync: true});
-      FileSystem.rename(`${path}.tmp`, path);
-    } catch (_) { /* sem espaço: tenta na próxima mudança */ }
+    const {restoredFromBackup, ...data} = value || {};
+    void restoredFromBackup;
+    const text = JSON.stringify(data);
+    try { writeSafe(`${FileSystem.dataDir}/${file}`, text); } catch (_) { /* sem espaço: tenta na próxima mudança */ }
+    try { FileSystem.mkdir(BACKUP_DIR, {recursive: true}); writeSafe(`${BACKUP_DIR}/${file}`, text); } catch (_) { /* cópia é só reserva */ }
   };
   return {
     get: () => value,
