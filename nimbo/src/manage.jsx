@@ -7,11 +7,39 @@ import {drives} from './drives.js';
 import {config, queue, toast, useStore} from './store.js';
 import {archiveKind, enqueueCopy, enqueueExtract, fmt, firstVolume, stripArchive, basename, dirname} from './engine.js';
 
-function list(path) {
+function list(path, sort = 'name') {
+  const by = {
+    name: (a, b) => a.name.localeCompare(b.name),
+    size: (a, b) => (b.size || 0) - (a.size || 0),
+    date: (a, b) => (b.modified || 0) - (a.modified || 0),
+  }[sort] || ((a, b) => a.name.localeCompare(b.name));
   try {
     return FileSystem.readDir(path).filter(e => !e.name.startsWith('.') && !/\.(part|resume|partial|complete)$/.test(e.name))
-      .sort((a, b) => (a.isDirectory !== b.isDirectory ? (a.isDirectory ? -1 : 1) : a.name.localeCompare(b.name)));
+      .sort((a, b) => (a.isDirectory !== b.isDirectory ? (a.isDirectory ? -1 : 1) : by(a, b)));
   } catch (_) { return null; }
+}
+const SORTS = [['name', 'Nome'], ['date', 'Mais novos'], ['size', 'Maiores']];
+
+// Ícone por tipo: cor + sigla curta, legível de longe na TV.
+const TYPE_BADGE = {
+  video: ['VÍD', '#63b3ed'], archive: ['ZIP', '#ffc857'], package: ['PKG', '#e58bd8'], audio: ['SOM', '#57d9a3'],
+  image: ['IMG', '#9be7ff'], partial: ['...', '#ff7a7a'], other: ['ARQ', '#6f84a3'],
+};
+function TypeIcon({entry}) {
+  if (entry.isDirectory) {
+    return (
+      <View className="w-[34px] h-[26px] justify-end">
+        <View className="w-[16px] h-[6px] rounded-md" style={{backgroundColor: '#4f9fe0'}} />
+        <View className="w-[34px] h-[20px] rounded-md" style={{backgroundColor: '#63b3ed'}} />
+      </View>
+    );
+  }
+  const [label, color] = TYPE_BADGE[category(entry.name)] || TYPE_BADGE.other;
+  return (
+    <View className="w-[34px] h-[26px] rounded-md items-center justify-center" style={{backgroundColor: color}}>
+      <Text className="font-heavy text-xs2 text-night">{label}</Text>
+    </View>
+  );
 }
 
 /* ---------- Arquivos ---------- */
@@ -20,6 +48,7 @@ export function Files({pickFolder, confirm}) {
   const [path, setPath] = useState(all[0] ? all[0].path : FileSystem.dataDir);
   const [tick, setTick] = useState(0);
   const [menu, setMenu] = useState(null);
+  const sort = useStore(config, c => c.filesSort || 'name');
   // Seleção múltipla: □ marca/desmarca o item com o cursor (arquivo ou pasta, em qualquer pasta).
   const [sel, setSel] = useState(() => new Map());   // caminho completo -> {name, isDirectory, size}
   const focused = useRef(null);
@@ -41,7 +70,7 @@ export function Files({pickFolder, confirm}) {
   }, [path]);
   const tasks = useStore(queue, q => q.tasks);
   useEffect(() => setTick(t => t + 1), [tasks.length]);
-  const entries = list(path) || [];
+  const entries = list(path, sort) || [];
   const drive = all.filter(d => path === d.path || path.startsWith(`${d.path}/`))[0];
   const up = drive && path !== drive.path ? dirname(path) : null;
   const refresh = () => setTick(t => t + 1);
@@ -115,6 +144,7 @@ export function Files({pickFolder, confirm}) {
         ))}
         <View className="flex-1" />
         {up ? <Button small focusKey="files-up" label="Voltar uma pasta" onPress={() => openDir(up)} /> : null}
+        <Button small label={`Ordem: ${SORTS.find(x => x[0] === sort)[1]}`} onPress={() => config.set({filesSort: SORTS[(SORTS.findIndex(x => x[0] === sort) + 1) % SORTS.length][0]})} />
         <Button small label="Nova pasta" onPress={async () => {
           const r = await Keyboard.open({title: 'Nome da nova pasta', maxLength: 80, type: 'basic'});
           if (r.status === 'done' && r.text.trim()) { FileSystem.mkdir(`${path}/${r.text.trim().replace(/[/\\<>:"|?*]/g, '_')}`, {recursive: true}); refresh(); }
@@ -138,7 +168,7 @@ export function Files({pickFolder, confirm}) {
                     {sel.has(`${path}/${e.name}`) ? <Svg width={30} height={30} viewBox="0 0 26 26" style={{width: 30, height: 30}}><Path d="M6 13 L11 18 L20 8" stroke="#2b1d00" strokeWidth="3" strokeLinecap="round" fill="none" /></Svg> : null}
                   </View>
                 ) : null}
-                <View className="w-[30px] h-[24px] rounded-md" style={{backgroundColor: e.isDirectory ? '#63b3ed' : kind ? '#ffc857' : '#56708f'}} />
+                <TypeIcon entry={e} />
                 <View className="flex-1"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{e.name}</Text></View>
                 {kind === 'first' ? <Pill text="Compactado" tone="warn" /> : null}
                 <Text className="font-semi text-cap text-mist">{e.isDirectory ? 'Pasta' : fmt(e.size)}</Text>

@@ -1,0 +1,19 @@
+NIMBO DOWNLOADER V2 - App nativo para PS5 (etaHEN + ShadowMount+)
+
+INSTALAR
+1. Ative o etaHEN e o ShadowMount+ no PS5.
+2. Copie a pasta PPSA48921 inteira para /data/homebrew/ no PS5
+   (fica /data/homebrew/PPSA48921/eboot.bin).
+   Jeito mais fácil: FTP do etaHEN (porta 1337) com FileZilla no PC
+   ou um app de FTP no celular, usando o IP do PS5.
+3. Espere o ShadowMount+ registrar (aparece o ícone na tela inicial).
+   Se não aparecer, reinicie o PS5 e rode o etaHEN/ShadowMount+ de novo.
+4. Abra o Nimbo e conecte o TorBox com o QR code.
+
+ATUALIZAR
+Pelo próprio app: aba Sobre > Procurar atualização > Atualizar.
+Depois feche e abra o Nimbo. (Ou substitua a pasta PPSA48921 pelo FTP.)
+
+CELULAR
+Painel > "Usar pelo celular". Abra o endereço mostrado no navegador do
+celular (mesma rede Wi-Fi) e digite o PIN.

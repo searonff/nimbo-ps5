@@ -144,6 +144,9 @@ export function watchItem(kind, id, name, dest, opts) {
 
 /* ---------- execução ---------- */
 let current = null;   // {kind:'job'|'task', id, handle}
+let held = false;     // atualização do app em andamento: não começa nada novo
+export function engineBusy() { return !!current; }
+export function holdEngine(on) { held = on; }
 let lastWritten = 0, lastAt = 0;
 
 export function jobAction(id, action) {
@@ -354,6 +357,7 @@ function step() {
   } else if (ui.get().speed) ui.set({speed: 0});
 
   if (current) { setAwake(true); return; }
+  if (held) return;
   const task = tasks().find(t => t.state === 'queued');
   if (task) { setAwake(true); guard((task.type === 'extract' ? runExtract : runCopy)(task), p => patchTask(task.id, p)); return; }
   const job = jobs().find(j => j.state === 'queued');

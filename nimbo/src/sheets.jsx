@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react';
 import {View, Text, FocusScope, ScrollView, FileSystem, Keyboard, Svg, Path, useFocus} from '@ps5-react/core';
 import {Button, Cover, Pill} from './ui.jsx';
 import {QR} from './qr.jsx';
-import {config, useStore, toast, queue} from './store.js';
+import {config, useStore, toast, queue, ui} from './store.js';
 import {drives} from './drives.js';
 import {enqueueTorbox, fmt, watchItem} from './engine.js';
 import * as torbox from './torbox.js';
@@ -34,6 +34,7 @@ function Toggle({label, value, onChange}) {
 
 /* item da nuvem: escolher arquivos, destino e extração */
 export function ItemSheet({item, onClose, onPickFolder}) {
+  const [armed, setArmed] = useState(false);
   const cfg = useStore(config);
   const jobs = useStore(queue, q => q.jobs);
   const doneIds = new Set(jobs.filter(j => j.tbKind === item.kind && j.itemId === item.id && j.state === 'done').map(j => j.fileId));
@@ -102,7 +103,19 @@ export function ItemSheet({item, onClose, onPickFolder}) {
       </View>
       <View className="flex-row gap-3 items-center">
         <Button primary focusKey="sheet-go" label={item.ready ? `Baixar ${fmt(total)}` : 'Baixar quando ficar pronto'} onPress={start} />
-        <Button focusKey="confirm-cancel" label="Cancelar" onPress={onClose} />
+        <Button focusKey="sheet-cancel" label="Cancelar" onPress={onClose} />
+        <View className="flex-1" />
+        {/* Apagar do TorBox pede um segundo toque para confirmar. */}
+        <Button danger focusKey="sheet-delete" label={armed === 'busy' ? 'Apagando…' : armed ? 'Confirmar exclusão' : 'Apagar do TorBox'}
+          onPress={() => {
+            if (armed === 'busy') return;
+            if (!armed) { setArmed(true); return; }
+            setArmed('busy');
+            torbox.remove(item.kind, item.id).then(() => {
+              ui.set({cloud: (ui.get().cloud || []).filter(x => !(x.kind === item.kind && x.id === item.id))});
+              toast('Apagado do TorBox', 'ok'); onClose();
+            }, e => { setArmed(false); toast(e.message, 'bad'); });
+          }} />
       </View>
     </Sheet>
   );

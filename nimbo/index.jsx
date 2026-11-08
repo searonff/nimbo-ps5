@@ -13,12 +13,13 @@ import {startPhone, phoneInfo} from './src/phone.js';
 import {drives} from './src/drives.js';
 import {startEngine, jobAction, taskAction, clearFinished, fmt, fmtSpeed, fmtEta, applyRateLimit} from './src/engine.js';
 import {syncMusic, applyMusicVolume} from './src/music.js';
+import {APP_VERSION, REPO_URL, checkUpdate, installUpdate, installDir} from './src/update.js';
 
 // v2.0.1: música mais baixa também para quem já tinha a configuração salva
 if (!config.get().volumeV2) config.set({musicVolume: 0.25, volumeV2: true});
 import * as torbox from './src/torbox.js';
 
-const TABS = [['home', 'Painel'], ['cloud', 'Nuvem'], ['downloads', 'Downloads'], ['files', 'Arquivos'], ['storage', 'Armazenamento'], ['settings', 'Ajustes']];
+const TABS = [['home', 'Painel'], ['cloud', 'Nuvem'], ['downloads', 'Downloads'], ['files', 'Arquivos'], ['storage', 'Armazenamento'], ['settings', 'Ajustes'], ['about', 'Sobre']];
 
 /* ---------- dados da nuvem compartilhados entre telas ---------- */
 let cloudLoading = false;
@@ -350,11 +351,24 @@ function TaskRow({t}) {
 function Downloads() {
   const q = useStore(queue);
   const speed = useStore(ui, s => s.speed);
-  const active = q.jobs.filter(j => j.state !== 'done');
+  const active = q.jobs.filter(j => j.state !== 'done' && j.state !== 'error');
   const done = q.jobs.filter(j => j.state === 'done').slice(-6).reverse();
+  const badJobs = q.jobs.filter(j => j.state === 'error');
+  const badTasks = q.tasks.filter(t => t.state === 'error');
+  const retryAll = () => { badJobs.forEach(j => jobAction(j.id, 'resume')); badTasks.forEach(t => taskAction(t.id, 'retry')); };
   return (
     <ScrollView className="flex-1 px-10">
       <View className="gap-3 pb-24">
+        {badJobs.length + badTasks.length ? (
+          <View className="gap-3 rounded-3xl px-5 py-4 border-2 border-bad" style={{backgroundColor: 'rgba(255,122,122,0.10)'}}>
+            <View className="flex-row items-center gap-3">
+              <View className="flex-1"><Text className="font-heavy text-h2 text-cloud">{`Precisa de atenção (${badJobs.length + badTasks.length})`}</Text></View>
+              <Button small primary label="Tentar todos de novo" onPress={retryAll} />
+            </View>
+            {badJobs.map(j => <JobRow key={j.id} j={j} />)}
+            {badTasks.map(t => <TaskRow key={t.id} t={t} />)}
+          </View>
+        ) : null}
         <View className="flex-row items-center justify-between">
           <Text className="font-heavy text-h2 text-cloud">Baixando</Text>
           <Button small label="Limpar concluídos" onPress={clearFinished} />
@@ -363,10 +377,89 @@ function Downloads() {
           <Text className="font-semi text-body text-mist">Nada baixando agora.</Text>}
         {q.watches.length ? <Text className="font-semi text-body text-sky">{`Aguardando ficar pronto no TorBox: ${q.watches.map(w => w.name).join(', ')}`}</Text> : null}
         <Text className="font-heavy text-h2 text-cloud mt-4">Extraindo e copiando</Text>
-        {q.tasks.length ? q.tasks.slice().reverse().map(t => <TaskRow key={t.id} t={t} />) :
+        {q.tasks.some(t => t.state !== 'error') ? q.tasks.filter(t => t.state !== 'error').reverse().map(t => <TaskRow key={t.id} t={t} />) :
           <Text className="font-semi text-body text-mist">Nenhuma tarefa.</Text>}
         {done.length ? <Text className="font-heavy text-h2 text-cloud mt-4">Concluídos</Text> : null}
         {done.map(j => <JobRow key={j.id} j={j} />)}
+      </View>
+    </ScrollView>
+  );
+}
+
+/* ---------- Sobre ---------- */
+// Procura atualização ao abrir (no máximo a cada 12 h) e avisa sem atrapalhar.
+function autoCheckUpdate() {
+  const c = config.get();
+  if (c.autoUpdate === false || Date.now() - (c.updateCheckedAt || 0) < 12 * 3600 * 1000) return;
+  checkUpdate().then(info => {
+    ui.set({update: info});
+    if (info.available) toast(`Nimbo ${info.version} disponível. Veja em Sobre.`, 'ok');
+  }, () => {});
+}
+
+function About() {
+  const info = useStore(ui, s => s.update || null);
+  const auto = useStore(config, c => c.autoUpdate !== false);
+  const [state, setState] = useState({phase: 'idle', text: '', frac: 0});
+  const phone = phoneInfo();
+  const check = () => {
+    setState({phase: 'checking', text: 'Procurando no GitHub…', frac: 0});
+    checkUpdate().then(i => {
+      ui.set({update: i});
+      setState({phase: 'idle', text: i.available ? '' : `Você já tem a versão mais recente (${i.version || APP_VERSION}).`, frac: 0});
+    }, e => setState({phase: 'idle', text: e.message, frac: 0}));
+  };
+  const install = () => {
+    setState({phase: 'installing', text: 'Preparando…', frac: 0});
+    installUpdate(info, (text, frac) => setState({phase: 'installing', text, frac}))
+      .then(() => setState({phase: 'done', text: `Nimbo ${info.version} instalado. Feche e abra o app para usar a versão nova.`, frac: 1}),
+        e => setState({phase: 'idle', text: e.message, frac: 0}));
+  };
+  const busy = state.phase === 'checking' || state.phase === 'installing';
+  return (
+    <ScrollView className="flex-1 px-10">
+      <View className="flex-row gap-6 pb-24">
+        <View className="flex-1 gap-4 rounded-3xl bg-glass px-8 py-6">
+          <View className="flex-row items-center gap-5">
+            <Image source={icon} style={{width: 132, height: 132, borderRadius: 30}} />
+            <View className="gap-1">
+              <Text className="font-heavy text-h1 text-cloud">Nimbo Downloader</Text>
+              <Text className="font-semi text-lead text-mist">{`Versão ${APP_VERSION} · para PS5 com etaHEN`}</Text>
+            </View>
+          </View>
+          <View className="h-[2px] bg-rim" />
+          <Text className="font-heavy text-h2 text-cloud">Atualizações</Text>
+          {info && info.available && state.phase !== 'done' ? (
+            <View className="gap-3 rounded-2xl bg-haze2 px-5 py-4 border-2 border-sun">
+              <Text className="font-heavy text-lead text-cloud">{`Versão ${info.version} disponível${info.asset && info.asset.size ? ` · ${fmt(info.asset.size)}` : ''}`}</Text>
+              {info.notes ? <Text className="font-body text-body text-mist" numberOfLines={6}>{info.notes}</Text> : null}
+              {!busy ? <View className="flex-row"><Button primary focusKey="about-update" label={`Atualizar para ${info.version}`} onPress={install} /></View> : null}
+            </View>
+          ) : null}
+          {state.phase === 'installing' ? (
+            <View className="gap-2">
+              <Text className="font-semi text-body text-cloud" numberOfLines={1}>{state.text}</Text>
+              <Bar value={state.frac} color="sun" h={14} />
+              <Text className="font-semi text-cap text-mist">Não feche o app até terminar.</Text>
+            </View>
+          ) : state.text ? <Text className={state.phase === 'done' ? 'font-heavy text-lead text-ok' : 'font-semi text-body text-mist'}>{state.text}</Text> : null}
+          <View className="flex-row gap-3">
+            {state.phase === 'done'
+              ? <Button primary focusKey="about-close" label="Fechar o app" onPress={() => BackHandler.exitApp && BackHandler.exitApp()} />
+              : <Button focusKey="about-check" label={state.phase === 'checking' ? 'Procurando…' : 'Procurar atualização'} onPress={busy ? () => {} : check} />}
+            <Button label={`Procurar ao abrir: ${auto ? 'Ligado' : 'Desligado'}`} onPress={() => config.set({autoUpdate: !auto})} />
+          </View>
+          {!installDir() ? <Text className="font-semi text-cap text-mist">A atualização pelo app precisa do Nimbo instalado em /data/homebrew (ShadowMount+).</Text> : null}
+        </View>
+        <View className="w-[360px] gap-4 rounded-3xl bg-glass px-6 py-6 items-center">
+          <Text className="font-heavy text-lead text-cloud">Projeto no GitHub</Text>
+          <View className="rounded-2xl bg-cloud p-3"><QR text={REPO_URL} size={220} /></View>
+          <Text className="font-semi text-cap text-mist">github.com/felipezmoraes/nimbo-ps5</Text>
+          <View className="h-[2px] bg-rim self-stretch" />
+          <Text className="font-semi text-cap text-mist">Endereço do PS5</Text>
+          <Text className="font-heavy text-lead text-cloud">{phone.address ? `${phone.address}${phone.port ? `:${phone.port}` : ''}` : 'Sem rede'}</Text>
+          <Text className="font-body text-xs2 text-mist">Feito com PS5 React · fonte Nunito (OFL) · música original · licença GPLv3</Text>
+        </View>
       </View>
     </ScrollView>
   );
@@ -412,7 +505,7 @@ function Settings({openConnect, pickFolder, confirm}) {
         <Row label="Música de fundo" value={onOff(c.music)} onPress={flip('music')} />
         <Row label="Volume da música" value={`${Math.round(c.musicVolume * 100)}%`} onPress={() => { cycle('musicVolume', [0.1, 0.25, 0.4, 0.6, 0.8])(); applyMusicVolume(); }} />
         <Row label="Sons da interface" value={onOff(c.sfx)} onPress={flip('sfx')} />
-        <Text className="font-semi text-cap text-mist mt-4">Nimbo Downloader 2.0.1 · música e arte originais · interface com PS5 React</Text>
+        <Text className="font-semi text-cap text-mist mt-4">{`Nimbo Downloader ${APP_VERSION} · música e arte originais · interface com PS5 React`}</Text>
       </View>
     </ScrollView>
   );
@@ -472,6 +565,7 @@ function App() {
     startPhone();
     syncMusic();
     loadCloud();
+    setTimeout(autoCheckUpdate, 8000);
     const t = setInterval(loadCloud, 60000);
     return () => clearInterval(t);
   }, []);
@@ -504,16 +598,16 @@ function App() {
         onBack={() => { if (tab !== 0) { setNav({tab: 0, dir: -1}); focus(`tab:${TABS[0][0]}`); return true; } BackHandler.exitApp && BackHandler.exitApp(); return true; }}>
         <View className="flex-row items-center gap-6 px-10 h-[84px]">
           <Image source={icon} style={{width: 54, height: 54, borderRadius: 14}} />
-          <Text className="font-heavy text-h2 text-cloud">Nimbo Downloader</Text>
-          <View className="flex-row items-center gap-1 ml-4">
+          <Text className="font-heavy text-h2 text-cloud">Nimbo</Text>
+          <View className="flex-row items-center gap-1 ml-3">
             <Text className="font-heavy text-xs2 text-mist px-2 py-1 rounded-md border border-mist">L1</Text>
             {TABS.map(([id, label], i) => (
               <View key={id} focusKey={`tab:${id}`} selected={i === tab}
                 onFocus={() => { tabFocused.current = true; setTab(i); }} onBlur={() => { tabFocused.current = false; }}
                 onPress={() => focus('content')}
-                className="px-4 h-[44px] justify-center rounded-full border-2 border-transparent focused:border-sun focused:bg-haze2">
+                className="px-3 h-[44px] justify-center rounded-full border-2 border-transparent focused:border-sun focused:bg-haze2">
                 <Text className={i === tab ? 'font-heavy text-lead text-cloud' : 'font-heavy text-lead text-mist'}>{label}</Text>
-                {i === tab ? <View className="absolute left-4 right-4 bottom-[3px] h-[3px] rounded-full bg-sun" /> : null}
+                {i === tab ? <View className="absolute left-3 right-3 bottom-[3px] h-[3px] rounded-full bg-sun" /> : null}
               </View>
             ))}
             <Text className="font-heavy text-xs2 text-mist px-2 py-1 rounded-md border border-mist">R1</Text>
@@ -530,6 +624,7 @@ function App() {
             <Screen id={3}><Guard><Files pickFolder={pickFolder} confirm={confirm} /></Guard></Screen>
             <Screen id={4}><Guard><Storage confirm={confirm} /></Guard></Screen>
             <Screen id={5}><Guard><Settings openConnect={openConnect} pickFolder={pickFolder} confirm={confirm} /></Guard></Screen>
+            <Screen id={6}><Guard><About /></Guard></Screen>
           </Screens>
           </View>
         )}
