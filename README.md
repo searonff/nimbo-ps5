@@ -12,8 +12,8 @@ App nativo para PS5 desbloqueado que baixa da sua nuvem (**TorBox, Real-Debrid, 
 | **Login por QR code** | TorBox, Real-Debrid e AllDebrid conectam apontando o celular para a TV. Premiumize usa a chave da API, digitada no PS5 ou colada pelo celular. |
 | **Downloads** | Várias conexões por arquivo, retomada, fila salva, limite de velocidade e "baixar quando ficar pronto" na nuvem. |
 | **Extração** | ZIP (com senha), 7z, RAR e RAR5, inclusive em várias partes. Pode extrair ao terminar e apagar o compactado. |
-| **Arquivos** | Navega por SSD, USB e estendido. Botão **Selecionar** (ou □) marca vários arquivos e pastas para copiar, mover, apagar, renomear e extrair; ícones por tipo e ordenação. |
-| **Armazenamento** | Uso por tipo, maiores pastas e arquivos, sugestões de limpeza e o tamanho de cada jogo instalado (jogo, atualização e DLC). |
+| **Arquivos** | Navega por SSD, USB e estendido. Botão **Selecionar** (ou □) marca vários arquivos e pastas para copiar, mover, apagar, renomear e extrair. Mostra o nome do jogo ao lado de arquivos como `PPSA07784.ffpfsc`, a data de cada arquivo, ícones por tipo e ordenação. |
+| **Armazenamento** | Uso por tipo, maiores pastas e arquivos (com nome do jogo e data), sugestões de limpeza e, para cada jogo instalado, versão, data de instalação e tamanho do jogo, da atualização e das DLCs. Apagar roda em segundo plano, sem travar a tela. |
 | **Celular** | Página com PIN, na mesma rede, para ver a fila, colar links (magnet, hoster, direto) em qualquer serviço conectado e baixar da nuvem. |
 | **Idiomas** | Português (Brasil), English, Español, Français, Deutsch e Italiano, inclusive na página do celular. Segue o idioma do PS5 na primeira vez. |
 | **Atualização automática** | Procura novas Releases deste repositório a cada 6 h e instala sozinha quando não há downloads rodando. Guarda a versão anterior para voltar se algo der errado. |
