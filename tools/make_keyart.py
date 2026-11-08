@@ -18,12 +18,13 @@ m = Image.new('L', icon.size, 0); ImageDraw.Draw(m).rounded_rectangle([0, 0, S -
 icon.putalpha(m)
 sh = Image.new('RGBA', (S + 120 * K, S + 120 * K), (0, 0, 0, 0)); ImageDraw.Draw(sh).rounded_rectangle([60 * K, 70 * K, S + 60 * K, S + 70 * K], 58 * K, fill=(0, 0, 0, 140))
 sh = sh.filter(ImageFilter.GaussianBlur(28 * K))
-cx, cy = 1390 * K, 300 * K
+cx, cy = 1390 * K, 330 * K
 img.alpha_composite(sh, (cx - S // 2 - 60 * K, cy - 60 * K)); img.alpha_composite(icon, (cx - S // 2, cy))
 d = ImageDraw.Draw(img)
 fh = ImageFont.truetype(os.path.join(N, 'assets', 'Nunito-ExtraBold.ttf'), 96 * K)
 fs = ImageFont.truetype(os.path.join(N, 'assets', 'Nunito-SemiBold.ttf'), 38 * K)
-for txt, f, y, col in [('Nimbo Downloader', fh, cy + S + 30 * K, (242, 245, 249, 255)), ('Downloads da nuvem direto no PS5', fs, cy + S + 150 * K, (190, 205, 228, 255))]:
+# Só o nome: a imagem da tela inicial é fixa e o app tem vários idiomas.
+for txt, f, y, col in [('Nimbo Downloader', fh, cy + S + 30 * K, (242, 245, 249, 255))]:
     w = d.textlength(txt, font=f)
     d.text((cx - w / 2 + 3 * K, y + 4 * K), txt, font=f, fill=(5, 10, 20, 120))
     d.text((cx - w / 2, y), txt, font=f, fill=col)

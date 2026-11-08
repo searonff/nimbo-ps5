@@ -50,7 +50,7 @@ export const config = createStore('config.json', {
   deleteFromCloud: false,
   keepAwake: true,
   music: true,
-  musicVolume: 0.25,
+  musicVolume: 0.3,
   sfx: true,
   speedLimitOn: false,
   speedLimitMB: 5,

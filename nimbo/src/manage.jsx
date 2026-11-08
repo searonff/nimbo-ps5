@@ -4,8 +4,9 @@ import {View, Text, ScrollView, FileSystem, Keyboard, Platform, useFocus, FocusS
 import {Bar, Button, Pill, ButtonGlyph} from './ui.jsx';
 import {Sheet} from './sheets.jsx';
 import {drives} from './drives.js';
-import {config, queue, toast, useStore} from './store.js';
+import {config, queue, toast, ui, useStore} from './store.js';
 import {archiveKind, enqueueCopy, enqueueExtract, fmt, firstVolume, stripArchive, basename, dirname} from './engine.js';
+import {t, tn} from './i18n.js';
 
 function list(path, sort = 'name') {
   const by = {
@@ -37,7 +38,7 @@ function TypeIcon({entry}) {
   const [label, color] = TYPE_BADGE[category(entry.name)] || TYPE_BADGE.other;
   return (
     <View className="w-[34px] h-[26px] rounded-md items-center justify-center" style={{backgroundColor: color}}>
-      <Text className="font-heavy text-xs2 text-night">{label}</Text>
+      <Text className="font-heavy text-xs2 text-night">{t(label)}</Text>
     </View>
   );
 }
@@ -51,13 +52,16 @@ export function Files({pickFolder, confirm}) {
   const sort = useStore(config, c => c.filesSort || 'name');
   // Seleção múltipla: □ marca/desmarca o item com o cursor (arquivo ou pasta, em qualquer pasta).
   const [sel, setSel] = useState(() => new Map());   // caminho completo -> {name, isDirectory, size}
+  const [selMode, setSelMode] = useState(false);
   const focused = useRef(null);
   const toggle = e => setSel(m => {
     const n = new Map(m), full = `${path}/${e.name}`;
     if (n.has(full)) n.delete(full); else n.set(full, {name: e.name, isDirectory: e.isDirectory, size: e.size || 0});
     return n;
   });
-  const clearSel = () => setSel(new Map());
+  const clearSel = () => { setSel(new Map()); setSelMode(false); ui.set({filesSel: false}); };
+  const enterSel = () => { setSelMode(true); ui.set({filesSel: true}); };
+  useEffect(() => () => ui.set({filesSel: false}), []);
   // Ao entrar numa pasta, o cursor vai para o primeiro item dela (e não cai lá em cima).
   const {focus} = useFocus();
   const moved = useRef(false);
@@ -75,18 +79,18 @@ export function Files({pickFolder, confirm}) {
   const up = drive && path !== drive.path ? dirname(path) : null;
   const refresh = () => setTick(t => t + 1);
   const rename = async e => {
-    const r = await Keyboard.open({title: 'Novo nome', text: e.name, maxLength: 200, type: 'basic'});
+    const r = await Keyboard.open({title: t('Novo nome'), text: e.name, maxLength: 200, type: 'basic'});
     if (r.status !== 'done' || !r.text || r.text === e.name) return;
     try { FileSystem.rename(`${path}/${e.name}`, `${path}/${r.text.replace(/[/\\<>:"|?*]/g, '_')}`); refresh(); } catch (err) { toast(String(err.message || err), 'bad'); }
   };
   const renameAt = async full => {
     const name = basename(full);
-    const r = await Keyboard.open({title: 'Novo nome', text: name, maxLength: 200, type: 'basic'});
+    const r = await Keyboard.open({title: t('Novo nome'), text: name, maxLength: 200, type: 'basic'});
     if (r.status !== 'done' || !r.text || r.text === name) return;
     try { FileSystem.rename(full, `${dirname(full)}/${r.text.replace(/[/\\<>:"|?*]/g, '_')}`); refresh(); } catch (err) { toast(String(err.message || err), 'bad'); }
   };
-  const remove = e => confirm('Apagar', `Apagar "${e.name}"${e.isDirectory ? ' e tudo dentro dela' : ''}? Não dá para desfazer.`, 'Apagar', () => {
-    FileSystem.removeAsync(`${path}/${e.name}`).then(() => { toast('Apagado', 'ok'); refresh(); }, err => toast(String(err.message || err), 'bad'));
+  const remove = e => confirm('Apagar', `${e.isDirectory ? t('Apagar a pasta “{1}” e tudo dentro dela?', {1: e.name}) : t('Apagar “{1}”?', {1: e.name})} ${t('Não dá para desfazer.')}`, 'Apagar', () => {
+    FileSystem.removeAsync(`${path}/${e.name}`).then(() => { toast(t('Apagado'), 'ok'); refresh(); }, err => toast(String(err.message || err), 'bad'));
   });
   void tick;
   const picked = [...sel.entries()].map(([full, e]) => ({full, ...e}));
@@ -94,10 +98,10 @@ export function Files({pickFolder, confirm}) {
   const pickedArchives = [...new Set(picked.filter(e => !e.isDirectory && archiveKind(e.name)).map(e => firstVolume(e.full)))];
   const batchCopy = move => pickFolder(path, dest => {
     for (const e of picked) enqueueCopy(e.full, dest, move);
-    toast(`${picked.length} ite${picked.length > 1 ? 'ns' : 'm'} na fila para ${move ? 'mover' : 'copiar'}`, 'ok');
+    toast(move ? tn(picked.length, '{n} item na fila para mover', '{n} itens na fila para mover') : tn(picked.length, '{n} item na fila para copiar', '{n} itens na fila para copiar'), 'ok');
     clearSel();
   });
-  const batchRemove = () => confirm('Apagar', `Apagar ${picked.length} ite${picked.length > 1 ? 'ns' : 'm'} selecionado${picked.length > 1 ? 's' : ''}${picked.some(e => e.isDirectory) ? ' (pastas com tudo dentro)' : ''}? Não dá para desfazer.`, 'Apagar', async () => {
+  const batchRemove = () => confirm('Apagar', `${tn(picked.length, 'Apagar {n} item selecionado?', 'Apagar {n} itens selecionados?')}${picked.some(e => e.isDirectory) ? ` ${t('As pastas vão com tudo dentro.')}` : ''} ${t('Não dá para desfazer.')}`, 'Apagar', async () => {
     let fails = 0;
     for (const e of picked) { try { await FileSystem.removeAsync(e.full); } catch (_) { fails++; } }
     toast(fails ? `${fails} não puderam ser apagados` : 'Apagados', fails ? 'bad' : 'ok');
@@ -105,7 +109,7 @@ export function Files({pickFolder, confirm}) {
   });
   const batchExtract = () => {
     for (const first of pickedArchives) enqueueExtract(first, {deleteArchive: config.get().deleteArchive});
-    toast(`${pickedArchives.length} extração(ões) na fila (veja em Downloads)`, 'ok');
+    toast(tn(pickedArchives.length, '{n} extração na fila (veja em Downloads)', '{n} extrações na fila (veja em Downloads)'), 'ok');
     clearSel();
   };
   const selectAll = () => setSel(m => {
@@ -117,81 +121,83 @@ export function Files({pickFolder, confirm}) {
     <FocusScope onAction={a => {
       if (a !== 'square') return false;
       const e = entries.find(x => x.name === focused.current);
+      if (!selMode) enterSel();
       if (e) toggle(e);
       return true;
-    }} onBack={() => { if (sel.size) { clearSel(); return true; } return false; }}>
+    }} onBack={() => { if (selMode) { clearSel(); return true; } return false; }}>
     <View className="flex-1 px-10 gap-3">
-      {sel.size ? (
-        <View className="flex-row gap-2 items-center rounded-2xl bg-haze2 px-4 py-2 border-2 border-sun">
-          {pickedArchives.length ? <Button small primary label="Extrair" onPress={batchExtract} /> : null}
-          <Button small label="Copiar para…" onPress={() => batchCopy(false)} />
-          <Button small label="Mover para…" onPress={() => batchCopy(true)} />
-          {sel.size === 1 ? <Button small label="Renomear" onPress={() => { const e = picked[0]; clearSel(); renameAt(e.full); }} /> : null}
-          <Button small danger label="Apagar" onPress={batchRemove} />
-          <Button small label="Tudo aqui" onPress={selectAll} />
-          <Button small label="Cancelar" onPress={clearSel} />
-          <View className="flex-1" />
-          <Text className="font-heavy text-lead text-cloud">{`${sel.size} selecionado${sel.size > 1 ? 's' : ''}${pickedBytes ? ` · ${fmt(pickedBytes)}` : ''}`}</Text>
-        </View>
-      ) : null}
       <View className="flex-row gap-2 items-center">
         {all.map(d => (
           <View key={d.path} selected={drive === d} onPress={() => setPath(d.path)}
             className="px-4 py-2 rounded-xl bg-glass border-[3px] border-transparent selected:border-sky focused:border-sun">
-            <Text className="font-heavy text-cap text-cloud">{d.label}</Text>
-            <Text className="font-semi text-xs2 text-mist">{`${fmt(d.free)} livres`}</Text>
+            <Text className="font-heavy text-cap text-cloud">{t(d.label)}</Text>
+            <Text className="font-semi text-xs2 text-mist">{t(`${fmt(d.free)} livres`)}</Text>
           </View>
         ))}
         <View className="flex-1" />
-        {up ? <Button small focusKey="files-up" label="Voltar uma pasta" onPress={() => openDir(up)} /> : null}
-        <Button small label={`Ordem: ${SORTS.find(x => x[0] === sort)[1]}`} onPress={() => config.set({filesSort: SORTS[(SORTS.findIndex(x => x[0] === sort) + 1) % SORTS.length][0]})} />
-        <Button small label="Nova pasta" onPress={async () => {
-          const r = await Keyboard.open({title: 'Nome da nova pasta', maxLength: 80, type: 'basic'});
+        {up ? <Button small focusKey="files-up" label={t('Voltar uma pasta')} onPress={() => openDir(up)} /> : null}
+        <Button small label={t(`Ordem: ${SORTS.find(x => x[0] === sort)[1]}`)} onPress={() => config.set({filesSort: SORTS[(SORTS.findIndex(x => x[0] === sort) + 1) % SORTS.length][0]})} />
+        <Button small focusKey="files-select" label={selMode ? 'Sair da seleção' : 'Selecionar'} onPress={() => { if (selMode) clearSel(); else { enterSel(); if (entries.length) setTimeout(() => focus('frow:0'), 0); } }} />
+        <Button small label={t('Nova pasta')} onPress={async () => {
+          const r = await Keyboard.open({title: t('Nome da nova pasta'), maxLength: 80, type: 'basic'});
           if (r.status === 'done' && r.text.trim()) { FileSystem.mkdir(`${path}/${r.text.trim().replace(/[/\\<>:"|?*]/g, '_')}`, {recursive: true}); refresh(); }
         }} />
       </View>
       <View className="flex-row items-center gap-3">
         <View className="flex-1"><Text className="font-semi text-body text-mist" numberOfLines={1}>{path}</Text></View>
-        {!sel.size ? <View className="flex-row items-center gap-2"><ButtonGlyph name="square" /><Text className="font-semi text-cap text-mist">marca arquivos e pastas para agir em vários de uma vez</Text></View> : null}
       </View>
       <ScrollView className="flex-1">
         <View className="gap-1 pb-24">
-          {!entries.length ? <Text className="font-semi text-body text-mist">Pasta vazia.</Text> : null}
+          {!entries.length ? <Text className="font-semi text-body text-mist">{t('Pasta vazia.')}</Text> : null}
           {entries.slice(0, 400).map((e, i) => {
             const kind = e.isDirectory ? '' : archiveKind(e.name);
             return (
               <View key={e.name} focusKey={`frow:${i}`} onFocus={() => { focused.current = e.name; }}
-                onPress={() => (e.isDirectory ? openDir(`${path}/${e.name}`) : sel.size ? toggle(e) : setMenu(e))}
+                onPress={() => (selMode ? toggle(e) : e.isDirectory ? openDir(`${path}/${e.name}`) : setMenu(e))}
                 className={sel.has(`${path}/${e.name}`) ? 'flex-row items-center gap-4 rounded-xl bg-haze2 px-5 h-[54px] border-[3px] border-sky focused:border-sun' : 'flex-row items-center gap-4 rounded-xl bg-glass px-5 h-[54px] border-[3px] border-transparent focused:border-sun'}>
-                {sel.size ? (
+                {selMode ? (
                   <View className={sel.has(`${path}/${e.name}`) ? 'w-[24px] h-[24px] rounded-md bg-sun items-center justify-center' : 'w-[24px] h-[24px] rounded-md bg-shade border-2 border-rim'}>
                     {sel.has(`${path}/${e.name}`) ? <Svg width={30} height={30} viewBox="0 0 26 26" style={{width: 30, height: 30}}><Path d="M6 13 L11 18 L20 8" stroke="#2b1d00" strokeWidth="3" strokeLinecap="round" fill="none" /></Svg> : null}
                   </View>
                 ) : null}
                 <TypeIcon entry={e} />
                 <View className="flex-1"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{e.name}</Text></View>
-                {kind === 'first' ? <Pill text="Compactado" tone="warn" /> : null}
-                <Text className="font-semi text-cap text-mist">{e.isDirectory ? 'Pasta' : fmt(e.size)}</Text>
+                {kind === 'first' ? <Pill text={t('Compactado')} tone="warn" /> : null}
+                <Text className="font-semi text-cap text-mist">{e.isDirectory ? t('Pasta') : fmt(e.size)}</Text>
               </View>
             );
           })}
         </View>
       </ScrollView>
+      {selMode ? (
+        <View className="flex-row gap-2 items-center rounded-2xl bg-haze2 px-4 py-2 mb-[64px] border-2 border-sun">
+          <Text className="font-heavy text-lead text-cloud">{sel.size ? `${tn(sel.size, '{n} selecionado', '{n} selecionados')}${pickedBytes ? ` · ${fmt(pickedBytes)}` : ''}` : t('Marque os itens com')}</Text>
+          {!sel.size ? <ButtonGlyph name="cross" /> : null}
+          <View className="flex-1" />
+          {pickedArchives.length ? <Button small primary label={t('Extrair')} onPress={batchExtract} /> : null}
+          {sel.size ? <Button small label={t('Copiar para…')} onPress={() => batchCopy(false)} /> : null}
+          {sel.size ? <Button small label={t('Mover para…')} onPress={() => batchCopy(true)} /> : null}
+          {sel.size === 1 ? <Button small label={t('Renomear')} onPress={() => { const e = picked[0]; clearSel(); renameAt(e.full); }} /> : null}
+          {sel.size ? <Button small danger label={t('Apagar')} onPress={batchRemove} /> : null}
+          <Button small label={sel.size === entries.length && entries.length ? 'Desmarcar tudo' : 'Tudo aqui'} onPress={() => (sel.size === entries.length && entries.length ? setSel(new Map()) : selectAll())} />
+          <Button small label={t('Cancelar')} onPress={clearSel} />
+        </View>
+      ) : null}
       {menu ? (
         <Sheet title={menu.name} onClose={() => setMenu(null)} width={700}>
           <Text className="font-semi text-body text-mist">{`${fmt(menu.size)} · ${path}`}</Text>
           <View className="gap-2">
-            {archiveKind(menu.name) ? <Button primary label="Extrair aqui" onPress={() => {
+            {archiveKind(menu.name) ? <Button primary label={t('Extrair aqui')} onPress={() => {
               const first = firstVolume(`${path}/${menu.name}`);
               enqueueExtract(first, {deleteArchive: config.get().deleteArchive});
-              toast('Extração na fila (veja em Downloads)', 'ok'); setMenu(null);
+              toast(t('Extração na fila (veja em Downloads)'), 'ok'); setMenu(null);
             }} /> : null}
-            <Button label="Copiar para…" onPress={() => { const src = `${path}/${menu.name}`; setMenu(null);
-              pickFolder(path, dest => { enqueueCopy(src, dest, false); toast('Cópia na fila', 'ok'); }); }} />
-            <Button label="Mover para…" onPress={() => { const src = `${path}/${menu.name}`; setMenu(null);
-              pickFolder(path, dest => { enqueueCopy(src, dest, true); toast('Movendo…', 'ok'); }); }} />
-            <Button label="Renomear" onPress={() => { const e = menu; setMenu(null); rename(e); }} />
-            <Button danger label="Apagar" onPress={() => { const e = menu; setMenu(null); remove(e); }} />
+            <Button label={t('Copiar para…')} onPress={() => { const src = `${path}/${menu.name}`; setMenu(null);
+              pickFolder(path, dest => { enqueueCopy(src, dest, false); toast(t('Cópia na fila'), 'ok'); }); }} />
+            <Button label={t('Mover para…')} onPress={() => { const src = `${path}/${menu.name}`; setMenu(null);
+              pickFolder(path, dest => { enqueueCopy(src, dest, true); toast(t('Movendo…'), 'ok'); }); }} />
+            <Button label={t('Renomear')} onPress={() => { const e = menu; setMenu(null); rename(e); }} />
+            <Button danger label={t('Apagar')} onPress={() => { const e = menu; setMenu(null); remove(e); }} />
           </View>
         </Sheet>
       ) : null}
@@ -288,8 +294,8 @@ export function Storage({confirm}) {
   const [scan, start, stop] = useScan();
   const [apps, setApps] = useState(null);
   const total = scan ? scan.bytes || 1 : 1;
-  const remove = s => confirm('Apagar', `Apagar "${s.name}"? Não dá para desfazer.`, 'Apagar', () => {
-    FileSystem.removeAsync(s.path).then(() => { toast('Apagado', 'ok'); start(scan.root); }, e => toast(String(e.message || e), 'bad'));
+  const remove = s => confirm('Apagar', `${t('Apagar “{1}”?', {1: s.name})} ${t('Não dá para desfazer.')}`, 'Apagar', () => {
+    FileSystem.removeAsync(s.path).then(() => { toast(t('Apagado'), 'ok'); start(scan.root); }, e => toast(String(e.message || e), 'bad'));
   });
   const loadApps = () => {
     setApps('loading');
@@ -310,9 +316,9 @@ export function Storage({confirm}) {
         <View className="flex-row flex-wrap gap-4">
           {all.map(d => (
             <View key={d.path} className="w-[388px] gap-2 rounded-3xl bg-glass px-6 py-4">
-              <Text className="font-heavy text-lead text-cloud">{d.label}</Text>
-              <Text className="font-heavy text-h1 text-cloud">{`${fmt(d.free)} livres`}</Text>
-              <Text className="font-semi text-cap text-mist">{`${fmt(d.total - d.free)} usados de ${fmt(d.total)}`}</Text>
+              <Text className="font-heavy text-lead text-cloud">{t(d.label)}</Text>
+              <Text className="font-heavy text-h1 text-cloud">{t(`${fmt(d.free)} livres`)}</Text>
+              <Text className="font-semi text-cap text-mist">{t(`${fmt(d.total - d.free)} usados de ${fmt(d.total)}`)}</Text>
               <Bar value={(d.total - d.free) / d.total} color={d.free / d.total < 0.1 ? 'bad' : 'sky'} h={12} />
               <View className="flex-row mt-1"><Button small primary label={scan && scan.running && scan.root === d.path ? 'Analisando…' : 'Analisar'} onPress={() => start(d.path)} /></View>
             </View>
@@ -321,8 +327,8 @@ export function Storage({confirm}) {
         {scan ? (
           <View className="gap-3 rounded-3xl bg-glass px-6 py-5">
             <View className="flex-row items-center gap-3">
-              <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{`${scan.running ? 'Analisando' : 'Uso de'} ${scan.root}: ${fmt(scan.bytes)} em ${scan.files} arquivos`}</Text></View>
-              {scan.running ? <Button small label="Parar" onPress={stop} /> : null}
+              <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{t(scan.running ? 'Analisando {r}: {b} em {n} arquivos' : 'Uso de {r}: {b} em {n} arquivos', {r: scan.root, b: fmt(scan.bytes), n: scan.files})}</Text></View>
+              {scan.running ? <Button small label={t('Parar')} onPress={stop} /> : null}
             </View>
             <View className="flex-row w-full h-[24px] rounded-full overflow-hidden bg-shade">
               {CATS.concat([OTHER]).filter(c => scan.cats[c[0]]).map(c => (
@@ -338,18 +344,18 @@ export function Storage({confirm}) {
               ))}
             </View>
           </View>
-        ) : <Text className="font-semi text-body text-mist">Escolha uma unidade e aperte Analisar para ver o que está ocupando espaço.</Text>}
+        ) : <Text className="font-semi text-body text-mist">{t('Escolha uma unidade e aperte Analisar para ver o que está ocupando espaço.')}</Text>}
         {scan && scan.suggestions.length ? (
           <View className="gap-2 rounded-3xl bg-glass px-6 py-5">
-            <Text className="font-heavy text-lead text-cloud">{`Sugestões de limpeza · até ${fmt(scan.suggestions.reduce((a, s) => a + s.size, 0))}`}</Text>
+            <Text className="font-heavy text-lead text-cloud">{t(`Sugestões de limpeza · até ${fmt(scan.suggestions.reduce((a, s) => a + s.size, 0))}`)}</Text>
             {scan.suggestions.slice(0, 12).map(s => (
               <View key={s.path} className="flex-row items-center gap-3">
                 <View className="flex-1">
                   <Text className="font-semi text-body text-cloud" numberOfLines={1}>{s.name}</Text>
-                  <Text className="font-semi text-cap text-mist">{s.why}</Text>
+                  <Text className="font-semi text-cap text-mist">{t(s.why)}</Text>
                 </View>
                 <Text className="font-heavy text-body text-cloud">{fmt(s.size)}</Text>
-                <Button small danger label="Apagar" onPress={() => remove(s)} />
+                <Button small danger label={t('Apagar')} onPress={() => remove(s)} />
               </View>
             ))}
           </View>
@@ -357,7 +363,7 @@ export function Storage({confirm}) {
         {scan && scan.dirs.length ? (
           <View className="flex-row gap-4">
             <View className="flex-1 gap-2 rounded-3xl bg-glass px-6 py-5">
-              <Text className="font-heavy text-lead text-cloud">Maiores pastas</Text>
+              <Text className="font-heavy text-lead text-cloud">{t('Maiores pastas')}</Text>
               {scan.dirs.map(([name, size]) => (
                 <View key={name} className="gap-1">
                   <View className="flex-row justify-between"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{name}</Text>
@@ -367,7 +373,7 @@ export function Storage({confirm}) {
               ))}
             </View>
             <View className="flex-1 gap-2 rounded-3xl bg-glass px-6 py-5">
-              <Text className="font-heavy text-lead text-cloud">Maiores arquivos</Text>
+              <Text className="font-heavy text-lead text-cloud">{t('Maiores arquivos')}</Text>
               {scan.top.slice(0, 12).map(f => (
                 <View key={f.path} onPress={() => remove(f)} className="flex-row justify-between rounded-lg px-2 border-2 border-transparent focused:border-bad">
                   <View className="flex-1"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{f.name}</Text></View>
@@ -379,11 +385,11 @@ export function Storage({confirm}) {
         ) : null}
         <View className="gap-2 rounded-3xl bg-glass px-6 py-5">
           <View className="flex-row items-center gap-3">
-            <View className="flex-1"><Text className="font-heavy text-lead text-cloud">Jogos e apps instalados</Text></View>
+            <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{t('Jogos e apps instalados')}</Text></View>
             <Button small label={apps === 'loading' ? 'Calculando…' : 'Calcular'} onPress={loadApps} />
           </View>
-          <Text className="font-semi text-cap text-mist">Jogo + atualizações + DLCs. Só visualização.</Text>
-          {Array.isArray(apps) && !apps.length ? <Text className="font-semi text-body text-mist">Nenhum encontrado.</Text> : null}
+          <Text className="font-semi text-cap text-mist">{t('Jogo + atualizações + DLCs. Só visualização.')}</Text>
+          {Array.isArray(apps) && !apps.length ? <Text className="font-semi text-body text-mist">{t('Nenhum encontrado.')}</Text> : null}
           {Array.isArray(apps) ? apps.slice(0, 40).map(a => (
             <View key={a.id} className="gap-1">
               <View className="flex-row justify-between gap-3">

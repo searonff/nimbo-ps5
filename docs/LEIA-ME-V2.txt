@@ -8,12 +8,31 @@ INSTALAR
    ou um app de FTP no celular, usando o IP do PS5.
 3. Espere o ShadowMount+ registrar (aparece o ícone na tela inicial).
    Se não aparecer, reinicie o PS5 e rode o etaHEN/ShadowMount+ de novo.
-4. Abra o Nimbo e conecte o TorBox com o QR code.
+4. Abra o Nimbo e conecte seu serviço em Ajustes > Serviços de nuvem
+   (TorBox, Real-Debrid, AllDebrid ou Premiumize).
+
+IDIOMA
+Ajustes > Geral > Idioma. Português, English, Español, Français,
+Deutsch e Italiano.
 
 ATUALIZAR
-Pelo próprio app: aba Sobre > Procurar atualização > Atualizar.
-Depois feche e abra o Nimbo. (Ou substitua a pasta PPSA48921 pelo FTP.)
+É automático: o app procura versões novas e instala quando não há
+downloads rodando. Depois feche e abra o Nimbo.
+Para forçar: Sobre > Procurar atualização. Se a versão nova der
+problema: Sobre > Voltar para a versão anterior.
+(Ou substitua a pasta PPSA48921 pelo FTP.)
 
 CELULAR
 Painel > "Usar pelo celular". Abra o endereço mostrado no navegador do
 celular (mesma rede Wi-Fi) e digite o PIN.
+
+CRÉDITOS
+Música: "Chill lofi inspired", de omfgdude (opengameart.org), CC0.
+Sons: Google Material Design sound resources, CC BY 4.0.
+Fonte: Nunito, SIL OFL 1.1. Framework: PS5 React, de half144 e
+colaboradores (github.com/half144/ps5-react), GPLv3.
+Detalhes em CREDITS.md no repositório github.com/felipezmoraes/nimbo-ps5
+
+AVISO
+O Nimbo é um gerenciador de downloads e arquivos. Não fornece nem indica
+conteúdo. O usuário é o único responsável pelo que baixa.

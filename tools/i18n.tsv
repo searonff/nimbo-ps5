@@ -1,0 +1,413 @@
+# pt-BR (chave)	en	es	fr	de	it
+Painel	Home	Inicio	Accueil	Start	Home
+Nuvem	Cloud	Nube	Cloud	Cloud	Cloud
+Downloads	Downloads	Descargas	Téléchargements	Downloads	Download
+Arquivos	Files	Archivos	Fichiers	Dateien	File
+Armazenamento	Storage	Almacenamiento	Stockage	Speicher	Spazio
+Ajustes	Settings	Ajustes	Réglages	Einstellungen	Impostazioni
+Sobre	About	Acerca de	À propos	Info	Info
+Baixar	Download	Descargar	Télécharger	Herunterladen	Scarica
+Extrair	Extract	Extraer	Extraire	Entpacken	Estrai
+Pronto	Ready	Listo	Prêt	Bereit	Pronto
+Copiar	Copy	Copiar	Copier	Kopieren	Copia
+Extraindo agora	Extracting now	Extrayendo ahora	Extraction en cours	Wird entpackt	Estrazione in corso
+Copiando agora	Copying now	Copiando ahora	Copie en cours	Wird kopiert	Copia in corso
+Lendo o arquivo…	Reading the file…	Leyendo el archivo…	Lecture du fichier…	Datei wird gelesen…	Lettura del file…
+Pausar	Pause	Pausar	Pause	Pause	Pausa
+Cancelar	Cancel	Cancelar	Annuler	Abbrechen	Annulla
+Tudo em dia	All caught up	Todo al día	Tout est à jour	Alles erledigt	Tutto in ordine
+Nenhum download em andamento	No downloads in progress	No hay descargas en curso	Aucun téléchargement en cours	Keine laufenden Downloads	Nessun download in corso
+{n} concluído recentemente	{n} finished recently	{n} terminado hace poco	{n} terminé récemment	{n} kürzlich fertig	{n} completato di recente
+{n} concluídos recentemente	{n} finished recently	{n} terminados hace poco	{n} terminés récemment	{n} kürzlich fertig	{n} completati di recente
+Escolha algo da sua nuvem para baixar	Pick something from your cloud to download	Elige algo de tu nube para descargar	Choisissez quelque chose dans votre cloud	Wähle etwas aus deiner Cloud zum Herunterladen	Scegli qualcosa dal tuo cloud da scaricare
+Abrir a nuvem	Open the cloud	Abrir la nube	Ouvrir le cloud	Cloud öffnen	Apri il cloud
+Conectar um serviço	Connect a service	Conectar un servicio	Connecter un service	Dienst verbinden	Collega un servizio
+Usar pelo celular	Use from your phone	Usar desde el móvil	Utiliser depuis le téléphone	Mit dem Handy nutzen	Usa dal telefono
+{1} com erro · veja em Downloads	{1} with errors · see Downloads	{1} con error · mira Descargas	{1} en erreur · voir Téléchargements	{1} mit Fehler · siehe Downloads	{1} con errori · vedi Download
+Pausado	Paused	En pausa	En pause	Pausiert	In pausa
+A fila está vazia.	The queue is empty.	La cola está vacía.	La file est vide.	Die Warteschlange ist leer.	La coda è vuota.
+{1} livres de {2}	{1} free of {2}	{1} libres de {2}	{1} libres sur {2}	{1} frei von {2}	{1} liberi su {2}
+Já baixado	Already downloaded	Ya descargado	Déjà téléchargé	Bereits geladen	Già scaricato
+Baixando	Downloading	Descargando	Téléchargement	Wird geladen	Download in corso
+Recentes na nuvem	Recent in the cloud	Recientes en la nube	Récents dans le cloud	Neu in der Cloud	Recenti nel cloud
+Algo deu errado nesta tela	Something went wrong on this screen	Algo salió mal en esta pantalla	Un problème est survenu sur cet écran	Auf diesem Bildschirm ist etwas schiefgelaufen	Qualcosa è andato storto in questa schermata
+Tentar de novo	Try again	Reintentar	Réessayer	Erneut versuchen	Riprova
+Buscar na nuvem	Search the cloud	Buscar en la nube	Rechercher dans le cloud	Cloud durchsuchen	Cerca nel cloud
+Todos	All	Todos	Tous	Alle	Tutti
+Prontos	Ready	Listos	Prêts	Bereit	Pronti
+Ainda na nuvem	Still in the cloud	Aún en la nube	Encore dans le cloud	Noch in der Cloud	Ancora nel cloud
+Mais recentes	Newest	Más recientes	Plus récents	Neueste	Più recenti
+Nome	Name	Nombre	Nom	Name	Nome
+Conecte um serviço para ver sua nuvem	Connect a service to see your cloud	Conecta un servicio para ver tu nube	Connectez un service pour voir votre cloud	Verbinde einen Dienst, um deine Cloud zu sehen	Collega un servizio per vedere il tuo cloud
+TorBox, Real-Debrid, AllDebrid ou Premiumize. Pode usar mais de um: a Nuvem junta todos.	TorBox, Real-Debrid, AllDebrid or Premiumize. You can use more than one: Cloud combines them all.	TorBox, Real-Debrid, AllDebrid o Premiumize. Puedes usar más de uno: la Nube los junta todos.	TorBox, Real-Debrid, AllDebrid ou Premiumize. Vous pouvez en utiliser plusieurs : le Cloud les regroupe.	TorBox, Real-Debrid, AllDebrid oder Premiumize. Du kannst mehrere nutzen: die Cloud fasst alle zusammen.	TorBox, Real-Debrid, AllDebrid o Premiumize. Puoi usarne più di uno: il Cloud li unisce tutti.
+O resto do app (Arquivos, Armazenamento, links diretos pelo celular) já funciona sem conta.	The rest of the app (Files, Storage, direct links from your phone) works without an account.	El resto de la app (Archivos, Almacenamiento, enlaces directos desde el móvil) funciona sin cuenta.	Le reste de l’app (Fichiers, Stockage, liens directs depuis le téléphone) marche sans compte.	Der Rest der App (Dateien, Speicher, direkte Links vom Handy) funktioniert ohne Konto.	Il resto dell’app (File, Archivio, link diretti dal telefono) funziona senza account.
+Não deu para carregar a nuvem	Couldn’t load the cloud	No se pudo cargar la nube	Impossible de charger le cloud	Cloud konnte nicht geladen werden	Impossibile caricare il cloud
+Carregando sua nuvem…	Loading your cloud…	Cargando tu nube…	Chargement de votre cloud…	Deine Cloud wird geladen…	Caricamento del cloud…
+Sua nuvem está vazia. Mande um link pelo celular.	Your cloud is empty. Send a link from your phone.	Tu nube está vacía. Envía un enlace desde el móvil.	Votre cloud est vide. Envoyez un lien depuis le téléphone.	Deine Cloud ist leer. Schick einen Link vom Handy.	Il tuo cloud è vuoto. Invia un link dal telefono.
+Limpar busca	Clear search	Borrar búsqueda	Effacer la recherche	Suche löschen	Cancella ricerca
+{n} item na nuvem	{n} item in the cloud	{n} elemento en la nube	{n} élément dans le cloud	{n} Eintrag in der Cloud	{n} elemento nel cloud
+{n} itens na nuvem	{n} items in the cloud	{n} elementos en la nube	{n} éléments dans le cloud	{n} Einträge in der Cloud	{n} elementi nel cloud
+{a} de {b} itens	{a} of {b} items	{a} de {b} elementos	{a} sur {b} éléments	{a} von {b} Einträgen	{a} di {b} elementi
+Nada encontrado para “{q}”.	Nothing found for “{q}”.	No se encontró nada para “{q}”.	Rien trouvé pour « {q} ».	Nichts gefunden für „{q}“.	Nessun risultato per “{q}”.
+Nenhum item neste filtro.	Nothing in this filter.	Nada en este filtro.	Rien dans ce filtre.	Nichts in diesem Filter.	Niente in questo filtro.
+Mostrar mais ({1} restantes)	Show more ({1} left)	Mostrar más ({1} restantes)	Afficher plus ({1} restants)	Mehr anzeigen ({1} übrig)	Mostra altri ({1} rimanenti)
+Concluído	Done	Terminado	Terminé	Fertig	Completato
+Erro	Error	Error	Erreur	Fehler	Errore
+Cancelado	Canceled	Cancelado	Annulé	Abgebrochen	Annullato
+Mover	Move	Mover	Déplacer	Verschieben	Sposta
+{a} de {b}	{a} of {b}	{a} de {b}	{a} sur {b}	{a} von {b}	{a} di {b}
+Retomar	Resume	Reanudar	Reprendre	Fortsetzen	Riprendi
+Baixar primeiro	Download first	Descargar primero	Télécharger en premier	Zuerst laden	Scarica per primo
+automático	automatic	automático	automatique	automatisch	automatico
+Precisa de atenção ({1})	Needs attention ({1})	Requiere atención ({1})	À vérifier ({1})	Braucht Aufmerksamkeit ({1})	Richiede attenzione ({1})
+Tentar todos de novo	Retry all	Reintentar todos	Tout réessayer	Alle erneut versuchen	Riprova tutti
+Limpar concluídos	Clear finished	Borrar terminados	Effacer les terminés	Fertige entfernen	Rimuovi completati
+Nada baixando agora.	Nothing downloading right now.	No se está descargando nada.	Aucun téléchargement en cours.	Gerade wird nichts geladen.	Nessun download in corso.
+Aguardando ficar pronto na nuvem: {1}	Waiting to be ready in the cloud: {1}	Esperando a que esté listo en la nube: {1}	En attente dans le cloud : {1}	Wartet in der Cloud: {1}	In attesa nel cloud: {1}
+Nenhuma tarefa.	No tasks.	No hay tareas.	Aucune tâche.	Keine Aufgaben.	Nessuna attività.
+Concluídos	Finished	Terminados	Terminés	Fertig	Completati
+Nimbo {1} disponível. Veja em Sobre.	Nimbo {1} is available. See About.	Nimbo {1} disponible. Mira Acerca de.	Nimbo {1} est disponible. Voir À propos.	Nimbo {1} ist verfügbar. Siehe Info.	Nimbo {1} disponibile. Vedi Info.
+Nimbo {1} instalado. Feche e abra o app para usar a versão nova.	Nimbo {1} installed. Close and reopen the app to use the new version.	Nimbo {1} instalado. Cierra y abre la app para usar la nueva versión.	Nimbo {1} installé. Fermez et rouvrez l’app pour utiliser la nouvelle version.	Nimbo {1} installiert. Schließe die App und öffne sie neu, um die neue Version zu nutzen.	Nimbo {1} installato. Chiudi e riapri l’app per usare la nuova versione.
+Fechar o app	Close the app	Cerrar la app	Fermer l’app	App schließen	Chiudi l’app
+Depois	Later	Después	Plus tard	Später	Più tardi
+Procurando no GitHub…	Checking GitHub…	Buscando en GitHub…	Vérification sur GitHub…	GitHub wird geprüft…	Controllo su GitHub…
+Você já tem a versão mais recente ({1}).	You already have the latest version ({1}).	Ya tienes la versión más reciente ({1}).	Vous avez déjà la dernière version ({1}).	Du hast bereits die neueste Version ({1}).	Hai già la versione più recente ({1}).
+Versão {1} · para PS5 com etaHEN	Version {1} · for PS5 with etaHEN	Versión {1} · para PS5 con etaHEN	Version {1} · pour PS5 avec etaHEN	Version {1} · für PS5 mit etaHEN	Versione {1} · per PS5 con etaHEN
+Atualizações	Updates	Actualizaciones	Mises à jour	Updates	Aggiornamenti
+Versão {1} disponível{2}	Version {1} available{2}	Versión {1} disponible{2}	Version {1} disponible{2}	Version {1} verfügbar{2}	Versione {1} disponibile{2}
+Atualizar para {1}	Update to {1}	Actualizar a {1}	Mettre à jour vers {1}	Auf {1} aktualisieren	Aggiorna a {1}
+Não feche o app até terminar.	Don’t close the app until it finishes.	No cierres la app hasta que termine.	Ne fermez pas l’app avant la fin.	Schließe die App nicht, bevor es fertig ist.	Non chiudere l’app finché non ha finito.
+Procurar atualização	Check for updates	Buscar actualización	Rechercher une mise à jour	Nach Updates suchen	Cerca aggiornamenti
+Ligado	On	Activado	Activé	An	Attivo
+Desligado	Off	Desactivado	Désactivé	Aus	Disattivo
+Atualizar sozinho: {1}	Auto-update: {1}	Actualizar solo: {1}	Mise à jour auto : {1}	Automatisch aktualisieren: {1}	Aggiornamento automatico: {1}
+Voltar para a versão anterior ({1})	Go back to the previous version ({1})	Volver a la versión anterior ({1})	Revenir à la version précédente ({1})	Zur vorherigen Version zurück ({1})	Torna alla versione precedente ({1})
+Versão anterior restaurada. Feche e abra o app.	Previous version restored. Close and reopen the app.	Versión anterior restaurada. Cierra y abre la app.	Version précédente restaurée. Fermez et rouvrez l’app.	Vorherige Version wiederhergestellt. Schließe die App und öffne sie neu.	Versione precedente ripristinata. Chiudi e riapri l’app.
+A atualização pelo app precisa do Nimbo instalado em /data/homebrew (ShadowMount+).	Updating from the app needs Nimbo installed in /data/homebrew (ShadowMount+).	La actualización desde la app necesita Nimbo instalado en /data/homebrew (ShadowMount+).	La mise à jour depuis l’app nécessite Nimbo installé dans /data/homebrew (ShadowMount+).	Das Update in der App braucht Nimbo in /data/homebrew (ShadowMount+).	L’aggiornamento dall’app richiede Nimbo installato in /data/homebrew (ShadowMount+).
+Projeto no GitHub	Project on GitHub	Proyecto en GitHub	Projet sur GitHub	Projekt auf GitHub	Progetto su GitHub
+Endereço do PS5	PS5 address	Dirección del PS5	Adresse de la PS5	PS5-Adresse	Indirizzo della PS5
+Feito com PS5 React · fonte Nunito (OFL) · música: {1} · licença GPLv3	Made with PS5 React · Nunito font (OFL) · music: {1} · GPLv3 license	Hecho con PS5 React · fuente Nunito (OFL) · música: {1} · licencia GPLv3	Fait avec PS5 React · police Nunito (OFL) · musique : {1} · licence GPLv3	Erstellt mit PS5 React · Schrift Nunito (OFL) · Musik: {1} · Lizenz GPLv3	Fatto con PS5 React · font Nunito (OFL) · musica: {1} · licenza GPLv3
+Serviços de nuvem	Cloud services	Servicios en la nube	Services cloud	Cloud-Dienste	Servizi cloud
+{1}: não conectado	{1}: not connected	{1}: no conectado	{1} : non connecté	{1}: nicht verbunden	{1}: non collegato
+Desconectar	Disconnect	Desconectar	Déconnecter	Trennen	Scollega
+Conectar	Connect	Conectar	Connecter	Verbinden	Collega
+Desconectar {1}	Disconnect {1}	Desconectar {1}	Déconnecter {1}	{1} trennen	Scollega {1}
+Sair da conta do {1} neste PS5? Os itens dele somem da Nuvem até você conectar de novo.	Sign out of {1} on this PS5? Its items disappear from Cloud until you connect again.	¿Cerrar sesión de {1} en este PS5? Sus elementos desaparecen de la Nube hasta que vuelvas a conectar.	Se déconnecter de {1} sur cette PS5 ? Ses éléments disparaissent du Cloud jusqu’à la reconnexion.	Von {1} auf dieser PS5 abmelden? Die Einträge verschwinden aus der Cloud, bis du dich wieder verbindest.	Uscire da {1} su questa PS5? I suoi elementi spariscono dal Cloud finché non lo ricolleghi.
+Pasta padrão	Default folder	Carpeta predeterminada	Dossier par défaut	Standardordner	Cartella predefinita
+Conexões por download	Connections per download	Conexiones por descarga	Connexions par téléchargement	Verbindungen pro Download	Connessioni per download
+Limitar velocidade	Limit speed	Limitar velocidad	Limiter la vitesse	Geschwindigkeit begrenzen	Limita velocità
+Velocidade máxima	Max speed	Velocidad máxima	Vitesse maximale	Höchstgeschwindigkeit	Velocità massima
+Impedir o modo de repouso	Prevent rest mode	Impedir el modo reposo	Empêcher le mode repos	Ruhemodus verhindern	Impedisci la modalità riposo
+Apagar da nuvem depois de baixar	Delete from the cloud after downloading	Borrar de la nube después de descargar	Supprimer du cloud après le téléchargement	Nach dem Download aus der Cloud löschen	Elimina dal cloud dopo il download
+Extração	Extraction	Extracción	Extraction	Entpacken	Estrazione
+Extrair automaticamente	Extract automatically	Extraer automáticamente	Extraire automatiquement	Automatisch entpacken	Estrai automaticamente
+Apagar o compactado depois	Delete the archive afterwards	Borrar el comprimido después	Supprimer l’archive ensuite	Archiv danach löschen	Elimina l’archivio dopo
+Senhas cadastradas	Saved passwords	Contraseñas guardadas	Mots de passe enregistrés	Gespeicherte Passwörter	Password salvate
+Nova senha de arquivo	New archive password	Nueva contraseña de archivo	Nouveau mot de passe d’archive	Neues Archivpasswort	Nuova password dell’archivio
+Senha adicionada	Password added	Contraseña añadida	Mot de passe ajouté	Passwort hinzugefügt	Password aggiunta
+Apagar todas as senhas	Delete all passwords	Borrar todas las contraseñas	Supprimer tous les mots de passe	Alle Passwörter löschen	Elimina tutte le password
+Apagar	Delete	Borrar	Supprimer	Löschen	Elimina
+Apagar senhas	Delete passwords	Borrar contraseñas	Supprimer les mots de passe	Passwörter löschen	Elimina password
+Apagar todas as senhas cadastradas?	Delete all saved passwords?	¿Borrar todas las contraseñas guardadas?	Supprimer tous les mots de passe enregistrés ?	Alle gespeicherten Passwörter löschen?	Eliminare tutte le password salvate?
+Música de fundo	Background music	Música de fondo	Musique de fond	Hintergrundmusik	Musica di sottofondo
+Volume da música	Music volume	Volumen de la música	Volume de la musique	Musiklautstärke	Volume della musica
+Qual música	Which song	Qué canción	Quelle musique	Welcher Song	Quale brano
+Chill lofi (padrão)	Chill lofi (default)	Chill lofi (predeterminada)	Chill lofi (par défaut)	Chill lofi (Standard)	Chill lofi (predefinita)
+Para usar a sua: Arquivos > escolha um MP3 > Usar como música de fundo	To use your own: Files > pick an MP3 > Use as background music	Para usar la tuya: Archivos > elige un MP3 > Usar como música de fondo	Pour utiliser la vôtre : Fichiers > choisissez un MP3 > Utiliser comme musique de fond	Für deine eigene: Dateien > MP3 wählen > Als Hintergrundmusik nutzen	Per usare la tua: File > scegli un MP3 > Usa come musica di sottofondo
+Sons da interface	Interface sounds	Sonidos de la interfaz	Sons de l’interface	Menütöne	Suoni dell’interfaccia
+Aponte a câmera do celular (mesmo Wi-Fi do PS5) ou abra:	Point your phone camera (same Wi-Fi as the PS5) or open:	Apunta la cámara del móvil (misma Wi-Fi que el PS5) o abre:	Visez avec l’appareil photo du téléphone (même Wi-Fi que la PS5) ou ouvrez :	Richte die Handykamera darauf (gleiches WLAN wie die PS5) oder öffne:	Inquadra con la fotocamera del telefono (stessa Wi-Fi della PS5) o apri:
+Pelo celular dá para mandar links, ver a fila e baixar da nuvem.	From your phone you can send links, see the queue and download from the cloud.	Desde el móvil puedes enviar enlaces, ver la cola y descargar de la nube.	Depuis le téléphone, vous pouvez envoyer des liens, voir la file et télécharger depuis le cloud.	Mit dem Handy kannst du Links schicken, die Warteschlange sehen und aus der Cloud laden.	Dal telefono puoi inviare link, vedere la coda e scaricare dal cloud.
+Não consegui abrir a porta do celular.	Couldn’t open the phone port.	No se pudo abrir el puerto del móvil.	Impossible d’ouvrir le port du téléphone.	Der Handy-Port konnte nicht geöffnet werden.	Impossibile aprire la porta per il telefono.
+Ligando o servidor do celular…	Starting the phone server…	Iniciando el servidor del móvil…	Démarrage du serveur pour le téléphone…	Handy-Server wird gestartet…	Avvio del server per il telefono…
+Fechar	Close	Cerrar	Fermer	Schließen	Chiudi
+Atualizando a nuvem…	Refreshing the cloud…	Actualizando la nube…	Actualisation du cloud…	Cloud wird aktualisiert…	Aggiornamento del cloud…
+Selecionar	Select	Seleccionar	Sélectionner	Auswählen	Seleziona
+Selecionar vários	Select several	Seleccionar varios	Sélection multiple	Mehrere auswählen	Seleziona più elementi
+Atualizar nuvem	Refresh cloud	Actualizar nube	Actualiser le cloud	Cloud aktualisieren	Aggiorna cloud
+Trocar aba	Switch tab	Cambiar pestaña	Changer d’onglet	Tab wechseln	Cambia scheda
+Sair da seleção	Exit selection	Salir de la selección	Quitter la sélection	Auswahl beenden	Esci dalla selezione
+Voltar	Back	Volver	Retour	Zurück	Indietro
+Chave do AllDebrid inválida. Conecte de novo em Ajustes.	Invalid AllDebrid key. Connect again in Settings.	Clave de AllDebrid no válida. Vuelve a conectar en Ajustes.	Clé AllDebrid invalide. Reconnectez-vous dans Réglages.	Ungültiger AllDebrid-Schlüssel. Verbinde dich in den Einstellungen neu.	Chiave AllDebrid non valida. Ricollega in Impostazioni.
+Conecte sua conta do AllDebrid primeiro.	Connect your AllDebrid account first.	Conecta primero tu cuenta de AllDebrid.	Connectez d’abord votre compte AllDebrid.	Verbinde zuerst dein AllDebrid-Konto.	Collega prima il tuo account AllDebrid.
+O AllDebrid bloqueou o acesso. Confirme o login pelo e-mail que eles enviaram.	AllDebrid blocked access. Confirm the login from the email they sent.	AllDebrid bloqueó el acceso. Confirma el inicio de sesión desde el correo que te enviaron.	AllDebrid a bloqué l’accès. Confirmez la connexion via l’e-mail reçu.	AllDebrid hat den Zugriff gesperrt. Bestätige die Anmeldung über die E-Mail.	AllDebrid ha bloccato l’accesso. Conferma l’accesso dall’e-mail ricevuta.
+Conta do AllDebrid bloqueada.	AllDebrid account blocked.	Cuenta de AllDebrid bloqueada.	Compte AllDebrid bloqué.	AllDebrid-Konto gesperrt.	Account AllDebrid bloccato.
+Precisa de conta Premium no AllDebrid.	Needs an AllDebrid Premium account.	Necesita una cuenta Premium de AllDebrid.	Nécessite un compte AllDebrid Premium.	Braucht ein AllDebrid-Premium-Konto.	Serve un account AllDebrid Premium.
+Limite de magnets ativos no AllDebrid.	AllDebrid active magnet limit reached.	Límite de magnets activos en AllDebrid.	Limite de magnets actifs atteinte sur AllDebrid.	Limit aktiver Magnets bei AllDebrid erreicht.	Limite di magnet attivi su AllDebrid.
+Magnet inválido.	Invalid magnet.	Magnet no válido.	Magnet invalide.	Ungültiger Magnet.	Magnet non valido.
+Site não suportado pelo AllDebrid.	Site not supported by AllDebrid.	Sitio no compatible con AllDebrid.	Site non pris en charge par AllDebrid.	Seite wird von AllDebrid nicht unterstützt.	Sito non supportato da AllDebrid.
+O arquivo não existe mais no site de origem.	The file no longer exists on the source site.	El archivo ya no existe en el sitio de origen.	Le fichier n’existe plus sur le site d’origine.	Die Datei gibt es auf der Quellseite nicht mehr.	Il file non esiste più sul sito d’origine.
+O link tem senha.	The link is password protected.	El enlace tiene contraseña.	Le lien est protégé par mot de passe.	Der Link hat ein Passwort.	Il link ha una password.
+Limite diário deste site no AllDebrid.	Daily limit for this site on AllDebrid.	Límite diario de este sitio en AllDebrid.	Limite quotidienne de ce site sur AllDebrid.	Tageslimit für diese Seite bei AllDebrid.	Limite giornaliero di questo sito su AllDebrid.
+O AllDebrid respondeu com erro {1}.	AllDebrid replied with error {1}.	AllDebrid respondió con error {1}.	AllDebrid a répondu avec l’erreur {1}.	AllDebrid hat mit Fehler {1} geantwortet.	AllDebrid ha risposto con errore {1}.
+(sem nome)	(no name)	(sin nombre)	(sans nom)	(ohne Namen)	(senza nome)
+O AllDebrid não listou os arquivos.	AllDebrid didn’t list the files.	AllDebrid no listó los archivos.	AllDebrid n’a pas listé les fichiers.	AllDebrid hat die Dateien nicht aufgelistet.	AllDebrid non ha elencato i file.
+O AllDebrid ainda está preparando o link. Aperte Retomar em alguns segundos.	AllDebrid is still preparing the link. Press Resume in a few seconds.	AllDebrid aún está preparando el enlace. Pulsa Reanudar en unos segundos.	AllDebrid prépare encore le lien. Appuyez sur Reprendre dans quelques secondes.	AllDebrid bereitet den Link noch vor. Drücke in ein paar Sekunden Fortsetzen.	AllDebrid sta ancora preparando il link. Premi Riprendi tra qualche secondo.
+O AllDebrid não gerou o link de download.	AllDebrid didn’t create the download link.	AllDebrid no generó el enlace de descarga.	AllDebrid n’a pas généré le lien de téléchargement.	AllDebrid hat keinen Download-Link erstellt.	AllDebrid non ha generato il link di download.
+Link não reconhecido. Use magnet:, http:// ou https://	Link not recognized. Use magnet:, http:// or https://	Enlace no reconocido. Usa magnet:, http:// o https://	Lien non reconnu. Utilisez magnet:, http:// ou https://	Link nicht erkannt. Nutze magnet:, http:// oder https://	Link non riconosciuto. Usa magnet:, http:// o https://
+Sem conexão com o {1}. Confira a internet do PS5.	No connection to {1}. Check the PS5’s internet.	Sin conexión con {1}. Revisa la internet del PS5.	Pas de connexion à {1}. Vérifiez l’internet de la PS5.	Keine Verbindung zu {1}. Prüfe das Internet der PS5.	Nessuna connessione a {1}. Controlla internet sulla PS5.
+O {1} pediu uma pausa. Tente de novo em instantes.	{1} asked for a break. Try again in a moment.	{1} pidió una pausa. Inténtalo de nuevo en un momento.	{1} demande une pause. Réessayez dans un instant.	{1} bittet um eine Pause. Versuche es gleich noch mal.	{1} ha chiesto una pausa. Riprova tra poco.
+Conecte sua conta do Premiumize primeiro.	Connect your Premiumize account first.	Conecta primero tu cuenta de Premiumize.	Connectez d’abord votre compte Premiumize.	Verbinde zuerst dein Premiumize-Konto.	Collega prima il tuo account Premiumize.
+O Premiumize respondeu com erro {1}.	Premiumize replied with error {1}.	Premiumize respondió con error {1}.	Premiumize a répondu avec l’erreur {1}.	Premiumize hat mit Fehler {1} geantwortet.	Premiumize ha risposto con errore {1}.
+Chave do Premiumize inválida. Confira em premiumize.me/account.	Invalid Premiumize key. Check it at premiumize.me/account.	Clave de Premiumize no válida. Revísala en premiumize.me/account.	Clé Premiumize invalide. Vérifiez sur premiumize.me/account.	Ungültiger Premiumize-Schlüssel. Prüfe ihn unter premiumize.me/account.	Chiave Premiumize non valida. Controlla su premiumize.me/account.
+Chave vazia.	Empty key.	Clave vacía.	Clé vide.	Leerer Schlüssel.	Chiave vuota.
+O Premiumize não gerou o link de download.	Premiumize didn’t create the download link.	Premiumize no generó el enlace de descarga.	Premiumize n’a pas généré le lien de téléchargement.	Premiumize hat keinen Download-Link erstellt.	Premiumize non ha generato il link di download.
+Pasta não encontrada no Premiumize.	Folder not found on Premiumize.	Carpeta no encontrada en Premiumize.	Dossier introuvable sur Premiumize.	Ordner bei Premiumize nicht gefunden.	Cartella non trovata su Premiumize.
+Sessão do Real-Debrid expirou. Conecte de novo em Ajustes.	Real-Debrid session expired. Connect again in Settings.	La sesión de Real-Debrid expiró. Vuelve a conectar en Ajustes.	Session Real-Debrid expirée. Reconnectez-vous dans Réglages.	Real-Debrid-Sitzung abgelaufen. Verbinde dich in den Einstellungen neu.	Sessione Real-Debrid scaduta. Ricollega in Impostazioni.
+Sua conta do Real-Debrid não tem permissão para isso.	Your Real-Debrid account isn’t allowed to do this.	Tu cuenta de Real-Debrid no tiene permiso para esto.	Votre compte Real-Debrid n’a pas l’autorisation.	Dein Real-Debrid-Konto darf das nicht.	Il tuo account Real-Debrid non ha il permesso.
+Site não suportado pelo Real-Debrid.	Site not supported by Real-Debrid.	Sitio no compatible con Real-Debrid.	Site non pris en charge par Real-Debrid.	Seite wird von Real-Debrid nicht unterstützt.	Sito non supportato da Real-Debrid.
+O site está fora do ar no Real-Debrid agora.	The site is down on Real-Debrid right now.	El sitio está caído en Real-Debrid ahora.	Le site est hors service sur Real-Debrid en ce moment.	Die Seite ist bei Real-Debrid gerade nicht erreichbar.	Il sito è fuori servizio su Real-Debrid ora.
+Arquivo indisponível no Real-Debrid.	File unavailable on Real-Debrid.	Archivo no disponible en Real-Debrid.	Fichier indisponible sur Real-Debrid.	Datei bei Real-Debrid nicht verfügbar.	File non disponibile su Real-Debrid.
+Seu tráfego do Real-Debrid acabou.	Your Real-Debrid traffic ran out.	Se acabó tu tráfico de Real-Debrid.	Votre trafic Real-Debrid est épuisé.	Dein Real-Debrid-Traffic ist aufgebraucht.	Il tuo traffico Real-Debrid è finito.
+O Real-Debrid bloqueou este arquivo.	Real-Debrid blocked this file.	Real-Debrid bloqueó este archivo.	Real-Debrid a bloqué ce fichier.	Real-Debrid hat diese Datei gesperrt.	Real-Debrid ha bloccato questo file.
+Limite de torrents ativos no Real-Debrid.	Real-Debrid active torrent limit reached.	Límite de torrents activos en Real-Debrid.	Limite de torrents actifs atteinte sur Real-Debrid.	Limit aktiver Torrents bei Real-Debrid erreicht.	Limite di torrent attivi su Real-Debrid.
+O Real-Debrid respondeu com erro {1}.	Real-Debrid replied with error {1}.	Real-Debrid respondió con error {1}.	Real-Debrid a répondu avec l’erreur {1}.	Real-Debrid hat mit Fehler {1} geantwortet.	Real-Debrid ha risposto con errore {1}.
+Conecte sua conta do Real-Debrid primeiro.	Connect your Real-Debrid account first.	Conecta primero tu cuenta de Real-Debrid.	Connectez d’abord votre compte Real-Debrid.	Verbinde zuerst dein Real-Debrid-Konto.	Collega prima il tuo account Real-Debrid.
+O Real-Debrid não iniciou o login.	Real-Debrid didn’t start the login.	Real-Debrid no inició el inicio de sesión.	Real-Debrid n’a pas lancé la connexion.	Real-Debrid hat die Anmeldung nicht gestartet.	Real-Debrid non ha avviato l’accesso.
+O Real-Debrid não gerou o link de download.	Real-Debrid didn’t create the download link.	Real-Debrid no generó el enlace de descarga.	Real-Debrid n’a pas généré le lien de téléchargement.	Real-Debrid hat keinen Download-Link erstellt.	Real-Debrid non ha generato il link di download.
+Armazenamento do app	App storage	Almacenamiento de la app	Stockage de l’app	App-Speicher	Spazio dell’app
+Já existe um arquivo com esse nome no destino.	A file with this name already exists at the destination.	Ya existe un archivo con ese nombre en el destino.	Un fichier portant ce nom existe déjà dans la destination.	Am Ziel gibt es schon eine Datei mit diesem Namen.	Esiste già un file con questo nome nella destinazione.
+Sem espaço livre no destino.	No free space at the destination.	Sin espacio libre en el destino.	Plus d’espace libre dans la destination.	Kein freier Speicher am Ziel.	Nessuno spazio libero nella destinazione.
+A conexão caiu. Aperte Retomar para continuar de onde parou.	The connection dropped. Press Resume to continue where it stopped.	Se cayó la conexión. Pulsa Reanudar para seguir donde se quedó.	La connexion a été coupée. Appuyez sur Reprendre pour continuer.	Die Verbindung ist abgebrochen. Drücke Fortsetzen, um weiterzumachen.	La connessione è caduta. Premi Riprendi per continuare da dove si era fermato.
+Sem permissão para gravar nesta pasta. Escolha outra.	No permission to write to this folder. Pick another one.	Sin permiso para escribir en esta carpeta. Elige otra.	Pas d’autorisation d’écriture dans ce dossier. Choisissez-en un autre.	Keine Schreibrechte in diesem Ordner. Wähle einen anderen.	Nessun permesso di scrittura in questa cartella. Scegline un’altra.
+O link expirou. Aperte Retomar para gerar outro.	The link expired. Press Resume to get a new one.	El enlace expiró. Pulsa Reanudar para generar otro.	Le lien a expiré. Appuyez sur Reprendre pour en générer un autre.	Der Link ist abgelaufen. Drücke Fortsetzen für einen neuen.	Il link è scaduto. Premi Riprendi per generarne un altro.
+O compactado está incompleto ou corrompido (falta alguma parte?).	The archive is incomplete or corrupted (missing a part?).	El comprimido está incompleto o dañado (¿falta alguna parte?).	L’archive est incomplète ou corrompue (une partie manque ?).	Das Archiv ist unvollständig oder beschädigt (fehlt ein Teil?).	L’archivio è incompleto o danneggiato (manca una parte?).
+Senha errada ou faltando. Cadastre em Ajustes > Senhas e tente de novo.	Wrong or missing password. Add it in Settings > Passwords and try again.	Contraseña incorrecta o ausente. Añádela en Ajustes > Contraseñas y reintenta.	Mot de passe erroné ou manquant. Ajoutez-le dans Réglages > Mots de passe et réessayez.	Falsches oder fehlendes Passwort. Trage es unter Einstellungen > Passwörter ein und versuche es erneut.	Password errata o mancante. Aggiungila in Impostazioni > Password e riprova.
+Erro de uma versão antiga do app. Aperte Tentar de novo.	Error from an old version of the app. Press Try again.	Error de una versión antigua de la app. Pulsa Reintentar.	Erreur d’une ancienne version de l’app. Appuyez sur Réessayer.	Fehler aus einer alten App-Version. Drücke Erneut versuchen.	Errore di una versione vecchia dell’app. Premi Riprova.
+Espaço insuficiente: precisa {1}, livre {2}	Not enough space: needs {1}, free {2}	Espacio insuficiente: necesita {1}, libre {2}	Espace insuffisant : il faut {1}, libre {2}	Nicht genug Speicher: braucht {1}, frei {2}	Spazio insufficiente: servono {1}, liberi {2}
+Download concluído	Download finished	Descarga terminada	Téléchargement terminé	Download fertig	Download completato
+Download concluído: {1}	Download finished: {1}	Descarga terminada: {1}	Téléchargement terminé : {1}	Download fertig: {1}	Download completato: {1}
+Falha no download	Download failed	Falló la descarga	Échec du téléchargement	Download fehlgeschlagen	Download non riuscito
+Sem espaço no destino.	No space at the destination.	Sin espacio en el destino.	Plus d’espace dans la destination.	Kein Speicher am Ziel.	Nessuno spazio nella destinazione.
+Já existe um arquivo com esse nome no destino. Tente de novo.	A file with this name already exists at the destination. Try again.	Ya existe un archivo con ese nombre en el destino. Reintenta.	Un fichier portant ce nom existe déjà. Réessayez.	Am Ziel gibt es schon eine Datei mit diesem Namen. Versuche es erneut.	Esiste già un file con questo nome nella destinazione. Riprova.
+O serviço recusou o link (pode ter expirado). Aperte Retomar.	The service refused the link (it may have expired). Press Resume.	El servicio rechazó el enlace (puede haber expirado). Pulsa Reanudar.	Le service a refusé le lien (il a peut-être expiré). Appuyez sur Reprendre.	Der Dienst hat den Link abgelehnt (vielleicht abgelaufen). Drücke Fortsetzen.	Il servizio ha rifiutato il link (forse è scaduto). Premi Riprendi.
+O servidor mandou uma página em vez do arquivo.	The server sent a web page instead of the file.	El servidor envió una página en vez del archivo.	Le serveur a envoyé une page au lieu du fichier.	Der Server hat eine Webseite statt der Datei geschickt.	Il server ha inviato una pagina invece del file.
+O tamanho do arquivo não bate com o da nuvem. Tente de novo.	The file size doesn’t match the cloud. Try again.	El tamaño del archivo no coincide con el de la nube. Reintenta.	La taille du fichier ne correspond pas au cloud. Réessayez.	Die Dateigröße passt nicht zur Cloud. Versuche es erneut.	La dimensione del file non corrisponde al cloud. Riprova.
+Sem conexão. Confira a internet do PS5.	No connection. Check the PS5’s internet.	Sin conexión. Revisa la internet del PS5.	Pas de connexion. Vérifiez l’internet de la PS5.	Keine Verbindung. Prüfe das Internet der PS5.	Nessuna connessione. Controlla internet sulla PS5.
+Extração concluída	Extraction finished	Extracción terminada	Extraction terminée	Entpacken fertig	Estrazione completata
+Extraído: {1}	Extracted: {1}	Extraído: {1}	Extrait : {1}	Entpackt: {1}	Estratto: {1}
+Nenhuma das senhas cadastradas funcionou.	None of the saved passwords worked.	Ninguna de las contraseñas guardadas funcionó.	Aucun des mots de passe enregistrés n’a marché.	Keines der gespeicherten Passwörter hat funktioniert.	Nessuna delle password salvate ha funzionato.
+Arquivo com senha: cadastre a senha em Ajustes e tente de novo.	Password-protected archive: add the password in Settings and try again.	Archivo con contraseña: añádela en Ajustes y reintenta.	Archive protégée : ajoutez le mot de passe dans Réglages et réessayez.	Archiv mit Passwort: trage es in den Einstellungen ein und versuche es erneut.	Archivio con password: aggiungila in Impostazioni e riprova.
+Este tipo de arquivo com senha ainda não é suportado.	This kind of password-protected archive isn’t supported yet.	Este tipo de archivo con contraseña aún no es compatible.	Ce type d’archive protégée n’est pas encore pris en charge.	Diese Art von Archiv mit Passwort wird noch nicht unterstützt.	Questo tipo di archivio con password non è ancora supportato.
+Arquivo incompleto ou faltando partes.	Archive incomplete or missing parts.	Archivo incompleto o faltan partes.	Archive incomplète ou parties manquantes.	Archiv unvollständig oder Teile fehlen.	Archivio incompleto o con parti mancanti.
+Falha ao extrair	Extraction failed	Falló la extracción	Échec de l’extraction	Entpacken fehlgeschlagen	Estrazione non riuscita
+Erro inesperado	Unexpected error	Error inesperado	Erreur inattendue	Unerwarteter Fehler	Errore imprevisto
+Pronto no {1}	Ready on {1}	Listo en {1}	Prêt sur {1}	Bereit bei {1}	Pronto su {1}
+Pronto no {1}, baixando: {2}	Ready on {1}, downloading: {2}	Listo en {1}, descargando: {2}	Prêt sur {1}, téléchargement : {2}	Bereit bei {1}, wird geladen: {2}	Pronto su {1}, download: {2}
+Mais novos	Newest	Más nuevos	Plus récents	Neueste	Più recenti
+VÍD	VID	VÍD	VID	VID	VID
+Novo nome	New name	Nuevo nombre	Nouveau nom	Neuer Name	Nuovo nome
+Apagar a pasta “{1}” e tudo dentro dela?	Delete the folder “{1}” and everything in it?	¿Borrar la carpeta “{1}” y todo su contenido?	Supprimer le dossier « {1} » et tout son contenu ?	Ordner „{1}“ mit allem Inhalt löschen?	Eliminare la cartella “{1}” e tutto il contenuto?
+Apagar “{1}”?	Delete “{1}”?	¿Borrar “{1}”?	Supprimer « {1} » ?	„{1}“ löschen?	Eliminare “{1}”?
+Não dá para desfazer.	This can’t be undone.	No se puede deshacer.	Action irréversible.	Das lässt sich nicht rückgängig machen.	Non si può annullare.
+{n} item na fila para mover	{n} item queued to move	{n} elemento en cola para mover	{n} élément en file pour déplacer	{n} Eintrag zum Verschieben eingereiht	{n} elemento in coda da spostare
+{n} itens na fila para mover	{n} items queued to move	{n} elementos en cola para mover	{n} éléments en file pour déplacer	{n} Einträge zum Verschieben eingereiht	{n} elementi in coda da spostare
+{n} item na fila para copiar	{n} item queued to copy	{n} elemento en cola para copiar	{n} élément en file pour copier	{n} Eintrag zum Kopieren eingereiht	{n} elemento in coda da copiare
+{n} itens na fila para copiar	{n} items queued to copy	{n} elementos en cola para copiar	{n} éléments en file pour copier	{n} Einträge zum Kopieren eingereiht	{n} elementi in coda da copiare
+Apagar {n} item selecionado?	Delete {n} selected item?	¿Borrar {n} elemento seleccionado?	Supprimer {n} élément sélectionné ?	{n} ausgewählten Eintrag löschen?	Eliminare {n} elemento selezionato?
+Apagar {n} itens selecionados?	Delete {n} selected items?	¿Borrar {n} elementos seleccionados?	Supprimer {n} éléments sélectionnés ?	{n} ausgewählte Einträge löschen?	Eliminare {n} elementi selezionati?
+As pastas vão com tudo dentro.	Folders go with everything inside.	Las carpetas se van con todo su contenido.	Les dossiers partent avec tout leur contenu.	Ordner werden mit allem Inhalt gelöscht.	Le cartelle vanno con tutto il contenuto.
+{1} não puderam ser apagados	{1} couldn’t be deleted	{1} no se pudieron borrar	{1} n’ont pas pu être supprimés	{1} konnten nicht gelöscht werden	{1} non è stato possibile eliminarli
+Voltar uma pasta	Up one folder	Subir una carpeta	Dossier parent	Ordner nach oben	Cartella superiore
+Nova pasta	New folder	Nueva carpeta	Nouveau dossier	Neuer Ordner	Nuova cartella
+Nome da nova pasta	New folder name	Nombre de la nueva carpeta	Nom du nouveau dossier	Name des neuen Ordners	Nome della nuova cartella
+Pasta vazia.	Empty folder.	Carpeta vacía.	Dossier vide.	Leerer Ordner.	Cartella vuota.
+Pasta	Folder	Carpeta	Dossier	Ordner	Cartella
+Marque os itens com	Mark items with	Marca los elementos con	Cochez les éléments avec	Einträge markieren mit	Seleziona gli elementi con
+Copiar para…	Copy to…	Copiar a…	Copier vers…	Kopieren nach…	Copia in…
+Mover para…	Move to…	Mover a…	Déplacer vers…	Verschieben nach…	Sposta in…
+Renomear	Rename	Renombrar	Renommer	Umbenennen	Rinomina
+Desmarcar tudo	Unmark all	Desmarcar todo	Tout décocher	Alle abwählen	Deseleziona tutto
+Tudo aqui	All here	Todo aquí	Tout ici	Alles hier	Tutto qui
+Extrair aqui	Extract here	Extraer aquí	Extraire ici	Hier entpacken	Estrai qui
+Extração na fila (veja em Downloads)	Extraction queued (see Downloads)	Extracción en cola (mira Descargas)	Extraction en file (voir Téléchargements)	Entpacken eingereiht (siehe Downloads)	Estrazione in coda (vedi Download)
+Cópia na fila	Copy queued	Copia en cola	Copie en file	Kopie eingereiht	Copia in coda
+Usar como música de fundo	Use as background music	Usar como música de fondo	Utiliser comme musique de fond	Als Hintergrundmusik nutzen	Usa come musica di sottofondo
+Tocando “{1}” como música de fundo	Playing “{1}” as background music	Sonando “{1}” como música de fondo	« {1} » joue en musique de fond	„{1}“ läuft als Hintergrundmusik	“{1}” in riproduzione come sottofondo
+Vídeos	Videos	Vídeos	Vidéos	Videos	Video
+Áudio	Audio	Audio	Audio	Audio	Audio
+Imagens	Images	Imágenes	Images	Bilder	Immagini
+Downloads parciais	Partial downloads	Descargas parciales	Téléchargements partiels	Teil-Downloads	Download parziali
+Outros	Other	Otros	Autres	Sonstiges	Altro
+Download parcial abandonado	Abandoned partial download	Descarga parcial abandonada	Téléchargement partiel abandonné	Abgebrochener Teil-Download	Download parziale abbandonato
+Compactado que parece já ter sido extraído	Archive that seems already extracted	Comprimido que parece ya extraído	Archive qui semble déjà extraite	Archiv, das schon entpackt scheint	Archivio che sembra già estratto
+{1} usados de {2}	{1} used of {2}	{1} usados de {2}	{1} utilisés sur {2}	{1} von {2} belegt	{1} usati su {2}
+Escolha uma unidade e aperte Analisar para ver o que está ocupando espaço.	Pick a drive and press Analyze to see what’s taking up space.	Elige una unidad y pulsa Analizar para ver qué ocupa espacio.	Choisissez un disque et appuyez sur Analyser pour voir ce qui prend de la place.	Wähle ein Laufwerk und drücke Analysieren, um zu sehen, was Platz belegt.	Scegli un’unità e premi Analizza per vedere cosa occupa spazio.
+Sugestões de limpeza · até {1}	Cleanup suggestions · up to {1}	Sugerencias de limpieza · hasta {1}	Suggestions de nettoyage · jusqu’à {1}	Aufräumvorschläge · bis zu {1}	Suggerimenti di pulizia · fino a {1}
+Maiores pastas	Largest folders	Carpetas más grandes	Plus gros dossiers	Größte Ordner	Cartelle più grandi
+Maiores arquivos	Largest files	Archivos más grandes	Plus gros fichiers	Größte Dateien	File più grandi
+Jogos e apps instalados	Installed games and apps	Juegos y apps instalados	Jeux et apps installés	Installierte Spiele und Apps	Giochi e app installati
+Jogo + atualizações + DLCs. Só visualização.	Game + updates + DLCs. View only.	Juego + actualizaciones + DLC. Solo ver.	Jeu + mises à jour + DLC. Lecture seule.	Spiel + Updates + DLCs. Nur Ansicht.	Gioco + aggiornamenti + DLC. Solo visualizzazione.
+Nenhum encontrado.	None found.	Ninguno encontrado.	Aucun trouvé.	Nichts gefunden.	Nessuno trovato.
+“Chill lofi inspired”, de omfgdude · CC0 · opengameart.org	“Chill lofi inspired” by omfgdude · CC0 · opengameart.org	“Chill lofi inspired”, de omfgdude · CC0 · opengameart.org	« Chill lofi inspired » par omfgdude · CC0 · opengameart.org	„Chill lofi inspired“ von omfgdude · CC0 · opengameart.org	“Chill lofi inspired” di omfgdude · CC0 · opengameart.org
+Não consegui tocar essa música; voltei para a padrão	Couldn’t play that song; switched back to the default	No se pudo reproducir esa canción; volví a la predeterminada	Impossible de lire cette musique ; retour à celle par défaut	Dieser Song lässt sich nicht abspielen; zurück zum Standard	Impossibile riprodurre il brano; tornato a quello predefinito
+Esse serviço conecta pelo QR code no PS5.	This service connects through the QR code on the PS5.	Este servicio se conecta con el código QR en el PS5.	Ce service se connecte via le QR code sur la PS5.	Dieser Dienst verbindet sich über den QR-Code auf der PS5.	Questo servizio si collega con il codice QR sulla PS5.
+Conferindo a chave… olhe a TV em instantes	Checking the key… look at the TV in a moment	Comprobando la clave… mira la TV en un momento	Vérification de la clé… regardez la TV dans un instant	Schlüssel wird geprüft… schau gleich auf den Fernseher	Verifica della chiave… guarda la TV tra poco
+{1} conectado pelo celular	{1} connected from the phone	{1} conectado desde el móvil	{1} connecté depuis le téléphone	{1} über das Handy verbunden	{1} collegato dal telefono
+Item não encontrado	Item not found	Elemento no encontrado	Élément introuvable	Eintrag nicht gefunden	Elemento non trovato
+Celular: {1} arquivo(s) na fila	Phone: {1} file(s) queued	Móvil: {1} archivo(s) en cola	Téléphone : {1} fichier(s) en file	Handy: {1} Datei(en) eingereiht	Telefono: {1} file in coda
+{1} arquivo(s) na fila do PS5	{1} file(s) queued on the PS5	{1} archivo(s) en la cola del PS5	{1} fichier(s) en file sur la PS5	{1} Datei(en) in der PS5-Warteschlange	{1} file in coda sulla PS5
+Já está na fila	Already in the queue	Ya está en la cola	Déjà dans la file	Schon in der Warteschlange	Già in coda
+Vai baixar assim que ficar pronto no {1}	Will download as soon as it’s ready on {1}	Se descargará en cuanto esté listo en {1}	Sera téléchargé dès qu’il sera prêt sur {1}	Wird geladen, sobald es bei {1} bereit ist	Verrà scaricato appena pronto su {1}
+Celular: link direto na fila	Phone: direct link queued	Móvil: enlace directo en cola	Téléphone : lien direct en file	Handy: direkter Link eingereiht	Telefono: link diretto in coda
+Na fila do PS5	Queued on the PS5	En la cola del PS5	En file sur la PS5	In der PS5-Warteschlange	In coda sulla PS5
+Conecte um serviço no PS5 (Ajustes > Serviços de nuvem) ou escolha Link direto.	Connect a service on the PS5 (Settings > Cloud services) or choose Direct link.	Conecta un servicio en el PS5 (Ajustes > Servicios en la nube) o elige Enlace directo.	Connectez un service sur la PS5 (Réglages > Services cloud) ou choisissez Lien direct.	Verbinde einen Dienst auf der PS5 (Einstellungen > Cloud-Dienste) oder wähle Direkter Link.	Collega un servizio sulla PS5 (Impostazioni > Servizi cloud) o scegli Link diretto.
+Enviando ao {1}… confira a fila em instantes	Sending to {1}… check the queue in a moment	Enviando a {1}… revisa la cola en un momento	Envoi à {1}… regardez la file dans un instant	Wird an {1} gesendet… schau gleich in die Warteschlange	Invio a {1}… controlla la coda tra poco
+Celular: link liberado pelo {1}, na fila	Phone: link unlocked by {1}, queued	Móvil: enlace liberado por {1}, en cola	Téléphone : lien débloqué par {1}, en file	Handy: Link von {1} freigegeben, eingereiht	Telefono: link sbloccato da {1}, in coda
+Liberado pelo {1}, na fila do PS5	Unlocked by {1}, queued on the PS5	Liberado por {1}, en la cola del PS5	Débloqué par {1}, en file sur la PS5	Von {1} freigegeben, in der PS5-Warteschlange	Sbloccato da {1}, in coda sulla PS5
+Celular: link adicionado ao {1}	Phone: link added to {1}	Móvil: enlace añadido a {1}	Téléphone : lien ajouté à {1}	Handy: Link zu {1} hinzugefügt	Telefono: link aggiunto a {1}
+Já estava no cache do {1}, baixando no PS5	Already cached on {1}, downloading on the PS5	Ya estaba en la caché de {1}, descargando en el PS5	Déjà en cache sur {1}, téléchargement sur la PS5	Schon im Cache von {1}, wird auf der PS5 geladen	Già nella cache di {1}, download sulla PS5
+Já estava no cache do {1}	Already cached on {1}	Ya estaba en la caché de {1}	Déjà en cache sur {1}	Schon im Cache von {1}	Già nella cache di {1}
+Adicionado ao {1}; baixa no PS5 quando ficar pronto	Added to {1}; downloads on the PS5 when ready	Añadido a {1}; se descarga en el PS5 cuando esté listo	Ajouté à {1} ; téléchargé sur la PS5 une fois prêt	Zu {1} hinzugefügt; lädt auf der PS5, sobald es bereit ist	Aggiunto a {1}; si scarica sulla PS5 quando è pronto
+Adicionado ao {1}	Added to {1}	Añadido a {1}	Ajouté à {1}	Zu {1} hinzugefügt	Aggiunto a {1}
+rota desconhecida	unknown route	ruta desconocida	route inconnue	unbekannte Route	percorso sconosciuto
+Vou baixar assim que ficar pronto no {1}	I’ll download it as soon as it’s ready on {1}	Lo descargaré en cuanto esté listo en {1}	Je le téléchargerai dès qu’il sera prêt sur {1}	Wird geladen, sobald es bei {1} bereit ist	Lo scaricherò appena è pronto su {1}
+Ainda carregando a lista de arquivos…	Still loading the file list…	Aún cargando la lista de archivos…	Chargement de la liste des fichiers…	Dateiliste wird noch geladen…	Caricamento dell’elenco dei file…
+Marque pelo menos um arquivo	Mark at least one file	Marca al menos un archivo	Cochez au moins un fichier	Markiere mindestens eine Datei	Seleziona almeno un file
+{n} arquivo na fila	{n} file queued	{n} archivo en cola	{n} fichier en file	{n} Datei eingereiht	{n} file in coda
+{n} arquivos na fila	{n} files queued	{n} archivos en cola	{n} fichiers en file	{n} Dateien eingereiht	{n} file in coda
+Esses arquivos já estão na fila	Those files are already in the queue	Esos archivos ya están en la cola	Ces fichiers sont déjà dans la file	Diese Dateien sind schon in der Warteschlange	Questi file sono già in coda
+carregando arquivos…	loading files…	cargando archivos…	chargement des fichiers…	Dateien werden geladen…	caricamento file…
+{1} de {2} arquivos marcados	{1} of {2} files marked	{1} de {2} archivos marcados	{1} sur {2} fichiers cochés	{1} von {2} Dateien markiert	{1} di {2} file selezionati
+Desmarcar todos	Unmark all	Desmarcar todos	Tout décocher	Alle abwählen	Deseleziona tutti
+Marcar todos	Mark all	Marcar todos	Tout cocher	Alle markieren	Seleziona tutti
+Extrair ao terminar	Extract when done	Extraer al terminar	Extraire à la fin	Nach dem Laden entpacken	Estrai al termine
+Baixar {1}	Download {1}	Descargar {1}	Télécharger {1}	{1} herunterladen	Scarica {1}
+Baixar quando ficar pronto	Download when ready	Descargar cuando esté listo	Télécharger une fois prêt	Laden, sobald bereit	Scarica quando è pronto
+Confirmar exclusão	Confirm deletion	Confirmar borrado	Confirmer la suppression	Löschen bestätigen	Conferma eliminazione
+Apagar da nuvem	Delete from cloud	Borrar de la nube	Supprimer du cloud	Aus der Cloud löschen	Elimina dal cloud
+Apagado do {1}	Deleted from {1}	Borrado de {1}	Supprimé de {1}	Aus {1} gelöscht	Eliminato da {1}
+Escolher pasta	Choose folder	Elegir carpeta	Choisir un dossier	Ordner wählen	Scegli cartella
+‹ Pasta acima	‹ Parent folder	‹ Carpeta superior	‹ Dossier parent	‹ Übergeordneter Ordner	‹ Cartella superiore
+Nenhuma subpasta	No subfolders	Sin subcarpetas	Aucun sous-dossier	Keine Unterordner	Nessuna sottocartella
+Usar esta pasta	Use this folder	Usar esta carpeta	Utiliser ce dossier	Diesen Ordner nutzen	Usa questa cartella
+Use quantos quiser: a aba Nuvem junta todos.	Use as many as you like: the Cloud tab combines them all.	Usa los que quieras: la pestaña Nube los junta todos.	Utilisez-en autant que vous voulez : l’onglet Cloud les regroupe.	Nutze so viele du willst: der Tab Cloud fasst alle zusammen.	Usane quanti vuoi: la scheda Cloud li unisce tutti.
+Com chave da API	With API key	Con clave de API	Avec clé API	Mit API-Schlüssel	Con chiave API
+O código expirou.	The code expired.	El código expiró.	Le code a expiré.	Der Code ist abgelaufen.	Il codice è scaduto.
+Chave da API do {1}	{1} API key	Clave de API de {1}	Clé API {1}	{1}-API-Schlüssel	Chiave API di {1}
+Conferindo a chave…	Checking the key…	Comprobando la clave…	Vérification de la clé…	Schlüssel wird geprüft…	Verifica della chiave…
+Conectar {1}	Connect {1}	Conectar {1}	Connecter {1}	{1} verbinden	Collega {1}
+1. Pegue sua chave em {1}	1. Get your key at {1}	1. Consigue tu clave en {1}	1. Récupérez votre clé sur {1}	1. Hol dir deinen Schlüssel auf {1}	1. Prendi la tua chiave su {1}
+2. Escaneie o QR, entre com o PIN e cole a chave em "Contas"	2. Scan the QR, enter the PIN and paste the key in “Accounts”	2. Escanea el QR, entra con el PIN y pega la clave en “Cuentas”	2. Scannez le QR, saisissez le PIN et collez la clé dans « Comptes »	2. Scanne den QR, gib die PIN ein und füge den Schlüssel unter „Konten“ ein	2. Scansiona il QR, inserisci il PIN e incolla la chiave in “Account”
+2. Digite a chave aqui no PS5	2. Type the key here on the PS5	2. Escribe la clave aquí en el PS5	2. Tapez la clé ici sur la PS5	2. Gib den Schlüssel hier auf der PS5 ein	2. Digita la chiave qui sulla PS5
+Digitar a chave no PS5	Type the key on the PS5	Escribir la clave en el PS5	Taper la clé sur la PS5	Schlüssel auf der PS5 eingeben	Digita la chiave sulla PS5
+1. Escaneie com o celular	1. Scan with your phone	1. Escanea con el móvil	1. Scannez avec le téléphone	1. Mit dem Handy scannen	1. Scansiona con il telefono
+2. Faça login e confirme o código	2. Log in and confirm the code	2. Inicia sesión y confirma el código	2. Connectez-vous et confirmez le code	2. Melde dich an und bestätige den Code	2. Accedi e conferma il codice
+Aguardando aprovação… expira em {1}:{2}	Waiting for approval… expires in {1}:{2}	Esperando aprobación… expira en {1}:{2}	En attente d’approbation… expire dans {1}:{2}	Warte auf Bestätigung… läuft ab in {1}:{2}	In attesa di approvazione… scade tra {1}:{2}
+Gerando código…	Generating code…	Generando código…	Génération du code…	Code wird erstellt…	Generazione del codice…
+Gerar outro código	Get a new code	Generar otro código	Générer un autre code	Neuen Code holen	Genera un altro codice
+Chave do TorBox inválida. Conecte de novo em Ajustes.	Invalid TorBox key. Connect again in Settings.	Clave de TorBox no válida. Vuelve a conectar en Ajustes.	Clé TorBox invalide. Reconnectez-vous dans Réglages.	Ungültiger TorBox-Schlüssel. Verbinde dich in den Einstellungen neu.	Chiave TorBox non valida. Ricollega in Impostazioni.
+Conecte sua conta do TorBox primeiro.	Connect your TorBox account first.	Conecta primero tu cuenta de TorBox.	Connectez d’abord votre compte TorBox.	Verbinde zuerst dein TorBox-Konto.	Collega prima il tuo account TorBox.
+Seu plano do TorBox não permite isso.	Your TorBox plan doesn’t allow this.	Tu plan de TorBox no lo permite.	Votre offre TorBox ne le permet pas.	Dein TorBox-Tarif erlaubt das nicht.	Il tuo piano TorBox non lo consente.
+Limite de downloads ativos no TorBox atingido.	TorBox active download limit reached.	Límite de descargas activas en TorBox alcanzado.	Limite de téléchargements actifs atteinte sur TorBox.	Limit aktiver Downloads bei TorBox erreicht.	Limite di download attivi su TorBox raggiunto.
+Arquivo grande demais para o seu plano.	File too large for your plan.	Archivo demasiado grande para tu plan.	Fichier trop gros pour votre offre.	Datei zu groß für deinen Tarif.	File troppo grande per il tuo piano.
+Site não suportado pelo TorBox.	Site not supported by TorBox.	Sitio no compatible con TorBox.	Site non pris en charge par TorBox.	Seite wird von TorBox nicht unterstützt.	Sito non supportato da TorBox.
+Sem conexão com o TorBox. Confira a internet do PS5.	No connection to TorBox. Check the PS5’s internet.	Sin conexión con TorBox. Revisa la internet del PS5.	Pas de connexion à TorBox. Vérifiez l’internet de la PS5.	Keine Verbindung zu TorBox. Prüfe das Internet der PS5.	Nessuna connessione a TorBox. Controlla internet sulla PS5.
+O TorBox pediu uma pausa. Tente de novo em instantes.	TorBox asked for a break. Try again in a moment.	TorBox pidió una pausa. Inténtalo de nuevo en un momento.	TorBox demande une pause. Réessayez dans un instant.	TorBox bittet um eine Pause. Versuche es gleich noch mal.	TorBox ha chiesto una pausa. Riprova tra poco.
+Erro HTTP {1}	HTTP error {1}	Error HTTP {1}	Erreur HTTP {1}	HTTP-Fehler {1}	Errore HTTP {1}
+O TorBox não gerou o link de download.	TorBox didn’t create the download link.	TorBox no generó el enlace de descarga.	TorBox n’a pas généré le lien de téléchargement.	TorBox hat keinen Download-Link erstellt.	TorBox non ha generato il link di download.
+O TorBox não iniciou o login.	TorBox didn’t start the login.	TorBox no inició el inicio de sesión.	TorBox n’a pas lancé la connexion.	TorBox hat die Anmeldung nicht gestartet.	TorBox non ha avviato l’accesso.
+Sem conexão com o GitHub. Confira a internet do PS5.	No connection to GitHub. Check the PS5’s internet.	Sin conexión con GitHub. Revisa la internet del PS5.	Pas de connexion à GitHub. Vérifiez l’internet de la PS5.	Keine Verbindung zu GitHub. Prüfe das Internet der PS5.	Nessuna connessione a GitHub. Controlla internet sulla PS5.
+Ainda não há versões publicadas no GitHub.	No versions published on GitHub yet.	Aún no hay versiones publicadas en GitHub.	Aucune version publiée sur GitHub pour l’instant.	Noch keine Versionen auf GitHub veröffentlicht.	Nessuna versione pubblicata su GitHub per ora.
+O GitHub limitou as consultas. Tente de novo mais tarde.	GitHub limited requests. Try again later.	GitHub limitó las consultas. Inténtalo más tarde.	GitHub a limité les requêtes. Réessayez plus tard.	GitHub hat die Anfragen begrenzt. Versuche es später.	GitHub ha limitato le richieste. Riprova più tardi.
+O GitHub respondeu com erro {1}.	GitHub replied with error {1}.	GitHub respondió con error {1}.	GitHub a répondu avec l’erreur {1}.	GitHub hat mit Fehler {1} geantwortet.	GitHub ha risposto con errore {1}.
+Não há versão anterior guardada.	No previous version saved.	No hay versión anterior guardada.	Aucune version précédente enregistrée.	Keine vorherige Version gespeichert.	Nessuna versione precedente salvata.
+Termine ou pause os downloads e extrações antes.	Finish or pause downloads and extractions first.	Termina o pausa las descargas y extracciones antes.	Terminez ou mettez en pause les téléchargements et extractions d’abord.	Beende oder pausiere zuerst Downloads und Entpacken.	Termina o metti in pausa download ed estrazioni prima.
+Pronto!	Done!	¡Listo!	Terminé !	Fertig!	Fatto!
+Esta versão não tem o arquivo do PS5 anexado.	This release doesn’t include the PS5 file.	Esta versión no incluye el archivo del PS5.	Cette version ne contient pas le fichier PS5.	Diese Version enthält keine PS5-Datei.	Questa versione non include il file per PS5.
+Termine ou pause os downloads e extrações antes de atualizar.	Finish or pause downloads and extractions before updating.	Termina o pausa las descargas y extracciones antes de actualizar.	Terminez ou mettez en pause les téléchargements et extractions avant la mise à jour.	Beende oder pausiere Downloads und Entpacken vor dem Update.	Termina o metti in pausa download ed estrazioni prima di aggiornare.
+Não achei a pasta do Nimbo em /data/homebrew. Atualize copiando a pasta nova pelo FTP.	Couldn’t find the Nimbo folder in /data/homebrew. Update by copying the new folder over FTP.	No encontré la carpeta de Nimbo en /data/homebrew. Actualiza copiando la carpeta nueva por FTP.	Dossier Nimbo introuvable dans /data/homebrew. Mettez à jour en copiant le nouveau dossier par FTP.	Nimbo-Ordner in /data/homebrew nicht gefunden. Aktualisiere per FTP mit dem neuen Ordner.	Cartella di Nimbo non trovata in /data/homebrew. Aggiorna copiando la nuova cartella via FTP.
+Baixando a versão nova…	Downloading the new version…	Descargando la nueva versión…	Téléchargement de la nouvelle version…	Neue Version wird geladen…	Download della nuova versione…
+Abrindo o pacote…	Opening the package…	Abriendo el paquete…	Ouverture du paquet…	Paket wird geöffnet…	Apertura del pacchetto…
+O pacote baixado não tem a pasta do app (PPSA48921).	The downloaded package doesn’t contain the app folder (PPSA48921).	El paquete descargado no tiene la carpeta de la app (PPSA48921).	Le paquet téléchargé ne contient pas le dossier de l’app (PPSA48921).	Das geladene Paket enthält den App-Ordner (PPSA48921) nicht.	Il pacchetto scaricato non contiene la cartella dell’app (PPSA48921).
+Guardando a versão atual…	Saving the current version…	Guardando la versión actual…	Sauvegarde de la version actuelle…	Aktuelle Version wird gesichert…	Salvataggio della versione attuale…
+Algo deu errado, voltando para a versão anterior…	Something went wrong, going back to the previous version…	Algo salió mal, volviendo a la versión anterior…	Un problème est survenu, retour à la version précédente…	Etwas ist schiefgelaufen, zurück zur vorherigen Version…	Qualcosa è andato storto, ritorno alla versione precedente…
+A atualização falhou e o app voltou para a versão {1}. ({2})	The update failed and the app went back to version {1}. ({2})	La actualización falló y la app volvió a la versión {1}. ({2})	La mise à jour a échoué et l’app est revenue à la version {1}. ({2})	Das Update ist fehlgeschlagen, die App ist zurück auf Version {1}. ({2})	L’aggiornamento non è riuscito e l’app è tornata alla versione {1}. ({2})
+A seguir	Up next	A continuación	À suivre	Als Nächstes	Prossimi
+Unidades	Drives	Unidades	Disques	Laufwerke	Unità
+Na fila	Queued	En cola	En file	Eingereiht	In coda
+Ordem: {1}	Sort: {1}	Orden: {1}	Tri : {1}	Sortierung: {1}	Ordine: {1}
+Na nuvem {1}%	In the cloud {1}%	En la nube {1}%	Dans le cloud {1}%	In der Cloud {1}%	Nel cloud {1}%
+Extraindo e copiando	Extracting and copying	Extrayendo y copiando	Extraction et copie	Entpacken und Kopieren	Estrazione e copia
+Idioma	Language	Idioma	Langue	Sprache	Lingua
+Geral	General	General	Général	Allgemein	Generale
+{1} · adicionar	{1} · add	{1} · añadir	{1} · ajouter	{1} · hinzufügen	{1} · aggiungi
+Som	Sound	Sonido	Son	Ton	Suono
+Apagado	Deleted	Borrado	Supprimé	Gelöscht	Eliminato
+{1} livres	{1} free	{1} libres	{1} libres	{1} frei	{1} liberi
+Compactado	Archive	Comprimido	Archive	Archiv	Archivio
+Movendo…	Moving…	Moviendo…	Déplacement…	Wird verschoben…	Spostamento…
+Parar	Stop	Parar	Arrêter	Stopp	Ferma
+No {1}: {2}%	On {1}: {2}%	En {1}: {2}%	Sur {1} : {2}%	Bei {1}: {2}%	Su {1}: {2}%
+Destino	Destination	Destino	Destination	Ziel	Destinazione
+ou abra {1}	or open {1}	o abre {1}	ou ouvrez {1}	oder öffne {1}	oppure apri {1}
+Baixado	Downloaded	Descargado	Téléchargé	Geladen	Scaricato
+Maiores	Largest	Más grandes	Plus gros	Größte	Più grandi
+Buscar	Search	Buscar	Rechercher	Suchen	Cerca
+{n} arquivo	{n} file	{n} archivo	{n} fichier	{n} Datei	{n} file
+{n} arquivos	{n} files	{n} archivos	{n} fichiers	{n} Dateien	{n} file
+Em andamento	In progress	En curso	En cours	Läuft	In corso
+Preparando…	Preparing…	Preparando…	Préparation…	Wird vorbereitet…	Preparazione…
+Procurando…	Searching…	Buscando…	Recherche…	Suche…	Ricerca…
+Restaurando…	Restoring…	Restaurando…	Restauration…	Wird wiederhergestellt…	Ripristino…
+Sem rede	No network	Sin red	Pas de réseau	Kein Netzwerk	Nessuna rete
+Marcar / desmarcar	Mark / unmark	Marcar / desmarcar	Cocher / décocher	Markieren / abwählen	Seleziona / deseleziona
+{1} parte {2}	{1} part {2}	{1} parte {2}	{1} partie {2}	{1} Teil {2}	{1} parte {2}
+SSD interno	Internal SSD	SSD interno	SSD interne	Interne SSD	SSD interno
+Estendido {1}	Extended {1}	Extendido {1}	Étendu {1}	Erweitert {1}	Esteso {1}
+Movido	Moved	Movido	Déplacé	Verschoben	Spostato
+Copiado	Copied	Copiado	Copié	Kopiert	Copiato
+Apagados	Deleted	Borrados	Supprimés	Gelöscht	Eliminati
+{n} selecionado	{n} selected	{n} seleccionado	{n} sélectionné	{n} ausgewählt	{n} selezionato
+{n} selecionados	{n} selected	{n} seleccionados	{n} sélectionnés	{n} ausgewählt	{n} selezionati
+Compactados	Archives	Comprimidos	Archives	Archive	Archivi
+Pacotes e imagens	Packages and images	Paquetes e imágenes	Paquets et images	Pakete und Images	Pacchetti e immagini
+Analisando…	Analyzing…	Analizando…	Analyse…	Wird analysiert…	Analisi…
+Analisar	Analyze	Analizar	Analyser	Analysieren	Analizza
+Analisando	Analyzing	Analizando	Analyse	Analyse	Analisi
+Calculando…	Calculating…	Calculando…	Calcul…	Wird berechnet…	Calcolo…
+Calcular	Calculate	Calcular	Calculer	Berechnen	Calcola
+{1} conectado!	{1} connected!	¡{1} conectado!	{1} connecté !	{1} verbunden!	{1} collegato!
+Apagando…	Deleting…	Borrando…	Suppression…	Wird gelöscht…	Eliminazione…
+Conectado	Connected	Conectado	Connecté	Verbunden	Collegato
+Com QR code	With QR code	Con código QR	Avec QR code	Mit QR-Code	Con codice QR
+Confirmar	Confirm	Confirmar	Confirmer	Bestätigen	Conferma
+Restaurando {1}…	Restoring {1}…	Restaurando {1}…	Restauration de {1}…	{1} wird wiederhergestellt…	Ripristino di {1}…
+Instalando {1}…	Installing {1}…	Instalando {1}…	Installation de {1}…	{1} wird installiert…	Installazione di {1}…
+SOM	AUD	AUD	AUD	AUD	AUD
+ARQ	FILE	ARCH	FICH	DATEI	FILE
+Não conectado	Not connected	No conectado	Non connecté	Nicht verbunden	Non collegato
+de	of	de	sur	von	di
+pt-BR	en	es	fr	de	it
+Digite o PIN que aparece no PS5	Enter the PIN shown on the PS5	Escribe el PIN que aparece en el PS5	Saisissez le PIN affiché sur la PS5	Gib die PIN ein, die auf der PS5 steht	Inserisci il PIN mostrato sulla PS5
+Entrar	Enter	Entrar	Entrer	Weiter	Entra
+Fila	Queue	Cola	File	Warteschlange	Coda
+Adicionar	Add	Añadir	Ajouter	Hinzufügen	Aggiungi
+Contas	Accounts	Cuentas	Comptes	Konten	Account
+Muitas tentativas, espere um pouco	Too many attempts, wait a bit	Demasiados intentos, espera un poco	Trop de tentatives, patientez un peu	Zu viele Versuche, warte kurz	Troppi tentativi, aspetta un po’
+PIN incorreto	Wrong PIN	PIN incorrecto	PIN incorrect	Falsche PIN	PIN errato
+Nada na fila. Use Adicionar ou Nuvem.	Nothing in the queue. Use Add or Cloud.	Nada en la cola. Usa Añadir o Nube.	Rien dans la file. Utilisez Ajouter ou Cloud.	Nichts in der Warteschlange. Nutze Hinzufügen oder Cloud.	Niente in coda. Usa Aggiungi o Cloud.
+ou	or	o	ou	oder	o
+um por linha	one per line	uno por línea	un par ligne	einer pro Zeile	uno per riga
+Enviar para	Send to	Enviar a	Envoyer à	Senden an	Invia a
+Link direto (sem serviço)	Direct link (no service)	Enlace directo (sin servicio)	Lien direct (sans service)	Direkter Link (ohne Dienst)	Link diretto (senza servizio)
+Baixar no PS5 quando ficar pronto	Download on the PS5 when ready	Descargar en el PS5 cuando esté listo	Télécharger sur la PS5 une fois prêt	Auf der PS5 laden, sobald bereit	Scarica sulla PS5 quando è pronto
+Cole a chave da API	Paste the API key	Pega la clave de API	Collez la clé API	API-Schlüssel einfügen	Incolla la chiave API
+chave da API	API key	clave de API	clé API	API-Schlüssel	chiave API
+Salvar chave	Save key	Guardar clave	Enregistrer la clé	Schlüssel speichern	Salva chiave
+Conecte pelo PS5: Ajustes > Serviços de nuvem (QR code).	Connect on the PS5: Settings > Cloud services (QR code).	Conecta en el PS5: Ajustes > Servicios en la nube (código QR).	Connectez-vous sur la PS5 : Réglages > Services cloud (QR code).	Auf der PS5 verbinden: Einstellungen > Cloud-Dienste (QR-Code).	Collega sulla PS5: Impostazioni > Servizi cloud (codice QR).
+Carregando…	Loading…	Cargando…	Chargement…	Wird geladen…	Caricamento…
+arquivo(s)	file(s)	archivo(s)	fichier(s)	Datei(en)	file
+Na nuvem	In the cloud	En la nube	Dans le cloud	In der Cloud	Nel cloud
+Baixar no PS5	Download on the PS5	Descargar en el PS5	Télécharger sur la PS5	Auf der PS5 laden	Scarica sulla PS5
+Nuvem vazia.	Cloud empty.	Nube vacía.	Cloud vide.	Cloud leer.	Cloud vuoto.
+Conferindo…	Checking…	Comprobando…	Vérification…	Wird geprüft…	Verifica…
+Baixando agora	Downloading now	Descargando ahora	Téléchargement en cours	Wird geladen	Download in corso
+Baixando agora · mais {n} na fila	Downloading now · {n} more queued	Descargando ahora · {n} más en cola	Téléchargement en cours · {n} de plus en file	Wird geladen · {n} weitere eingereiht	Download in corso · altri {n} in coda
+{a} extraídos	{a} extracted	{a} extraídos	{a} extraits	{a} entpackt	{a} estratti
+falta {a}	{a} left	faltan {a}	reste {a}	noch {a}	mancano {a}
+Analisando {r}: {b} em {n} arquivos	Analyzing {r}: {b} in {n} files	Analizando {r}: {b} en {n} archivos	Analyse de {r} : {b} dans {n} fichiers	Analyse von {r}: {b} in {n} Dateien	Analisi di {r}: {b} in {n} file
+Uso de {r}: {b} em {n} arquivos	Usage of {r}: {b} in {n} files	Uso de {r}: {b} en {n} archivos	Utilisation de {r} : {b} dans {n} fichiers	Belegung von {r}: {b} in {n} Dateien	Utilizzo di {r}: {b} in {n} file
+{n} extração na fila (veja em Downloads)	{n} extraction queued (see Downloads)	{n} extracción en cola (mira Descargas)	{n} extraction en file (voir Téléchargements)	{n} Entpacken eingereiht (siehe Downloads)	{n} estrazione in coda (vedi Download)
+{n} extrações na fila (veja em Downloads)	{n} extractions queued (see Downloads)	{n} extracciones en cola (mira Descargas)	{n} extractions en file (voir Téléchargements)	{n} Entpack-Aufträge eingereiht (siehe Downloads)	{n} estrazioni in coda (vedi Download)
+PS5 React, de half144 e colaboradores · fonte Nunito (OFL) · licença GPLv3	PS5 React by half144 and contributors · Nunito font (OFL) · GPLv3 license	PS5 React, de half144 y colaboradores · fuente Nunito (OFL) · licencia GPLv3	PS5 React, par half144 et contributeurs · police Nunito (OFL) · licence GPLv3	PS5 React von half144 und Mitwirkenden · Schrift Nunito (OFL) · Lizenz GPLv3	PS5 React, di half144 e collaboratori · font Nunito (OFL) · licenza GPLv3
+Música: {m} · sons: Google Material Design (CC BY 4.0)	Music: {m} · sounds: Google Material Design (CC BY 4.0)	Música: {m} · sonidos: Google Material Design (CC BY 4.0)	Musique : {m} · sons : Google Material Design (CC BY 4.0)	Musik: {m} · Töne: Google Material Design (CC BY 4.0)	Musica: {m} · suoni: Google Material Design (CC BY 4.0)

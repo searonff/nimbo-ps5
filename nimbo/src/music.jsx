@@ -1,10 +1,11 @@
-// Música de fundo: o mixer do PS5 React só toca WAVs de até 10 s e não deixa parar
-// um som já iniciado, então o loop (~49 s) vem em 16 partes curtas (~3 s) com bordas
-// sobrepostas de 0,35 s. Ajustes valem na hora: o trecho que já está tocando é
+// Música de fundo: “Chill lofi inspired”, de omfgdude (CC0, opengameart.org).
+// O mixer do PS5 React toca WAVs de até 10 s e não deixa parar um som já iniciado, então a
+// faixa vem em 20 trechos de ~6 s (mono, 22 kHz) com bordas de 0,35 s em fade cruzado:
+// somados, reproduzem a faixa original. Ajustes valem na hora: o trecho que está tocando é
 // abafado pelo volume geral até terminar, e os próximos já saem no volume novo.
+import {useEffect} from 'react';
 import {Sound} from '@ps5-react/core';
-import {config} from './store.js';
-
+import {config, useStore} from './store.js';
 import m1 from '../assets/music/music1.wav';
 import m2 from '../assets/music/music2.wav';
 import m3 from '../assets/music/music3.wav';
@@ -21,10 +22,16 @@ import m13 from '../assets/music/music13.wav';
 import m14 from '../assets/music/music14.wav';
 import m15 from '../assets/music/music15.wav';
 import m16 from '../assets/music/music16.wav';
-const FILES = [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16];
+import m17 from '../assets/music/music17.wav';
+import m18 from '../assets/music/music18.wav';
+import m19 from '../assets/music/music19.wav';
+import m20 from '../assets/music/music20.wav';
+const FILES = [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16, m17, m18, m19, m20];
 
-const STEP_MS = 3076.9;          // duração do loop / 16 (tools/compose_music.py)
-const TAIL_MS = STEP_MS + 700;   // um trecho dura o passo + as bordas sobrepostas
+export const MUSIC_CREDIT = '“Chill lofi inspired”, de omfgdude · CC0 · opengameart.org';
+
+const STEP_MS = 5959.33;          // duração da faixa / 20
+const TAIL_MS = STEP_MS + 700;    // um trecho dura o passo + as duas bordas
 let timer = null, restore = null, index = 0, started = 0, playing = false;
 let lastStart = 0, lastVolume = 0;
 
@@ -49,7 +56,7 @@ function duck(factor) {
   restore = setTimeout(() => { restore = null; Sound.setVolume(1); }, left);
 }
 
-export function startMusic() {
+function startMusic() {
   if (playing) return;
   if (restore) { clearTimeout(restore); restore = null; Sound.setVolume(1); }
   playing = true;
@@ -58,7 +65,7 @@ export function startMusic() {
   tick();
 }
 
-export function stopMusic() {
+function stopMusic() {
   if (!playing) return;
   playing = false;
   if (timer) clearTimeout(timer);
@@ -66,12 +73,11 @@ export function stopMusic() {
   duck(0);                                  // silencia o trecho em andamento já
 }
 
-export function syncMusic() {
-  if (config.get().music) startMusic(); else stopMusic();
-}
-
-// Volume novo: os próximos trechos já saem nele; se baixou, o atual baixa na hora.
-export function applyMusicVolume() {
-  if (!playing || !lastVolume) return;
-  duck(config.get().musicVolume / lastVolume);
+// Liga, desliga e acompanha o volume conforme os Ajustes.
+export function BackgroundMusic() {
+  const on = useStore(config, c => !!c.music);
+  const volume = useStore(config, c => c.musicVolume);
+  useEffect(() => { if (on) startMusic(); else stopMusic(); }, [on]);
+  useEffect(() => { if (playing && lastVolume) duck(volume / lastVolume); }, [volume]);
+  return null;
 }

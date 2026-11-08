@@ -6,7 +6,7 @@ import {Http, Downloads, Archives, FileSystem, Platform} from '@ps5-react/core';
 import {config} from './store.js';
 import {engineBusy, holdEngine} from './engine.js';
 
-export const APP_VERSION = '2.1.0';
+export const APP_VERSION = '2.2.0';
 export const REPO = 'felipezmoraes/nimbo-ps5';
 export const REPO_URL = `https://github.com/${REPO}`;
 const TITLE = 'PPSA48921';
@@ -69,6 +69,38 @@ function waitTask(handle, onProgress) {
   return handle.done.finally(() => unsub && unsub());
 }
 
+// Troca arquivo por arquivo: grava ao lado e renomeia por cima (a pasta montada pelo ShadowMount+ continua válida).
+async function replaceFiles(src, target, progress) {
+  const list = files(src);
+  for (let i = 0; i < list.length; i++) {
+    const rel = list[i], to = `${target}/${rel}`, tmp = `${to}.nimbo-new`;
+    progress(rel, i / list.length);
+    const dir = to.slice(0, to.lastIndexOf('/'));
+    if (!FileSystem.exists(dir)) FileSystem.mkdir(dir, {recursive: true});
+    if (FileSystem.exists(tmp)) await FileSystem.removeAsync(tmp);
+    await waitTask(FileSystem.copyAsync(`${src}/${rel}`, tmp, {verify: true, resume: false}));
+    if (FileSystem.exists(to)) await FileSystem.removeAsync(to);
+    FileSystem.rename(tmp, to);
+  }
+}
+
+// Volta para a versão guardada antes da última atualização.
+export function backupVersion() {
+  const v = config.get().backupVersion;
+  return v && FileSystem.exists(`${FileSystem.dataDir}/app-backup/eboot.bin`) ? v : '';
+}
+export async function rollback(step) {
+  const target = installDir();
+  if (!target || !backupVersion()) throw new Error('Não há versão anterior guardada.');
+  if (engineBusy()) throw new Error('Termine ou pause os downloads e extrações antes.');
+  holdEngine(true);
+  try {
+    await replaceFiles(`${FileSystem.dataDir}/app-backup`, target, (rel, frac) => step(`Restaurando ${rel}…`, frac));
+    config.set({updateInstalled: backupVersion()});
+    step('Pronto!', 1);
+  } finally { holdEngine(false); }
+}
+
 // step(texto, fração 0–1) informa o andamento na tela.
 export async function installUpdate(info, step) {
   if (!info || !info.asset) throw new Error('Esta versão não tem o arquivo do PS5 anexado.');
@@ -91,16 +123,19 @@ export async function installUpdate(info, step) {
       p => step('Abrindo o pacote…', 0.6 + (p.total ? (p.written || 0) / p.total * 0.2 : 0)));
     const src = FileSystem.exists(`${out}/${TITLE}/eboot.bin`) ? `${out}/${TITLE}` : FileSystem.exists(`${out}/eboot.bin`) ? out : null;
     if (!src) throw new Error('O pacote baixado não tem a pasta do app (PPSA48921).');
-    const list = files(src);
-    for (let i = 0; i < list.length; i++) {
-      const rel = list[i], to = `${target}/${rel}`, tmp = `${to}.nimbo-new`;
-      step(`Instalando ${rel}…`, 0.8 + 0.2 * i / list.length);
-      const dir = to.slice(0, to.lastIndexOf('/'));
-      if (!FileSystem.exists(dir)) FileSystem.mkdir(dir, {recursive: true});
-      if (FileSystem.exists(tmp)) await FileSystem.removeAsync(tmp);
-      await waitTask(FileSystem.copyAsync(`${src}/${rel}`, tmp, {verify: true, resume: false}));
-      if (FileSystem.exists(to)) await FileSystem.removeAsync(to);
-      FileSystem.rename(tmp, to);
+    // Cópia de segurança da versão atual antes de trocar qualquer arquivo.
+    step('Guardando a versão atual…', 0.8);
+    const backup = `${FileSystem.dataDir}/app-backup`;
+    try { await FileSystem.removeAsync(backup); } catch (_) { /* não havia */ }
+    await waitTask(FileSystem.copyAsync(target, backup, {verify: true, resume: false}));
+    config.set({backupVersion: APP_VERSION});
+    try {
+      await replaceFiles(src, target, (rel, frac) => step(`Instalando ${rel}…`, 0.82 + 0.18 * frac));
+    } catch (e) {
+      // algo falhou no meio: volta tudo para a versão anterior
+      step('Algo deu errado, voltando para a versão anterior…', 0.9);
+      await replaceFiles(backup, target, () => {});
+      throw new Error(`A atualização falhou e o app voltou para a versão ${APP_VERSION}. (${e.message})`);
     }
     step('Pronto!', 1);
     config.set({updateInstalled: info.version});

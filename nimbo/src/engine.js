@@ -3,6 +3,7 @@
 import {Archives, Downloads, FileSystem, Notifications, Power} from '@ps5-react/core';
 import {config, queue, ui, nextId, toast} from './store.js';
 import * as torbox from './torbox.js';
+import {provider} from './debrid/index.js';
 
 /* ---------- caminhos ---------- */
 export function sanitize(name) {
@@ -84,7 +85,15 @@ const FRIENDLY_ERRORS = [
   [/timed? ?out|connection|network|resolve|socket|ECONN/i, 'A conexão caiu. Aperte Retomar para continuar de onde parou.'],
   [/permission|EACCES|EPERM|read-only/i, 'Sem permissão para gravar nesta pasta. Escolha outra.'],
   [/HTTP 4\d\d|forbidden|expired/i, 'O link expirou. Aperte Retomar para gerar outro.'],
+  [/unsupported or incomplete|incomplete archive|corrupt|truncated|unexpected end/i, 'O compactado está incompleto ou corrompido (falta alguma parte?).'],
+  [/password|encrypted|senha/i, 'Senha errada ou faltando. Cadastre em Ajustes > Senhas e tente de novo.'],
+  [/maxBytes must be/i, 'Erro de uma versão antiga do app. Aperte Tentar de novo.'],
 ];
+// Também usado na tela, para erros salvos por versões antigas.
+export function friendlyError(msg) {
+  const hit = FRIENDLY_ERRORS.find(([re]) => re.test(String(msg || '')));
+  return hit ? hit[1] : msg;
+}
 function friendly(patch) {
   if (!patch.error) return patch;
   const hit = FRIENDLY_ERRORS.find(([re]) => re.test(patch.error));
@@ -99,10 +108,12 @@ export function enqueueTorbox(item, files, dest, {extract, deleteArchive}) {
   const current = jobs();
   const fresh = [];
   for (const f of files) {
-    if (current.some(j => j.tbKind === item.kind && j.itemId === item.id && j.fileId === f.id && j.state !== 'done')) continue;
+    const prov = item.provider || 'torbox';
+    if (current.some(j => (j.provider || 'torbox') === prov && j.tbKind === item.kind && j.itemId === item.id && j.fileId === f.id && j.state !== 'done')) continue;
     const path = unique(`${dest}/${relPath(f.name)}`);
     fresh.push({
-      id: nextId(), type: 'torbox', tbKind: item.kind, itemId: item.id, fileId: f.id, itemName: item.name,
+      id: nextId(), type: prov === 'torbox' ? 'torbox' : 'debrid', provider: prov, link: f.link || '',
+      tbKind: item.kind, itemId: item.id, fileId: f.id, itemName: item.name,
       name: basename(path), path, size: f.size || 0, written: 0, state: 'queued', error: '',
       extract, deleteArchive, created: Date.now(),
     });
@@ -112,9 +123,9 @@ export function enqueueTorbox(item, files, dest, {extract, deleteArchive}) {
   return added;
 }
 
-export function enqueueDirect(url, dest, {extract, deleteArchive}) {
+export function enqueueDirect(url, dest, {extract, deleteArchive}, givenName) {
   FileSystem.mkdir(dest, {recursive: true});
-  let name = decodeURIComponent((url.split(/[?#]/)[0].split('/').pop() || 'download'));
+  let name = givenName || (() => { try { return decodeURIComponent(url.split(/[?#]/)[0].split('/').pop() || 'download'); } catch (_) { return 'download'; } })();
   const path = unique(`${dest}/${sanitize(name)}`);
   queue.set(q => ({...q, jobs: q.jobs.concat([{
     id: nextId(), type: 'direct', url, name: basename(path), path, size: 0, written: 0, state: 'queued', error: '',
@@ -137,9 +148,9 @@ export function enqueueCopy(src, destDir, move) {
   }])}));
 }
 
-export function watchItem(kind, id, name, dest, opts) {
-  queue.set(q => ({...q, watches: q.watches.filter(w => !(w.kind === kind && w.id === id))
-    .concat([{kind, id, name, dest, ...opts, since: Date.now()}])}));
+export function watchItem(kind, id, name, dest, opts, prov = 'torbox') {
+  queue.set(q => ({...q, watches: q.watches.filter(w => !((w.provider || 'torbox') === prov && w.kind === kind && w.id === id))
+    .concat([{provider: prov, kind, id, name, dest, ...opts, since: Date.now()}])}));
 }
 
 /* ---------- execução ---------- */
@@ -153,12 +164,12 @@ export function jobAction(id, action) {
   const job = jobs().find(j => j.id === id);
   if (!job) return;
   if (action === 'pause') {
-    if (current && current.kind === 'job' && current.id === id) { current.pausing = true; current.handle.cancel(); }
+    if (current && current.kind === 'job' && current.id === id) { current.pausing = true; if (current.handle) current.handle.cancel(); }
     else if (job.state === 'queued') patchJob(id, {state: 'paused'});
   } else if (action === 'resume') {
     if (job.state === 'paused' || job.state === 'error') patchJob(id, {state: 'queued', error: ''});
   } else if (action === 'cancel') {
-    if (current && current.kind === 'job' && current.id === id) { current.cancelling = true; current.handle.cancel(); return; }
+    if (current && current.kind === 'job' && current.id === id) { current.cancelling = true; if (current.handle) current.handle.cancel(); return; }
     discardPartial(job);
     queue.set(q => ({...q, jobs: q.jobs.filter(j => j.id !== id)}));
   } else if (action === 'remove') {
@@ -195,7 +206,7 @@ function permalink(job) {
     `&${id}=${job.itemId}&file_id=${job.fileId}&zip_link=false&redirect=true`;
 }
 
-function startJob(job) {
+async function startJob(job) {
   FileSystem.mkdir(dirname(job.path), {recursive: true});
   // outro download terminou com o mesmo nome depois que este entrou na fila: escolhe outro nome
   if (FileSystem.exists(job.path) && !FileSystem.exists(`${job.path}.part`)) {
@@ -208,13 +219,26 @@ function startJob(job) {
     patchJob(job.id, {state: 'error', error: `Espaço insuficiente: precisa ${fmt(job.size)}, livre ${fmt(free)}`});
     return;
   }
+  let url = job.type === 'torbox' ? permalink(job) : job.url;
+  if (job.type === 'debrid') {
+    // Real-Debrid, AllDebrid e Premiumize geram o link direto na hora (eles expiram).
+    const slot = {kind: 'job', id: job.id, handle: null};
+    current = slot;
+    patchJob(job.id, {state: 'downloading', error: ''});
+    let r;
+    try { r = await provider(job.provider).resolve(job); } catch (e) { current = null; throw e; }
+    if (slot.cancelling) { current = null; queue.set(q => ({...q, jobs: q.jobs.filter(j => j.id !== job.id)})); return; }
+    if (slot.pausing) { current = null; patchJob(job.id, {state: 'paused'}); return; }
+    url = r.url;
+    if (r.size && !job.size) { job = {...job, size: r.size}; patchJob(job.id, {size: r.size}); }
+  }
   const handle = Downloads.enqueue({
-    url: job.type === 'torbox' ? permalink(job) : job.url,
+    url,
     destination: job.path,
     connections: config.get().connections,
     resume: true,
     rejectHtml: true,
-    ...(job.type === 'torbox' && job.size > 0 ? {expectedBytes: job.size} : {}),
+    ...(job.type !== 'direct' && job.size > 0 ? {expectedBytes: job.size} : {}),
   });
   current = {kind: 'job', id: job.id, handle};
   lastWritten = job.written; lastAt = Date.now();
@@ -252,18 +276,19 @@ function friendlyDownloadError(error) {
   const m = String(error && error.message || error);
   if (/space|ENOSPC/i.test(m)) return 'Sem espaço no destino.';
   if (/already exists/i.test(m)) return 'Já existe um arquivo com esse nome no destino. Tente de novo.';
-  if (/denied|expired|403|401/i.test(m)) return 'O TorBox recusou o link. Tente de novo.';
+  if (/denied|expired|403|401/i.test(m)) return 'O serviço recusou o link (pode ter expirado). Aperte Retomar.';
   if (/html/i.test(m)) return 'O servidor mandou uma página em vez do arquivo.';
-  if (/expected|size/i.test(m)) return 'O tamanho do arquivo não bate com o do TorBox. Tente de novo.';
+  if (/expected|size/i.test(m)) return 'O tamanho do arquivo não bate com o da nuvem. Tente de novo.';
   if (/resolve|connect|network|timed out/i.test(m)) return 'Sem conexão. Confira a internet do PS5.';
   return m;
 }
 
 function afterDownload(job) {
   // apaga da nuvem quando todos os arquivos daquele item terminaram
-  if (job.type === 'torbox' && config.get().deleteFromCloud) {
-    const pending = jobs().some(j => j.type === 'torbox' && j.tbKind === job.tbKind && j.itemId === job.itemId && j.state !== 'done');
-    if (!pending) torbox.remove(job.tbKind, job.itemId).catch(() => {});
+  if ((job.type === 'torbox' || job.type === 'debrid') && config.get().deleteFromCloud) {
+    const prov = job.provider || 'torbox';
+    const pending = jobs().some(j => (j.provider || 'torbox') === prov && j.tbKind === job.tbKind && j.itemId === job.itemId && j.state !== 'done');
+    if (!pending) provider(prov).remove({provider: prov, kind: job.tbKind, id: job.itemId, name: job.itemName}).catch(() => {});
   }
   if (!job.extract) return;
   const first = firstVolume(job.path);
@@ -368,20 +393,24 @@ function step() {
 let watchBusy = false;
 async function checkWatches() {
   const ws = queue.get().watches;
-  if (!ws.length || watchBusy || !config.get().apiKey) return;
+  if (!ws.length || watchBusy) return;
   watchBusy = true;
   try {
-    const kinds = [...new Set(ws.map(w => w.kind))];
-    for (const kind of kinds) {
-      const list = await torbox.list(kind).catch(() => []);
-      for (const w of ws.filter(x => x.kind === kind)) {
-        const item = list.find(i => i.id === w.id);
-        if (item && item.ready && item.files.length) {
-          enqueueTorbox(item, item.files, w.dest, {extract: w.extract, deleteArchive: w.deleteArchive});
-          queue.set(q => ({...q, watches: q.watches.filter(x => !(x.kind === kind && x.id === w.id))}));
-          Notifications.show('Pronto no TorBox', item.name);
-          toast(`Pronto no TorBox, baixando: ${item.name}`, 'ok');
-        }
+    const provs = [...new Set(ws.map(w => w.provider || 'torbox'))];
+    for (const pid of provs) {
+      const p = provider(pid);
+      if (!p.linked()) continue;
+      const list = await p.list().catch(() => []);
+      for (const w of ws.filter(x => (x.provider || 'torbox') === pid)) {
+        let item = list.find(i => i.kind === w.kind && String(i.id) === String(w.id)) ||
+          (w.name ? list.find(i => i.ready && i.name === w.name) : null);   // Premiumize troca o id ao terminar
+        if (!item || !item.ready) continue;
+        if (item.needsFiles) item = await p.details(item).catch(() => null);
+        if (!item || !item.files.length) continue;
+        enqueueTorbox(item, item.files, w.dest, {extract: w.extract, deleteArchive: w.deleteArchive});
+        queue.set(q => ({...q, watches: q.watches.filter(x => x !== w && !((x.provider || 'torbox') === pid && x.kind === w.kind && x.id === w.id))}));
+        Notifications.show(`Pronto no ${p.name}`, item.name);
+        toast(`Pronto no ${p.name}, baixando: ${item.name}`, 'ok');
       }
     }
   } finally { watchBusy = false; }

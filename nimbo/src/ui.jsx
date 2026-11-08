@@ -9,6 +9,7 @@ import {useStore, ui} from './store.js';
 
 const Arc = 'Arc';   // primitiva de arco do Embedded React (graus, sentido horário a partir das 12h)
 import {fmtSpeed} from './engine.js';
+import {t} from './i18n.js';
 
 /* céu com nuvens que atravessam a tela devagar (só translate: barato no renderizador) */
 const DRIFT = [
@@ -68,7 +69,7 @@ export function Hints({items}) {
       {items.map(([glyphs, label]) => (
         <View key={label} className="flex-row items-center gap-2">
           {glyphs.map(g => <ButtonGlyph key={g} name={g} />)}
-          <Text className="font-semi text-cap text-mist">{label}</Text>
+          <Text className="font-semi text-cap text-mist">{t(label)}</Text>
         </View>
       ))}
     </View>
@@ -109,7 +110,7 @@ export function Pill({text, tone = 'muted'}) {
   const [bg, fg] = tones[tone] || tones.muted;
   return (
     <View className="px-3 py-[3px] rounded-full" style={{backgroundColor: bg}}>
-      <Text className="font-heavy text-xs2" style={{color: fg}}>{text}</Text>
+      <Text className="font-heavy text-xs2" style={{color: fg}}>{t(text)}</Text>
     </View>
   );
 }
@@ -123,7 +124,7 @@ export function Button({label, onPress, primary, danger, small, focusKey, disabl
       className="rounded-full flex-row items-center justify-center border-[3px] border-transparent
         focused:border-sun focused:scale-105 transition-transform duration-150">
       <Text className={small ? 'font-heavy text-cap' : 'font-heavy text-body'}
-        style={{color: primary ? '#2b1d00' : danger ? '#ff7a7a' : '#f2f5f9'}}>{label}</Text>
+        style={{color: primary ? '#2b1d00' : danger ? '#ff7a7a' : '#f2f5f9'}}>{t(label)}</Text>
     </View>
   );
 }
@@ -167,8 +168,29 @@ export function Toast() {
       className="absolute bottom-[78px] left-0 right-0 items-center" pointerEvents="none">
       <View className="px-6 py-3 rounded-full border-2 bg-haze2"
         style={{borderColor: visible.kind === 'bad' ? '#ff7a7a' : visible.kind === 'ok' ? '#57d9a3' : '#2d4568'}}>
-        <Text className="font-semi text-body text-cloud">{visible.text}</Text>
+        <Text className="font-semi text-body text-cloud">{t(visible.text)}</Text>
       </View>
     </motion.View>
+  );
+}
+
+// Bandeiras desenhadas (sem imagens): 3:2, cantos arredondados pelo contêiner.
+const R = (x, y, w, h) => `M${x} ${y}h${w}v${h}h${-w}z`;
+const FLAGS = {
+  br: [['#229e45', R(0, 0, 30, 20)], ['#f8e509', 'M15 2.2 L27.6 10 L15 17.8 L2.4 10 Z'], ['#2b49a3', 'M15 5.6a4.4 4.4 0 1 0 0.01 0z']],
+  us: [['#ffffff', R(0, 0, 30, 20)], ...[0, 2, 4, 6, 8, 10, 12].map(i => ['#b22234', R(0, i * 20 / 13, 30, 20 / 13)]), ['#3c3b6e', R(0, 0, 12, 20 * 7 / 13)]],
+  es: [['#c60b1e', R(0, 0, 30, 20)], ['#ffc400', R(0, 5, 30, 10)]],
+  fr: [['#002395', R(0, 0, 10, 20)], ['#ffffff', R(10, 0, 10, 20)], ['#ed2939', R(20, 0, 10, 20)]],
+  de: [['#000000', R(0, 0, 30, 6.67)], ['#dd0000', R(0, 6.67, 30, 6.67)], ['#ffce00', R(0, 13.33, 30, 6.67)]],
+  it: [['#009246', R(0, 0, 10, 20)], ['#ffffff', R(10, 0, 10, 20)], ['#ce2b37', R(20, 0, 10, 20)]],
+};
+export function Flag({code, w = 48}) {
+  const h = Math.round(w * 2 / 3);
+  return (
+    <View style={{width: w, height: h, borderRadius: Math.round(w / 9), overflow: 'hidden', borderWidth: 2, borderColor: 'rgba(255,255,255,0.18)'}}>
+      <Svg width={w} height={h} viewBox="0 0 30 20" style={{width: w, height: h}}>
+        {(FLAGS[code] || []).map(([fill, d], i) => <Path key={i} d={d} fill={fill} />)}
+      </Svg>
+    </View>
   );
 }
