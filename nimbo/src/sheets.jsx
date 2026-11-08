@@ -311,7 +311,7 @@ export function ConnectSheet({providerId, onClose}) {
             <Text className="font-semi text-body text-mist">{t('2. Faça login e confirme o código')}</Text>
             <Text className="font-heavy text-h1 text-sun" numberOfLines={1}>{info.code}</Text>
             <Text className="font-semi text-cap text-mist">
-              {error || `Aguardando aprovação… expira em ${Math.floor(left / 60)}:${String(Math.max(0, left % 60)).padStart(2, '0')}`}
+              {t(error) || t(`Aguardando aprovação… expira em ${Math.floor(left / 60)}:${String(Math.max(0, left % 60)).padStart(2, '0')}`)}
             </Text>
           </View>
         </View>
