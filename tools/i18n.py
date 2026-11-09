@@ -96,7 +96,7 @@ def build():
         for l, v in zip(LANGS, cols[1:]): table[l][cols[0]] = v
     used = keys(sources()) if True else {}
     extra = json.load(open(os.path.join(ROOT, 'tools/i18n-extra.json'))) if os.path.exists(os.path.join(ROOT, 'tools/i18n-extra.json')) else []
-    IGNORE = {"Nimbo Downloader", "Nimbo", "PIN", "{1} MB/s", "{1}:{2} · PIN {3}", "github.com/felipezmoraes/nimbo-ps5"}
+    IGNORE = {"Nimbo Downloader", "Nimbo", "PIN", "{1} MB/s", "{1}:{2} · PIN {3}", "github.com/searonff/nimbo-ps5"}
     missing = [k for k in list(used) + extra if k not in known and k not in IGNORE]
     for k in missing: print('FALTA:', json.dumps(k, ensure_ascii=False))
     for k in sorted(known - set(used) - set(extra)): print('sobrando:', json.dumps(k, ensure_ascii=False))

@@ -7,7 +7,7 @@ import {config} from './store.js';
 import {engineBusy, holdEngine} from './engine.js';
 
 export const APP_VERSION = '2.2.2';
-export const REPO = 'felipezmoraes/nimbo-ps5';
+export const REPO = 'searonff/nimbo-ps5';
 export const REPO_URL = `https://github.com/${REPO}`;
 const TITLE = 'PPSA48921';
 

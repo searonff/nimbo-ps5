@@ -31,7 +31,7 @@ Música: "Chill lofi inspired", de omfgdude (opengameart.org), CC0.
 Sons: Google Material Design sound resources, CC BY 4.0.
 Fonte: Nunito, SIL OFL 1.1. Framework: PS5 React, de half144 e
 colaboradores (github.com/half144/ps5-react), GPLv3.
-Detalhes em CREDITS.md no repositório github.com/felipezmoraes/nimbo-ps5
+Detalhes em CREDITS.md no repositório github.com/searonff/nimbo-ps5
 
 AVISO
 O Nimbo é um gerenciador de downloads e arquivos. Não fornece nem indica

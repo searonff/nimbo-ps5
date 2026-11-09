@@ -501,7 +501,7 @@ function About() {
         <View className="w-[360px] gap-4 rounded-3xl bg-glass px-6 py-6 items-center">
           <Text className="font-heavy text-lead text-cloud">{t('Projeto no GitHub')}</Text>
           <View className="rounded-2xl bg-cloud p-3"><QR text={REPO_URL} size={220} /></View>
-          <Text className="font-semi text-cap text-mist">{t('github.com/felipezmoraes/nimbo-ps5')}</Text>
+          <Text className="font-semi text-cap text-mist">{t('github.com/searonff/nimbo-ps5')}</Text>
           <View className="h-[2px] bg-rim self-stretch" />
           <Text className="font-semi text-cap text-mist">{t('Endereço do PS5')}</Text>
           <Text className="font-heavy text-lead text-cloud">{phone.address ? `${phone.address}${phone.port ? `:${phone.port}` : ''}` : 'Sem rede'}</Text>
