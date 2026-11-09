@@ -1,107 +1,112 @@
-# Nimbo Downloader para PS5
+# Nimbo Downloader for PS5
 
-App nativo para PS5 desbloqueado que baixa da sua nuvem (**TorBox, Real-Debrid, AllDebrid e Premiumize**) direto para o SSD interno, USB ou armazenamento estendido. Ele extrai os arquivos, organiza o que foi baixado e mostra o que está ocupando espaço. Você usa pelo controle, na TV, ou pelo celular.
+**English** · [Português (Brasil)](README.pt-BR.md)
 
-![Painel](docs/screens/home.jpg)
+A native app for jailbroken PS5 consoles that downloads from your cloud (**TorBox, Real-Debrid, AllDebrid and Premiumize**) straight to the internal SSD, USB or extended storage. It extracts archives, organizes your downloads and shows what is taking up space. Use it with the controller on the TV, or from your phone.
 
-## O que ele faz
+![Home](docs/screens/home.jpg)
+
+## What it does
 
 | | |
 |---|---|
-| **Nuvem** | Junta TorBox, Real-Debrid, AllDebrid e Premiumize numa lista só, com busca (inclusive pelo nome dos arquivos), filtros por serviço e ordenação. Baixa só os arquivos marcados e pode apagar da nuvem depois. |
-| **Login por QR code** | TorBox, Real-Debrid e AllDebrid conectam apontando o celular para a TV. Premiumize usa a chave da API, digitada no PS5 ou colada pelo celular. |
-| **Downloads** | Várias conexões por arquivo, retomada, fila salva, limite de velocidade e "baixar quando ficar pronto" na nuvem. |
-| **Extração** | ZIP (com senha), 7z, RAR e RAR5, inclusive em várias partes. Pode extrair ao terminar e apagar o compactado. |
-| **Arquivos** | Navega por SSD, USB e estendido. Botão **Selecionar** (ou □) marca vários arquivos e pastas para copiar, mover, apagar, renomear e extrair. Mostra o nome do jogo ao lado de arquivos como `PPSA07784.ffpfsc`, a data de cada arquivo, ícones por tipo e ordenação. |
-| **Armazenamento** | Uso por tipo, maiores pastas e arquivos (com nome do jogo e data), sugestões de limpeza e, para cada jogo instalado, versão, data de instalação e tamanho do jogo, da atualização e das DLCs. Apagar roda em segundo plano, sem travar a tela. |
-| **Celular** | Página com PIN, na mesma rede, para ver a fila, colar links (magnet, hoster, direto) em qualquer serviço conectado e baixar da nuvem. |
-| **Idiomas** | Português (Brasil), English, Español, Français, Deutsch e Italiano, inclusive na página do celular. Segue o idioma do PS5 na primeira vez. |
-| **Atualização automática** | Procura novas Releases deste repositório a cada 6 h e instala sozinha quando não há downloads rodando. Guarda a versão anterior para voltar se algo der errado. |
-| **Clima** | Música lo-fi (CC0) e sons da interface, com volume e opção de desligar. Céu animado e fundo próprio na tela inicial do PS5. |
+| **Cloud** | Combines TorBox, Real-Debrid, AllDebrid and Premiumize in a single list, with search (including file names inside each item), per-service filters and sorting. Downloads only the files you mark and can delete them from the cloud afterwards. |
+| **QR code login** | TorBox, Real-Debrid and AllDebrid connect by pointing your phone at the TV. Premiumize uses its API key, typed on the PS5 or pasted from your phone. |
+| **Downloads** | Multiple connections per file, resume, a saved queue, speed limit and "download when ready" for items still being prepared in the cloud. |
+| **Extraction** | ZIP (including password-protected), 7z, RAR and RAR5, also split into parts. Can extract when a download finishes and delete the archive afterwards. Saved archive passwords can be added, edited and deleted. |
+| **Files** | Browse the SSD, USB and extended storage. The **Select** button (or □) marks several files and folders to copy, move, delete, rename and extract. Shows the game name next to files like `PPSA07784.ffpfsc`, the date of each file, icons by type and sorting. |
+| **Storage** | Usage by type, largest folders and files (with game name and date), cleanup suggestions and, for each installed game, version, install date and the size of the game, its updates and DLCs. Deleting runs in the background without freezing the screen. |
+| **Phone** | A PIN-protected page on the same network to see the queue, paste links (magnet, file hosts, direct) into any connected service and download from the cloud. |
+| **Languages** | Português (Brasil), English, Español, Français, Deutsch and Italiano, including the phone page. Follows the PS5 language on first launch. |
+| **Auto-update** | Checks this repository's Releases every 6 hours and installs new versions by itself when no downloads are running. Keeps the previous version so you can roll back. |
+| **Backup of your settings** | Logins, settings and the queue are also saved to `/data/nimbo-settings`, so they come back if you delete the app from the PS5 menu and reinstall it. |
+| **Ambience** | Lo-fi music (CC0) and interface sounds, with volume control and an off switch. Animated sky and custom art on the PS5 home screen. |
 
 <p>
 <img src="docs/screens/cloud.jpg" width="49%"> <img src="docs/screens/files.jpg" width="49%">
 <img src="docs/screens/storage.jpg" width="49%"> <img src="docs/screens/about.jpg" width="49%">
 </p>
 
-## Requisitos
+## Requirements
 
-- PS5 desbloqueado com **etaHEN** e **ShadowMount+**. Testado no firmware 12.40.
-- Conta em pelo menos um serviço (TorBox, Real-Debrid, AllDebrid ou Premiumize), só para a aba Nuvem. Arquivos, Armazenamento e links diretos funcionam sem conta.
+- A jailbroken PS5 with **etaHEN** and **ShadowMount+**. Tested on firmware 12.40.
+- An account with at least one service (TorBox, Real-Debrid, AllDebrid or Premiumize), only for the Cloud tab. Files, Storage and direct links work without an account.
 
-## Instalar
+## Install
 
-1. Baixe o `NimboDownloader-PS5-vX.Y.Z.zip` em [Releases](../../releases).
-2. Copie a pasta `PPSA48921` inteira para `/data/homebrew/` no PS5. O jeito mais fácil é pelo FTP do etaHEN (porta 1337), com FileZilla ou um app de FTP no celular.
-3. Espere o ShadowMount+ registrar o app: o ícone aparece na tela inicial. Se não aparecer, reinicie o PS5 e rode o etaHEN de novo.
-4. Abra o Nimbo e conecte seu serviço em **Ajustes › Serviços de nuvem**.
+1. Download `NimboDownloader-PS5-vX.Y.Z.zip` from [Releases](../../releases).
+2. Copy the whole `PPSA48921` folder to `/data/homebrew/` on the PS5. The easiest way is etaHEN's FTP server (port 1337), using FileZilla or an FTP app on your phone.
+3. Wait for ShadowMount+ to register the app: its icon shows up on the home screen. If it doesn't, restart the PS5 and run etaHEN again.
+4. Open Nimbo and connect your service in **Settings › Cloud services**.
 
-**Atualizar:** é automático (desligue em **Sobre › Atualizar sozinho**). Para forçar: **Sobre › Procurar atualização › Atualizar**. Depois, feche e abra o app. Se a versão nova der problema, **Sobre › Voltar para a versão anterior**.
+**Update:** automatic (turn it off in **About › Auto-update**). To force it: **About › Check for updates › Update**. Then close and reopen the app. If the new version misbehaves, use **About › Go back to the previous version**. To update manually, replace the `PPSA48921` folder over FTP; there's no need to delete the app from the PS5 menu.
 
-## Controles
+## Controls
 
-| Botão | Ação |
+| Button | Action |
 |---|---|
-| ✕ | Selecionar |
-| ○ | Voltar / fechar |
-| △ | Atualizar a nuvem |
-| □ | Buscar (Nuvem) · selecionar vários (Arquivos) |
-| L1 / R1 | Trocar de aba |
+| ✕ | Select |
+| ○ | Back / close |
+| △ | Refresh the cloud |
+| □ | Search (Cloud) · select several (Files) |
+| L1 / R1 | Switch tab |
 
-## Estrutura
+## Project layout
 
 ```
-nimbo/            app V2 (PS5 React): index.jsx, src/, assets/, sce_sys/
-  src/engine.js   fila de downloads, extração e cópias
-  src/torbox.js   API do TorBox
-  src/debrid/     Real-Debrid, AllDebrid, Premiumize e a interface comum dos serviços
-  src/i18n.js     idiomas (traduções em src/i18n/strings.js, geradas de tools/i18n.tsv)
-  src/music.jsx   música de fundo (assets/music: a faixa CC0 em trechos WAV)
-  src/update.js   atualização pelo GitHub
-  src/phone.js    servidor e página do celular
-tools/            geradores de arte (make_art, make_keyart, make_dds) e i18n.py (traduções)
-src/, web/        V1 (payload ELF + interface no navegador)
-docs/             LEIA-ME e prints
+nimbo/            V2 app (PS5 React): index.jsx, src/, assets/, sce_sys/
+  src/engine.js   download queue, extraction and copies
+  src/torbox.js   TorBox API
+  src/debrid/     Real-Debrid, AllDebrid, Premiumize and the common service interface
+  src/i18n.js     languages (translations in src/i18n/strings.js, generated from tools/i18n.tsv)
+  src/music.jsx   background music (assets/music: the CC0 track split into WAV segments)
+  src/update.js   updates from GitHub
+  src/phone.js    phone server and web page
+tools/            art generators (make_art, make_keyart, make_dds) and i18n.py (translations)
+src/, web/        V1 (ELF payload + browser interface)
+docs/             readme files and screenshots
 ```
 
-## Compilar
+## Building
 
-O app é feito com **PS5 React** (React sobre QuickJS, renderização nativa em 1080p).
+The app is built with **PS5 React** (React on QuickJS, native rendering at 1080p).
 
 ```bash
-# dentro do PS5 React
-python3 tools/cli.py dev   --app-dir /caminho/nimbo-ps5/nimbo   # prévia no PC
-python3 tools/cli.py build --app-dir /caminho/nimbo-ps5/nimbo   # gera dist/PPSA48921
+# inside PS5 React
+python3 tools/cli.py dev   --app-dir /path/to/nimbo-ps5/nimbo   # preview on the PC
+python3 tools/cli.py build --app-dir /path/to/nimbo-ps5/nimbo   # builds dist/PPSA48921
 ```
 
-A arte é gerada pelos scripts em `tools/`. A tela inicial do PS5 usa `sce_sys/pic0.dds` (3840×2160, BC7), criado por `tools/make_dds.py`.
+The art is generated by the scripts in `tools/`. The PS5 home screen uses `sce_sys/pic0.dds` (3840×2160, BC7), created by `tools/make_dds.py`.
 
-**Traduções:** edite `tools/i18n.tsv` (o texto em português é a chave) e rode `python3 tools/i18n.py build`, que gera `nimbo/src/i18n/strings.js` e avisa o que faltar.
+**Translations:** edit `tools/i18n.tsv` (the Portuguese text is the key) and run `python3 tools/i18n.py build`. It generates `nimbo/src/i18n/strings.js` and reports anything missing.
 
-**Publicar uma versão:** troque `APP_VERSION` em `nimbo/src/update.js` e `version` em `nimbo/app.json`, compile e crie uma Release com a tag `vX.Y.Z` e o zip anexado. O nome do zip precisa conter "PS5" e a pasta `PPSA48921` dentro dele, porque é isso que o app procura para se atualizar.
+**Publishing a version:** change `APP_VERSION` in `nimbo/src/update.js` and `version` in `nimbo/app.json`, build, and create a Release tagged `vX.Y.Z` with the zip attached. The zip name must contain "PS5" and the `PPSA48921` folder must be inside it, because that's what the app looks for when updating.
 
-## Versão 1 (legado)
+## Version 1 (legacy)
 
-A primeira versão era um payload ELF (`nimbo-ps5.elf`), rodado pelo PS5 Payload Manager, com a interface aberta no navegador do PS5. O código continua em `src/` e `web/`. Para compilar: `./scripts/build-deps-ps5.sh && make ps5 && ./scripts/package.sh` (SDK em `/opt/ps5-payload-sdk`).
+The first version was an ELF payload (`nimbo-ps5.elf`) run by PS5 Payload Manager, with its interface opened in the PS5 web browser. The code is still in `src/` and `web/`. To build it: `./scripts/build-deps-ps5.sh && make ps5 && ./scripts/package.sh` (SDK in `/opt/ps5-payload-sdk`).
 
-## Aviso legal
+## Legal notice
 
-O Nimbo Downloader é um **gerenciador de downloads e de arquivos**. Ele não fornece, hospeda, indexa nem indica nenhum conteúdo. Ele só transfere arquivos que o próprio usuário guardou na conta dele em um serviço de terceiros, ou links que o próprio usuário informou.
+Nimbo Downloader is a **download and file manager**. It does not provide, host, index or point to any content. It only transfers files that the user stored in their own account on a third-party service, or links the user entered.
 
-- O app **não foi criado para pirataria** nem para contornar proteção de direitos autorais, e o autor não apoia esse uso. A finalidade é baixar e organizar conteúdo que você tem o direito de usar: seus backups, homebrew, software livre, mídia de domínio público ou conteúdo adquirido legalmente.
-- **A responsabilidade pelo que é baixado é exclusivamente do usuário.** Cabe a ele cumprir as leis do seu país e os termos de uso dos serviços que usa (TorBox, Real-Debrid, AllDebrid, Premiumize e outros).
-- Desbloquear o console pode violar os termos de uso do fabricante, anular a garantia e trazer riscos ao aparelho. Faça isso por sua conta e risco.
-- Projeto pessoal e independente, **sem vínculo** com Sony Interactive Entertainment, PlayStation, TorBox, Real-Debrid, AllDebrid, Premiumize ou qualquer serviço citado. Marcas citadas pertencem aos seus donos.
-- O software é fornecido **"como está", sem garantias**, nos termos da licença GPLv3. O autor não responde por perda de dados, danos ao console ou mau uso.
+- The app **was not made for piracy** or for circumventing copyright protection, and the author does not endorse such use. Its purpose is to download and organize content you have the right to use: your own backups, homebrew, free software, public-domain media or legally acquired content.
+- **The user is solely responsible for what they download.** It is up to the user to follow the laws of their country and the terms of the services they use (TorBox, Real-Debrid, AllDebrid, Premiumize and others).
+- Jailbreaking a console may violate the manufacturer's terms of use, void the warranty and put the device at risk. Do it at your own risk.
+- This is a personal, independent project with **no affiliation** with Sony Interactive Entertainment, PlayStation, TorBox, Real-Debrid, AllDebrid, Premiumize or any service mentioned. Trademarks belong to their owners.
+- The software is provided **"as is", without warranty**, under the GPLv3 license. The author is not liable for data loss, damage to the console or misuse.
 
-## Créditos e licenças
+The screenshots use free, open content (Blender open movies, Linux distributions, Creative Commons music) and made-up game names.
 
-O Nimbo é GPLv3. Tudo o que vem de terceiros tem licença que permite usar e redistribuir, e está listado em **[CREDITS.md](CREDITS.md)**:
+## Credits and licenses
 
-- **Música:** “Chill lofi inspired”, de omfgdude ([OpenGameArt](https://opengameart.org/content/chill-lofi-inspired)), **CC0** (domínio público: uso livre, inclusive comercial, sem exigir crédito).
-- **Sons da interface:** Google Material Design sound resources, **CC BY 4.0** (crédito no app e no CREDITS.md).
-- **Fonte:** Nunito, **SIL OFL 1.1**.
-- **Framework:** PS5 React, de half144 e colaboradores (https://github.com/half144/ps5-react), GPLv3.
-- **qrcode-generator** (MIT). A V1 usa cJSON, curl, mbedTLS, libarchive, zlib e xz.
+Nimbo is GPLv3. Everything from third parties is licensed for use and redistribution and is listed in **[CREDITS.md](CREDITS.md)** (in Portuguese):
 
-Os créditos também aparecem no app, na aba **Sobre**.
+- **Music:** "Chill lofi inspired" by omfgdude ([OpenGameArt](https://opengameart.org/content/chill-lofi-inspired)), **CC0** (public domain: free to use, including commercially, no credit required).
+- **Interface sounds:** Google Material Design sound resources, **CC BY 4.0** (credited in the app and in CREDITS.md).
+- **Font:** Nunito, **SIL OFL 1.1**.
+- **Framework:** PS5 React by half144 and contributors (https://github.com/half144/ps5-react), GPLv3.
+- **qrcode-generator** (MIT). V1 uses cJSON, curl, mbedTLS, libarchive, zlib and xz.
+
+The credits also appear in the app's **About** tab.
