@@ -12,14 +12,16 @@ App nativo para PS5 desbloqueado que baixa da sua nuvem (**TorBox, Real-Debrid, 
 |---|---|
 | **Nuvem** | Junta TorBox, Real-Debrid, AllDebrid e Premiumize numa lista só, com busca (inclusive pelo nome dos arquivos), filtros por serviço e ordenação. Baixa só os arquivos marcados e pode apagar da nuvem depois. |
 | **Login por QR code** | TorBox, Real-Debrid e AllDebrid conectam apontando o celular para a TV. Premiumize usa a chave da API, digitada no PS5 ou colada pelo celular. |
-| **Downloads** | Várias conexões por arquivo, retomada, fila salva, limite de velocidade e "baixar quando ficar pronto" na nuvem. |
-| **Extração** | ZIP (com senha), 7z, RAR e RAR5, inclusive em várias partes. Pode extrair ao terminar e apagar o compactado. |
+| **Downloads** | Várias conexões por arquivo, retomada, fila salva, limite de velocidade e "baixar quando ficar pronto" na nuvem. Cancelar apaga o pedaço baixado e a pasta que ficou vazia. |
+| **Extração** | ZIP (com senha), 7z, RAR e RAR5, inclusive em várias partes. Pode extrair ao terminar e apagar o compactado, e também extrair um jogo enquanto o próximo baixa (**Extrair durante o download**, em Ajustes). Senhas de arquivos salvas podem ser adicionadas, editadas e apagadas. |
 | **Arquivos** | Navega por SSD, USB e estendido. Botão **Selecionar** (ou □) marca vários arquivos e pastas para copiar, mover, apagar, renomear e extrair. Mostra o nome do jogo ao lado de arquivos como `PPSA07784.ffpfsc`, a data de cada arquivo, ícones por tipo e ordenação. |
 | **Armazenamento** | Uso por tipo, maiores pastas e arquivos (com nome do jogo e data), sugestões de limpeza e, para cada jogo instalado, versão, data de instalação e tamanho do jogo, da atualização e das DLCs. Apagar roda em segundo plano, sem travar a tela. |
 | **Celular** | Página com PIN, na mesma rede, para ver a fila, colar links (magnet, hoster, direto) em qualquer serviço conectado e baixar da nuvem. |
 | **Idiomas** | Português (Brasil), English, Español, Français, Deutsch e Italiano, inclusive na página do celular. Segue o idioma do PS5 na primeira vez. |
-| **Atualização automática** | Procura novas Releases deste repositório a cada 6 h e instala sozinha quando não há downloads rodando. Guarda a versão anterior para voltar se algo der errado. |
-| **Clima** | Música lo-fi (CC0) e sons da interface, com volume e opção de desligar. Céu animado e fundo próprio na tela inicial do PS5. |
+| **Atualização automática** | Procura novas Releases deste repositório a cada 6 h e instala sozinha quando não há downloads rodando. Guarda a versão anterior para voltar se algo der errado. Avisa quando há versão nova (faixa no topo e notificação do PS5) e mostra as novidades de cada versão em **Sobre › O que há de novo**. |
+| **Cópia de segurança dos ajustes** | Logins, ajustes e fila também ficam em `/data/nimbo-settings`, e voltam se você excluir o app pelo menu do PS5 e instalar de novo. |
+| **Luz do controle** | Mostra o estado da fila: âmbar baixando, roxo extraindo ou copiando, verde quando termina e vermelho se algo falhar. |
+| **Clima** | Música lo-fi (CC0) e sons da interface, com volume e opção de desligar. Painéis translúcidos sobre um céu com nuvens, e fundo próprio na tela inicial do PS5. |
 
 <p>
 <img src="docs/screens/pt-BR/cloud.jpg" width="49%"> <img src="docs/screens/pt-BR/files.jpg" width="49%">
@@ -38,7 +40,9 @@ App nativo para PS5 desbloqueado que baixa da sua nuvem (**TorBox, Real-Debrid, 
 3. Espere o ShadowMount+ registrar o app: o ícone aparece na tela inicial. Se não aparecer, reinicie o PS5 e rode o etaHEN de novo.
 4. Abra o Nimbo e conecte seu serviço em **Ajustes › Serviços de nuvem**.
 
-**Atualizar:** é automático (desligue em **Sobre › Atualizar sozinho**). Para forçar: **Sobre › Procurar atualização › Atualizar**. Depois, feche e abra o app. Se a versão nova der problema, **Sobre › Voltar para a versão anterior**.
+**Atualizar:** é automático (desligue em **Sobre › Atualizar sozinho**). Para forçar: **Sobre › Procurar atualização › Atualizar**. Depois, feche e abra o app. Se a versão nova der problema, **Sobre › Voltar para a versão anterior**. Para atualizar à mão, substitua a pasta `PPSA48921` pelo FTP; não precisa excluir o app pelo menu do PS5.
+
+> **Vindo da 2.2.2 ou anterior?** Instale a 2.2.3 à mão uma vez: as versões antigas procuram atualização no endereço antigo do repositório. Da 2.2.3 em diante, a atualização automática funciona.
 
 ## Controles
 
@@ -68,12 +72,12 @@ docs/             LEIA-ME e prints
 
 ## Compilar
 
-O app é feito com **PS5 React** (React sobre QuickJS, renderização nativa em 1080p).
+O app é feito com **[PS5 React](https://github.com/JVK3R/ps5-react)** (React sobre QuickJS, renderização nativa em 1080p). No Windows, use o WSL 2 com Ubuntu e clone o SDK dentro do Linux (`~/`), não em `/mnt/c`.
 
 ```bash
 # dentro do PS5 React
-python3 tools/cli.py dev   --app-dir /caminho/nimbo-ps5/nimbo   # prévia no PC
-python3 tools/cli.py build --app-dir /caminho/nimbo-ps5/nimbo   # gera dist/PPSA48921
+CC=clang CXX=clang++ python3 tools/cli.py preview --app-dir /caminho/nimbo-ps5/nimbo   # prévia no PC
+CC=clang CXX=clang++ python3 tools/cli.py build   --app-dir /caminho/nimbo-ps5/nimbo   # gera dist/PPSA48921
 ```
 
 A arte é gerada pelos scripts em `tools/`. A tela inicial do PS5 usa `sce_sys/pic0.dds` (3840×2160, BC7), criado por `tools/make_dds.py`.
@@ -103,7 +107,7 @@ O Nimbo é GPLv3. Tudo o que vem de terceiros tem licença que permite usar e re
 - **Música:** “Chill lofi inspired”, de omfgdude ([OpenGameArt](https://opengameart.org/content/chill-lofi-inspired)), **CC0** (domínio público: uso livre, inclusive comercial, sem exigir crédito).
 - **Sons da interface:** Google Material Design sound resources, **CC BY 4.0** (crédito no app e no CREDITS.md).
 - **Fonte:** Nunito, **SIL OFL 1.1**.
-- **Framework:** PS5 React, de half144 e colaboradores (https://github.com/half144/ps5-react), GPLv3.
+- **Framework:** PS5 React, de half144 e colaboradores (hoje continuado em https://github.com/JVK3R/ps5-react), GPLv3.
 - **qrcode-generator** (MIT). A V1 usa cJSON, curl, mbedTLS, libarchive, zlib e xz.
 
 Os créditos também aparecem no app, na aba **Sobre**.

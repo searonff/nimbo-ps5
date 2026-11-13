@@ -456,7 +456,10 @@ export default {
 "Avisar versão nova: {1}": "Notify new version: {1}",
 "O que há de novo": "What's new",
 "Novidades da versão {1}": "What's new in version {1}",
-"Esta versão não tem notas.": "This version has no notes."
+"Esta versão não tem notas.": "This version has no notes.",
+"Luz do controle mostra o andamento": "Controller light shows progress",
+"Extrair durante o download": "Extract while downloading",
+"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "Extraction runs alongside the next download. Both get a bit slower, and the drive needs room for both."
 },
 "es": {
 "Painel": "Inicio",
@@ -914,7 +917,10 @@ export default {
 "Avisar versão nova: {1}": "Avisar nueva versión: {1}",
 "O que há de novo": "Novedades",
 "Novidades da versão {1}": "Novedades de la versión {1}",
-"Esta versão não tem notas.": "Esta versión no tiene notas."
+"Esta versão não tem notas.": "Esta versión no tiene notas.",
+"Luz do controle mostra o andamento": "La luz del mando muestra el progreso",
+"Extrair durante o download": "Extraer durante la descarga",
+"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "La extracción se ejecuta junto con la siguiente descarga. Ambas van un poco más lentas y el disco necesita espacio para las dos."
 },
 "fr": {
 "Painel": "Accueil",
@@ -1372,7 +1378,10 @@ export default {
 "Avisar versão nova: {1}": "Signaler nouvelle version : {1}",
 "O que há de novo": "Nouveautés",
 "Novidades da versão {1}": "Nouveautés de la version {1}",
-"Esta versão não tem notas.": "Cette version n'a pas de notes."
+"Esta versão não tem notas.": "Cette version n'a pas de notes.",
+"Luz do controle mostra o andamento": "La lumière de la manette indique la progression",
+"Extrair durante o download": "Extraire pendant le téléchargement",
+"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "L'extraction s'exécute en même temps que le téléchargement suivant. Les deux sont un peu plus lents et le disque doit avoir de la place pour les deux."
 },
 "de": {
 "Painel": "Start",
@@ -1830,7 +1839,10 @@ export default {
 "Avisar versão nova: {1}": "Neue Version melden: {1}",
 "O que há de novo": "Was ist neu",
 "Novidades da versão {1}": "Neu in Version {1}",
-"Esta versão não tem notas.": "Diese Version hat keine Hinweise."
+"Esta versão não tem notas.": "Diese Version hat keine Hinweise.",
+"Luz do controle mostra o andamento": "Controller-Licht zeigt den Fortschritt",
+"Extrair durante o download": "Während des Downloads entpacken",
+"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "Das Entpacken läuft parallel zum nächsten Download. Beides wird etwas langsamer, und das Laufwerk braucht Platz für beides."
 },
 "it": {
 "Painel": "Home",
@@ -2288,6 +2300,9 @@ export default {
 "Avisar versão nova: {1}": "Avvisa nuova versione: {1}",
 "O que há de novo": "Novità",
 "Novidades da versão {1}": "Novità della versione {1}",
-"Esta versão não tem notas.": "Questa versione non ha note."
+"Esta versão não tem notas.": "Questa versione non ha note.",
+"Luz do controle mostra o andamento": "La luce del controller mostra l'avanzamento",
+"Extrair durante o download": "Estrai durante il download",
+"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "L'estrazione avviene insieme al download successivo. Entrambi rallentano un po' e il disco deve avere spazio per tutti e due."
 }
 };

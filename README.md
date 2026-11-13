@@ -12,15 +12,16 @@ A native app for jailbroken PS5 consoles that downloads from your cloud (**TorBo
 |---|---|
 | **Cloud** | Combines TorBox, Real-Debrid, AllDebrid and Premiumize in a single list, with search (including file names inside each item), per-service filters and sorting. Downloads only the files you mark and can delete them from the cloud afterwards. |
 | **QR code login** | TorBox, Real-Debrid and AllDebrid connect by pointing your phone at the TV. Premiumize uses its API key, typed on the PS5 or pasted from your phone. |
-| **Downloads** | Multiple connections per file, resume, a saved queue, speed limit and "download when ready" for items still being prepared in the cloud. |
-| **Extraction** | ZIP (including password-protected), 7z, RAR and RAR5, also split into parts. Can extract when a download finishes and delete the archive afterwards. Saved archive passwords can be added, edited and deleted. |
+| **Downloads** | Multiple connections per file, resume, a saved queue, speed limit and "download when ready" for items still being prepared in the cloud. Cancelling deletes the partial file and the folder it left empty. |
+| **Extraction** | ZIP (including password-protected), 7z, RAR and RAR5, also split into parts. Can extract when a download finishes and delete the archive afterwards, or extract one game while the next one downloads (**Extract while downloading**, in Settings). Saved archive passwords can be added, edited and deleted. |
 | **Files** | Browse the SSD, USB and extended storage. The **Select** button (or □) marks several files and folders to copy, move, delete, rename and extract. Shows the game name next to files like `PPSA07784.ffpfsc`, the date of each file, icons by type and sorting. |
 | **Storage** | Usage by type, largest folders and files (with game name and date), cleanup suggestions and, for each installed game, version, install date and the size of the game, its updates and DLCs. Deleting runs in the background without freezing the screen. |
 | **Phone** | A PIN-protected page on the same network to see the queue, paste links (magnet, file hosts, direct) into any connected service and download from the cloud. |
 | **Languages** | Português (Brasil), English, Español, Français, Deutsch and Italiano, including the phone page. Follows the PS5 language on first launch. |
-| **Auto-update** | Checks this repository's Releases every 6 hours and installs new versions by itself when no downloads are running. Keeps the previous version so you can roll back. |
+| **Auto-update** | Checks this repository's Releases every 6 hours and installs new versions by itself when no downloads are running. Keeps the previous version so you can roll back. Tells you when a new version is out (a banner at the top and a PS5 notification) and shows what changed in **About › What's new**. |
 | **Backup of your settings** | Logins, settings and the queue are also saved to `/data/nimbo-settings`, so they come back if you delete the app from the PS5 menu and reinstall it. |
-| **Ambience** | Lo-fi music (CC0) and interface sounds, with volume control and an off switch. Animated sky and custom art on the PS5 home screen. |
+| **Controller light** | Shows the queue state: amber while downloading, purple while extracting or copying, green when done and red if something fails. |
+| **Ambience** | Lo-fi music (CC0) and interface sounds, with volume control and an off switch. Translucent panels over a cloudy sky, and custom art on the PS5 home screen. |
 
 <p>
 <img src="docs/screens/cloud.jpg" width="49%"> <img src="docs/screens/files.jpg" width="49%">
@@ -40,6 +41,8 @@ A native app for jailbroken PS5 consoles that downloads from your cloud (**TorBo
 4. Open Nimbo and connect your service in **Settings › Cloud services**.
 
 **Update:** automatic (turn it off in **About › Auto-update**). To force it: **About › Check for updates › Update**. Then close and reopen the app. If the new version misbehaves, use **About › Go back to the previous version**. To update manually, replace the `PPSA48921` folder over FTP; there's no need to delete the app from the PS5 menu.
+
+> **Coming from 2.2.2 or older?** Install 2.2.3 manually once: older versions look for updates at the repository's old address. From 2.2.3 on, auto-update works.
 
 ## Controls
 
@@ -69,12 +72,12 @@ docs/             readme files and screenshots
 
 ## Building
 
-The app is built with **PS5 React** (React on QuickJS, native rendering at 1080p).
+The app is built with **[PS5 React](https://github.com/JVK3R/ps5-react)** (React on QuickJS, native rendering at 1080p). On Windows, use WSL 2 with Ubuntu and clone the SDK inside Linux (`~/`), not under `/mnt/c`.
 
 ```bash
 # inside PS5 React
-python3 tools/cli.py dev   --app-dir /path/to/nimbo-ps5/nimbo   # preview on the PC
-python3 tools/cli.py build --app-dir /path/to/nimbo-ps5/nimbo   # builds dist/PPSA48921
+CC=clang CXX=clang++ python3 tools/cli.py preview --app-dir /path/to/nimbo-ps5/nimbo   # preview on the PC
+CC=clang CXX=clang++ python3 tools/cli.py build   --app-dir /path/to/nimbo-ps5/nimbo   # builds dist/PPSA48921
 ```
 
 The art is generated by the scripts in `tools/`. The PS5 home screen uses `sce_sys/pic0.dds` (3840×2160, BC7), created by `tools/make_dds.py`.
@@ -106,7 +109,7 @@ Nimbo is GPLv3. Everything from third parties is licensed for use and redistribu
 - **Music:** "Chill lofi inspired" by omfgdude ([OpenGameArt](https://opengameart.org/content/chill-lofi-inspired)), **CC0** (public domain: free to use, including commercially, no credit required).
 - **Interface sounds:** Google Material Design sound resources, **CC BY 4.0** (credited in the app and in CREDITS.md).
 - **Font:** Nunito, **SIL OFL 1.1**.
-- **Framework:** PS5 React by half144 and contributors (https://github.com/half144/ps5-react), GPLv3.
+- **Framework:** PS5 React by half144 and contributors (now continued at https://github.com/JVK3R/ps5-react), GPLv3.
 - **qrcode-generator** (MIT). V1 uses cJSON, curl, mbedTLS, libarchive, zlib and xz.
 
 The credits also appear in the app's **About** tab.

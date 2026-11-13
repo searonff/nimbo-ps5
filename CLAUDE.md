@@ -36,3 +36,8 @@ O texto em português é a chave. Edite `tools/i18n.tsv` (pt, en, es, fr, de, it
 1. `APP_VERSION` em `nimbo/src/update.js` e `version` em `nimbo/app.json` (`2.2.3` → `02.230.000`).
 2. Compilar e zipar com a pasta `PPSA48921` dentro; o nome do zip precisa conter "PS5" (ex.: `NimboDownloader-PS5-v2.2.3.zip`).
 3. Release no GitHub `searonff/nimbo-ps5` com tag `vX.Y.Z` e o zip anexado. O texto da release aparece no app como "Novidades".
+
+**Sempre, a cada release** (pedido do usuário):
+- Atualizar **os dois READMEs** (`README.md` em inglês e `README.pt-BR.md`): tabela "O que ele faz" com os recursos novos, avisos de instalação/atualização e o que mais tiver mudado. Os dois devem dizer a mesma coisa.
+- Rodar `i18n.py build` antes de compilar e só seguir com "0 faltando".
+- Antes do push, `git fetch` (o usuário às vezes commita README e prints direto no GitHub).
