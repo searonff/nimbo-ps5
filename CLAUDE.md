@@ -10,6 +10,7 @@ App homebrew para PS5 (etaHEN + ShadowMount+), feito com **PS5 React** (React so
 - Ambiente: WSL 2 com **Ubuntu-24.04** (`wsl -d Ubuntu-24.04`). O SDK fica clonado em `~/ps5-react` dentro do WSL (não em `/mnt/c`: muito lento).
 - Prévia no PC: `CC=clang CXX=clang++ python3 tools/cli.py preview --app-dir /mnt/c/Users/felip/nimbo-ps5/nimbo` (setas = direcional, Enter = ✕, Backspace = ○).
 - Pacote do PS5: `python3 tools/cli.py build --app-dir ...` gera `dist/PPSA48921`.
+- `tools/build_ps5.py` do SDK foi modificado localmente: cache de `.o` por hash (fonte + comando) e compilação em paralelo. Original em `~/build_ps5.py.orig`; reaplicar com `python3 /mnt/c/Users/felip/nimbo-ps5/tools/patch_build.py tools/build_ps5.py`. Após `git pull` no SDK, apagar `~/ps5-react/.build/nimbo/obj` (o cache não segue headers) e reaplicar o patch.
 - Checagem rápida de sintaxe sem o SDK: `npx esbuild@0.24.0 <arquivo> --loader:.js=jsx`.
 
 ## Limites do renderizador (importante)
