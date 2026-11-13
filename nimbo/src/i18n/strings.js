@@ -459,7 +459,9 @@ export default {
 "Esta versão não tem notas.": "This version has no notes.",
 "Luz do controle mostra o andamento": "Controller light shows progress",
 "Extrair durante o download": "Extract while downloading",
-"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "Extraction runs alongside the next download. Both get a bit slower, and the drive needs room for both."
+"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "Extraction runs alongside the next download. Both get a bit slower, and the drive needs room for both.",
+"Remover": "Remove",
+"Limpar falhas": "Clear failed"
 },
 "es": {
 "Painel": "Inicio",
@@ -920,7 +922,9 @@ export default {
 "Esta versão não tem notas.": "Esta versión no tiene notas.",
 "Luz do controle mostra o andamento": "La luz del mando muestra el progreso",
 "Extrair durante o download": "Extraer durante la descarga",
-"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "La extracción se ejecuta junto con la siguiente descarga. Ambas van un poco más lentas y el disco necesita espacio para las dos."
+"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "La extracción se ejecuta junto con la siguiente descarga. Ambas van un poco más lentas y el disco necesita espacio para las dos.",
+"Remover": "Quitar",
+"Limpar falhas": "Borrar fallidos"
 },
 "fr": {
 "Painel": "Accueil",
@@ -1381,7 +1385,9 @@ export default {
 "Esta versão não tem notas.": "Cette version n'a pas de notes.",
 "Luz do controle mostra o andamento": "La lumière de la manette indique la progression",
 "Extrair durante o download": "Extraire pendant le téléchargement",
-"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "L'extraction s'exécute en même temps que le téléchargement suivant. Les deux sont un peu plus lents et le disque doit avoir de la place pour les deux."
+"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "L'extraction s'exécute en même temps que le téléchargement suivant. Les deux sont un peu plus lents et le disque doit avoir de la place pour les deux.",
+"Remover": "Retirer",
+"Limpar falhas": "Effacer les échecs"
 },
 "de": {
 "Painel": "Start",
@@ -1842,7 +1848,9 @@ export default {
 "Esta versão não tem notas.": "Diese Version hat keine Hinweise.",
 "Luz do controle mostra o andamento": "Controller-Licht zeigt den Fortschritt",
 "Extrair durante o download": "Während des Downloads entpacken",
-"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "Das Entpacken läuft parallel zum nächsten Download. Beides wird etwas langsamer, und das Laufwerk braucht Platz für beides."
+"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "Das Entpacken läuft parallel zum nächsten Download. Beides wird etwas langsamer, und das Laufwerk braucht Platz für beides.",
+"Remover": "Entfernen",
+"Limpar falhas": "Fehlgeschlagene löschen"
 },
 "it": {
 "Painel": "Home",
@@ -2303,6 +2311,8 @@ export default {
 "Esta versão não tem notas.": "Questa versione non ha note.",
 "Luz do controle mostra o andamento": "La luce del controller mostra l'avanzamento",
 "Extrair durante o download": "Estrai durante il download",
-"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "L'estrazione avviene insieme al download successivo. Entrambi rallentano un po' e il disco deve avere spazio per tutti e due."
+"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "L'estrazione avviene insieme al download successivo. Entrambi rallentano un po' e il disco deve avere spazio per tutti e due.",
+"Remover": "Rimuovi",
+"Limpar falhas": "Cancella falliti"
 }
 };

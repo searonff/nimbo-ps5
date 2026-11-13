@@ -356,6 +356,7 @@ function TaskRow({t: tk}) {
         <View className="flex-1"><Text className="font-semi text-cap text-mist" numberOfLines={1}>{t((tk.error && friendlyError(tk.error)) || tk.result || tk.dest)}</Text></View>
         {tk.state === 'running' || tk.state === 'queued' ? <Button small label={t('Cancelar')} onPress={() => taskAction(tk.id, 'cancel')} /> : null}
         {tk.state === 'error' ? <Button small label={t('Tentar de novo')} onPress={() => taskAction(tk.id, 'retry')} /> : null}
+        {tk.state === 'error' ? <Button small label={t('Remover')} onPress={() => taskAction(tk.id, 'remove')} /> : null}
       </View>
     </View>
   );
@@ -369,6 +370,9 @@ function Downloads() {
   const badJobs = q.jobs.filter(j => j.state === 'error');
   const badTasks = q.tasks.filter(t => t.state === 'error');
   const retryAll = () => { badJobs.forEach(j => jobAction(j.id, 'resume')); badTasks.forEach(t => taskAction(t.id, 'retry')); };
+  // Tira da lista tudo o que falhou: download com erro é cancelado (apaga o pedaço baixado),
+  // extração/cópia com erro só sai da fila (os arquivos já extraídos ficam).
+  const clearFailed = () => { badJobs.forEach(j => jobAction(j.id, 'cancel')); badTasks.forEach(t => taskAction(t.id, 'remove')); };
   return (
     <ScrollView className="flex-1 px-10">
       <View className="gap-3 pb-24">
@@ -377,6 +381,7 @@ function Downloads() {
             <View className="flex-row items-center gap-3">
               <View className="flex-1"><Text className="font-heavy text-h2 text-cloud">{t(`Precisa de atenção (${badJobs.length + badTasks.length})`)}</Text></View>
               <Button small primary label={t('Tentar todos de novo')} onPress={retryAll} />
+              <Button small label={t('Limpar falhas')} onPress={clearFailed} />
             </View>
             {badJobs.map(j => <JobRow key={j.id} j={j} />)}
             {badTasks.map(t => <TaskRow key={t.id} t={t} />)}
