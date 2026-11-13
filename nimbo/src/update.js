@@ -3,10 +3,10 @@
 // A troca é por arquivo (grava ao lado e renomeia por cima) para não quebrar a montagem
 // que o ShadowMount+ faz da pasta; a versão nova vale quando o app é reaberto.
 import {Http, Downloads, Archives, FileSystem, Platform} from '@ps5-react/core';
-import {config} from './store.js';
+import {config, ui} from './store.js';
 import {engineBusy, holdEngine} from './engine.js';
 
-export const APP_VERSION = '2.2.7';
+export const APP_VERSION = '2.2.8';
 export const REPO = 'searonff/nimbo-ps5';
 export const REPO_URL = `https://github.com/${REPO}`;
 const TITLE = 'PPSA48921';
@@ -181,10 +181,16 @@ export function installUpdate(info, step) {
     return running;
   }
   lastStep = null;
+  // Andamento também no store (faixa do topo): no máximo 1 vez por segundo, porque cada
+  // ui.set redesenha o app inteiro e atrasa a música.
+  let shownAt = 0;
+  ui.set({updating: {version: info && info.version, text: 'Preparando…', frac: 0}});
   running = doInstall(info, (text, frac) => {
     lastStep = [text, frac];
     listeners.forEach(fn => { try { fn(text, frac); } catch (_) { /* tela fechada */ } });
-  }).finally(() => { running = null; lastStep = null; listeners.clear(); });
+    const now = Date.now();
+    if (now - shownAt >= 1000 || frac >= 1) { shownAt = now; ui.set({updating: {version: info.version, text, frac}}); }
+  }).finally(() => { running = null; lastStep = null; listeners.clear(); ui.set({updating: null}); });
   return running;
 }
 

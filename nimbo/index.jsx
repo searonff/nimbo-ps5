@@ -1,6 +1,6 @@
 // Nimbo V2 — gerenciador de downloads da nuvem (TorBox, Real-Debrid, AllDebrid, Premiumize), nativo para PS5 (PS5 React).
 import {useEffect, useState, Component} from 'react';
-import {AppRegistry, View, Text, Image, FocusScope, ScrollView, Screens, Screen, useIsScreenActive, useFocus, Sound, BackHandler, Keyboard, Notifications, Svg, Circle, Line, Path, Platform, FileSystem} from '@ps5-react/core';
+import {AppRegistry, View, Text, Image, FocusScope, ScrollView, VirtualList, Screens, Screen, useIsScreenActive, useFocus, Sound, BackHandler, Keyboard, Notifications, Svg, Circle, Line, Path, Platform, FileSystem} from '@ps5-react/core';
 import {useRef} from 'react';
 import icon from './sce_sys/icon0.png';
 import {useInterfaceSounds} from './sounds.js';
@@ -374,12 +374,16 @@ function Cloud({openItem, openConnect}) {
         {Object.keys(partial).map(pid => <Text key={pid} className="font-semi text-cap text-bad">{`${provider(pid).name}: ${t(partial[pid])}`}</Text>)}
         <Text className="font-semi text-cap text-mist">{list.length === cloud.length ? tn(cloud.length, '{n} item na nuvem', '{n} itens na nuvem') : t('{a} de {b} itens', {a: list.length, b: cloud.length})}</Text>
         {!list.length ? <Text className="font-semi text-lead text-mist mt-4">{query ? t('Nada encontrado para “{q}”.', {q: query}) : t('Nenhum item neste filtro.')}</Text> : null}
-        {shown.map(it => {
+        {/* VirtualList: só as linhas perto da tela ficam montadas. O renderizador desenha no máximo
+            128 <Svg> ao mesmo tempo; com a lista inteira montada, o ícone das capas sumia depois de ~100 itens.
+            Mais itens entram sozinhos quando o cursor chega perto do fim. Altura fixa: capa 84 + 2×12 + 2×3 de borda. */}
+        <VirtualList data={shown} keyExtractor={itemKey} itemHeight={114} rowGap={8}
+          onEndReached={() => { if (list.length > limit) setLimit(n => n + 40); }} renderItem={({item: it}) => {
           const mine = jobs.filter(j => jobOf(j, it));
           const done = mine.length && mine.filter(j => j.state === 'done').length === (it.fileCount || it.files.length);
           return (
             <View key={itemKey(it)} onPress={() => openItem(it)}
-              className="flex-row items-center gap-5 rounded-2xl bg-glass px-4 py-3 border-[3px] border-line focused:border-sun">
+              className="flex-row items-center gap-5 rounded-2xl bg-glass px-4 h-[114px] border-[3px] border-line focused:border-sun">
               <Cover name={it.name} files={it.files} w={150} h={84} radius={10} />
               <View className="flex-1 gap-1">
                 <Text className="font-heavy text-lead text-cloud" numberOfLines={1}>{it.name}</Text>
@@ -392,8 +396,7 @@ function Cloud({openItem, openConnect}) {
               {it.ready ? <Pill text={t('Pronto')} tone="ok" /> : <Pill text={t(`Na nuvem ${Math.round(it.progress * 100)}%`)} tone="warn" />}
             </View>
           );
-        })}
-        {list.length > limit ? <View className="flex-row"><Button label={t(`Mostrar mais (${list.length - limit} restantes)`)} onPress={() => setLimit(n => n + 40)} /></View> : null}
+        }} />
       </View>
     </ScrollView>
   );
@@ -525,6 +528,10 @@ function autoCheckUpdate(force) {
       }
       return done();
     }
+    // Avisa que começou (antes só havia aviso no fim); a faixa do topo mostra o andamento.
+    if (config.get().updateNotify !== false) {
+      try { Notifications.show(t('Atualizando o Nimbo'), t('Instalando a versão {v}…', {v: info.version})); } catch (_) { /* desktop */ }
+    }
     installUpdate(info, () => {}).then(() => { ui.set({updateReady: info.version}); done(); },
       e => { toast(e.message, 'bad'); done(); });
   }, done);
@@ -538,6 +545,21 @@ function UpdateBanner({onOpen}) {
   const installed = useStore(config, c => c.updateInstalled || '');
   const dismissed = useStore(ui, s => s.updateDismissed || '');
   const avail = info && info.available && installed !== info.version && dismissed !== info.version ? info.version : '';
+  const updating = useStore(ui, s => s.updating || null);
+  if (updating) {
+    // Instalação em andamento (automática ou pelo Sobre): etapa e progresso.
+    const f = updating.frac || 0;
+    const phase = f < 0.6 ? 'Baixando' : f < 0.8 ? 'Abrindo o pacote' : 'Instalando';
+    return (
+      <View className="flex-row items-center gap-4 mx-10 mb-2 rounded-2xl bg-haze2 px-5 py-2 border-2 border-sky">
+        <View className="flex-1 gap-1">
+          <Text className="font-heavy text-body text-cloud">{t('Atualizando para {v} · {p} · {n}%', {v: updating.version || '', p: t(phase), n: Math.round(f * 100)})}</Text>
+          <Bar value={f} h={6} color="sky" />
+        </View>
+        <Button small focusKey="banner-open" label={t('Ver')} onPress={onOpen} />
+      </View>
+    );
+  }
   if (!ready && !(notify && avail)) return null;
   if (!ready) {
     return (

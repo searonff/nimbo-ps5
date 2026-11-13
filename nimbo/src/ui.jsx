@@ -112,15 +112,37 @@ export function Pill({text, tone = 'muted'}) {
 }
 
 /* botão de comando com foco dourado */
-export function Button({label, onPress, primary, danger, small, focusKey, disabled}) {
-  const look = {backgroundColor: primary ? '#ffc857' : danger ? '#172741' : '#213656',
+// outline: só contorno (fundo transparente), para ações secundárias sobre painel da mesma cor do
+// botão comum (o Cancelar sumia na janela). triangle: símbolo do △ antes do texto (ação do Triângulo).
+export function Button({label, onPress, primary, danger, outline: outlined, triangle, small, focusKey, disabled}) {
+  const outline = outlined || danger;   // perigo sempre com contorno vermelho: o fundo antigo tinha a cor do painel
+  const look = {backgroundColor: primary ? '#ffc857' : outline ? 'transparent' : danger ? '#172741' : '#213656',
     height: small ? 57 : 75, paddingLeft: small ? 24 : 36, paddingRight: small ? 24 : 36};
+  const border = outline ? (danger ? 'border-bad' : 'border-rim') : 'border-transparent';
   return (
     <View focusKey={focusKey} onPress={disabled ? undefined : onPress} disabled={disabled} style={look}
-      className="rounded-full flex-row items-center justify-center border-[3px] border-transparent
-        focused:border-sun focused:scale-105 transition-transform duration-150">
+      className={`rounded-full flex-row items-center justify-center gap-3 border-[3px] ${border}
+        focused:border-sun focused:scale-105 transition-transform duration-150`}>
+      {triangle ? <Svg width={26} height={26} viewBox="0 0 28 28" style={{width: 26, height: 26}}>
+        <Path d="M14 6 L22 20 L6 20 Z" stroke={primary ? '#2b1d00' : '#6fe0c0'} strokeWidth="2.6" strokeLinejoin="round" fill="none" /></Svg> : null}
       <Text className={small ? 'font-heavy text-cap' : 'font-heavy text-body'}
         style={{color: primary ? '#2b1d00' : danger ? '#ff7a7a' : '#f2f5f9'}}>{t(label)}</Text>
+    </View>
+  );
+}
+
+// Caixa de marcar. O visto é desenhado com dois retângulos girados, não com <Svg>: o renderizador
+// só desenha 128 Svg montados ao mesmo tempo, e numa lista de arquivos cada linha tem uma caixa.
+// (A fonte Nunito não tem o caractere ✓.)
+export function Check({on, size = 30}) {
+  if (!on) return <View style={{width: size, height: size, borderRadius: 8}} className="flex-none border-2 border-mist" />;
+  const s = size / 30;
+  return (
+    <View style={{width: size, height: size, borderRadius: 8}} className="flex-none bg-sun items-center justify-center">
+      <View style={{width: 10 * s, height: 18 * s, marginTop: -4 * s, transform: [{rotate: '45deg'}]}}>
+        <View style={{position: 'absolute', right: 0, top: 0, width: 3.5 * s, height: 18 * s, borderRadius: 2, backgroundColor: '#2b1d00'}} />
+        <View style={{position: 'absolute', left: 0, bottom: 0, width: 10 * s, height: 3.5 * s, borderRadius: 2, backgroundColor: '#2b1d00'}} />
+      </View>
     </View>
   );
 }
@@ -181,7 +203,7 @@ export function releaseInfo(name, files = []) {
   let base = raw.replace(/^\s*(PPSA|CUSA)\d{5}[\s._-]*/i, '').replace(/\.[a-z0-9]{2,5}$/i, '').replace(/[[(].*?[\])]/g, ' ').replace(/_+/g, ' ').replace(/\.(?!\d)|(?<!\d)\./g, ' ');
   const cutAt = base.search(/\b(S\d{1,2}(E\d{1,3})?|(2160|1080|720|480)p|v\d+(\.\d+)+|(19[5-9]\d|20[0-4]\d)|(PPSA|CUSA)\d{5}|WEB|WEBRip|BluRay|HDTV|x26[45]|H 26[45]|REPACK|PROPER|MULTi|FLAC|MP3|320kbps)\b/i);
   if (cutAt > 2) base = base.slice(0, cutAt);
-  const title = base.replace(/-[A-Za-z0-9]+\s*$/, '').replace(/[\s-]+$/, '').replace(/\s+/g, ' ').trim() || raw;
+  const title = base.replace(/-[A-Za-z0-9]+\s*$/, '').replace(/[\s-]+$/, '').replace(/^[\s-]+/, '').replace(/\s+/g, ' ').trim() || raw;
   // Tipo: pela maioria dos arquivos (em bytes); ID de jogo ou temporada decidem antes.
   const weight = {};
   for (const f of files || []) { const k = kindOfName(f.short || f.name || ''); weight[k] = (weight[k] || 0) + (f.size || 1); }
@@ -195,7 +217,8 @@ export function releaseInfo(name, files = []) {
 
 /* Capa de um item da nuvem: o tipo dá a cor e o pictograma; o nome da release vira título + etiquetas.
    Pequena (lista da Nuvem): só o pictograma, sem texto miúdo. */
-export function Cover({name, files, w, h, radius = 14}) {
+// noTitle: a janela de download já mostra o nome grande ao lado; a capa fica com tipo e etiquetas.
+export function Cover({name, files, w, h, radius = 14, noTitle}) {
   const info = releaseInfo(name, files);
   const c = TYPE_COLOR[info.kind] || TYPE_COLOR.other;
   const bg = {width: w, height: h, borderRadius: radius, backgroundGradient: {type: 'linear', angle: 150, stops: [
@@ -213,7 +236,7 @@ export function Cover({name, files, w, h, radius = 14}) {
         <Text className="font-heavy text-cap" style={{color: c}}>{t(info.label)}</Text>
       </View>
       <View className="gap-1">
-        <Text className="font-heavy text-body text-cloud" numberOfLines={lines}>{info.title}</Text>
+        {noTitle ? null : <Text className="font-heavy text-body text-cloud" numberOfLines={lines}>{info.title}</Text>}
         {info.tags.length ? (
           <View className="flex-row gap-1 overflow-hidden">
             {info.tags.slice(0, w < 260 ? 2 : 3).map(x => (

@@ -1,7 +1,8 @@
 // Janelas sobrepostas: item da nuvem, escolher pasta, conectar TorBox por QR, confirmar.
 import {useEffect, useState} from 'react';
 import {View, Text, FocusScope, ScrollView, FileSystem, Keyboard, Svg, Path, useFocus} from '@ps5-react/core';
-import {Button, ButtonGlyph, Cover, Pill, Flag} from './ui.jsx';
+import {Button, ButtonGlyph, Cover, Pill, Flag, Check, releaseInfo} from './ui.jsx';
+import {gameTitle} from './manage.jsx';
 import {QR} from './qr.jsx';
 import {config, useStore, toast, queue, ui} from './store.js';
 import {drives} from './drives.js';
@@ -18,11 +19,13 @@ export function Sheet({title, onClose, children, width = 820, actions = []}) {
   return (
     <FocusScope trap autoFocus onBack={() => { onClose(); return true; }}
       onAction={a => { const hit = live.find(x => x[0] === a); if (!hit) return false; hit[2](); return true; }}>
-      <View className="absolute inset-0 bg-shade items-center justify-center">
+      {/* Camada bem escura: a lista de trás quase some e a janela manda (antes a lista competia). */}
+      <View style={{backgroundColor: 'rgba(5,10,20,0.86)'}} className="absolute inset-0 items-center justify-center">
         {/* Altura máxima com folga de 60 px em cima e embaixo da tela de 1080: os botões têm 75 px
-            e janelas com lista (download, ações) passavam dos 640 de antes e ficavam cortadas. */}
-        <View style={{width}} className="max-h-[960px] rounded-3xl bg-haze2 p-7 gap-4 border-2 border-rim">
-          <View className="flex-row items-center gap-4">
+            e janelas com lista (download, ações) passavam dos 640 de antes e ficavam cortadas.
+            Painel em haze: botões e caixas em haze2 ganham contraste sobre ele. */}
+        <View style={{width}} className="max-h-[960px] rounded-3xl bg-haze px-9 py-8 gap-5 border-2 border-rim">
+          {title == null ? null : <View className="flex-row items-center gap-4">
             <View className="flex-1 min-w-0"><Text className="font-heavy text-h2 text-cloud" numberOfLines={1}>{t(title)}</Text></View>
             {live.concat([['circle', 'Fechar']]).map(([btn, label]) => (
               <View key={btn} className="flex-none flex-row items-center gap-2 rounded-full bg-shade px-3 py-1">
@@ -30,7 +33,7 @@ export function Sheet({title, onClose, children, width = 820, actions = []}) {
                 <Text className="font-heavy text-cap text-cloud">{t(label)}</Text>
               </View>
             ))}
-          </View>
+          </View>}
           {children}
         </View>
       </View>
@@ -61,13 +64,14 @@ export function NotesSheet({title, notes, onClose}) {
   );
 }
 
-function Toggle({label, value, onChange}) {
+// Opção em bloco de largura igual (3 lado a lado na janela de download: nenhuma sobra sozinha embaixo).
+// dim: opção que só vale com outra ligada (Sem subpastas depende de Extrair).
+function Toggle({label, value, onChange, dim}) {
   return (
-    <View onPress={() => onChange(!value)} className="flex-row items-center gap-3 px-3 h-[44px] rounded-xl border-2 border-transparent focused:border-sun">
-      <View className={value ? 'w-[26px] h-[26px] rounded-md items-center justify-center bg-sun' : 'w-[26px] h-[26px] rounded-md items-center justify-center bg-shade border-2 border-rim'}>
-        {value ? <Svg width={26} height={26} viewBox="0 0 26 26" style={{width: 26, height: 26}}><Path d="M6 13 L11 18 L20 8" stroke="#2b1d00" strokeWidth="3" strokeLinecap="round" fill="none" /></Svg> : null}
-      </View>
-      <Text className="font-semi text-body text-cloud">{t(label)}</Text>
+    <View onPress={() => onChange(!value)}
+      className="flex-1 min-w-0 flex-row items-center gap-4 px-5 h-[64px] rounded-2xl bg-haze2 border-[3px] border-transparent focused:border-sun">
+      <Check on={value} />
+      <View className="flex-1 min-w-0"><Text className={dim ? 'font-heavy text-body text-mist' : 'font-heavy text-body text-cloud'} numberOfLines={1}>{t(label)}</Text></View>
     </View>
   );
 }
@@ -112,70 +116,77 @@ export function ItemSheet({item: initial, onClose, onPickFolder}) {
     onClose();
   };
 
+  // Nome grande: o do jogo instalado (param.json), senão o título limpo da release; nunca só o ID.
+  const rel = releaseInfo(item.name, item.files);
+  const name = gameTitle(item.name) || (rel.title.length >= 4 ? rel.title : item.name);
+  const all = item.ready && item.files.length > 1;
+  const markAll = () => setPicked(picked.size === item.files.length ? new Set() : new Set(item.files.map(f => f.id)));
+  const meta = item.needsFiles ? (item.ready ? `${fmt(item.size)} · ${t(loadErr || 'carregando arquivos…')}` : fmt(item.size))
+    : `${fmt(item.size)} · ${tn(item.files.length, '{n} arquivo', '{n} arquivos')}`;
+  const del1 = () => {
+    if (armed === 'busy') return;
+    if (!armed) { setArmed(true); return; }   // segundo toque confirma
+    setArmed('busy');
+    prov.remove(item).then(() => {
+      ui.set({cloud: (ui.get().cloud || []).filter(x => !((x.provider || 'torbox') === (item.provider || 'torbox') && x.kind === item.kind && x.id === item.id))});
+      toast(`Apagado do ${prov.name}`, 'ok'); onClose();
+    }, e => { setArmed(false); toast(e.message, 'bad'); });
+  };
+
+  // Layout aprovado no esboço (2.2.8): capa + nome em destaque; "Salvar em" numa linha; 3 opções de
+  // largura igual; ações embaixo, com a destrutiva separada à esquerda. Sem cabeçalho de atalhos:
+  // a barra de dicas já mostra os botões, e o △ aparece dentro do Baixar.
   return (
-    <Sheet title={item.name} onClose={onClose} width={1040}
-      actions={[['triangle', item.ready ? 'Baixar' : 'Baixar quando ficar pronto', start],
-        item.ready && item.files.length > 1 ? ['square', picked.size === item.files.length ? 'Desmarcar todos' : 'Marcar todos',
-          () => setPicked(picked.size === item.files.length ? new Set() : new Set(item.files.map(f => f.id)))] : null]}>
-      <View className="flex-row gap-5">
-        <Cover name={item.name} files={item.files} w={210} h={118} />
-        <View className="flex-1 gap-2 justify-center">
-          <View className="flex-row gap-3 items-center">
-            <Text className="font-semi text-body text-mist">{item.needsFiles ? (item.ready ? `${fmt(item.size)} · ${t(loadErr || 'carregando arquivos…')}` : fmt(item.size)) : `${fmt(item.size)} · ${tn(item.files.length, '{n} arquivo', '{n} arquivos')}`}</Text>
+    <Sheet title={null} onClose={onClose} width={1120}
+      actions={[['triangle', 'Baixar', start], all ? ['square', 'Marcar todos', markAll] : null]}>
+      <View className="flex-row gap-8 items-center">
+        <Cover name={item.name} files={item.files} w={288} h={162} radius={18} noTitle />
+        <View className="flex-1 min-w-0 gap-2">
+          <Text className="font-heavy text-h1 text-cloud" numberOfLines={2}>{name}</Text>
+          <Text className="font-semi text-lead text-mist" numberOfLines={1}>{meta}</Text>
+          <View className="flex-row">
             {item.ready ? <Pill text={t(`Pronto no ${prov.name}`)} tone="ok" /> : <Pill text={t(`No ${prov.name}: ${Math.round(item.progress * 100)}%`)} tone="warn" />}
           </View>
-          <View onPress={() => onPickFolder(dest, setDest)} className="flex-row items-center gap-3 px-3 h-[44px] rounded-xl bg-shade border-2 border-transparent focused:border-sun">
-            <Text className="font-semi text-cap text-mist">{t('Destino')}</Text>
-            <View className="flex-1 min-w-0"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{dest}</Text></View>
+        </View>
+      </View>
+      <View className="h-[2px] bg-rim" />
+      <View className="flex-row items-center gap-5">
+        <View className="w-[130px]"><Text className="font-semi text-body text-mist">{t('Salvar em')}</Text></View>
+        <View className="flex-1 min-w-0"><Text className="font-heavy text-lead text-cloud" numberOfLines={1}>{dest}</Text></View>
+        <Button small label={t('Trocar pasta')} onPress={() => onPickFolder(dest, setDest)} />
+      </View>
+      <View className="flex-row gap-3">
+        <Toggle label="Extrair ao terminar" value={extract} onChange={setExtract} />
+        <Toggle label="Apagar o compactado" value={del} onChange={setDel} />
+        <Toggle label="Sem subpastas" value={flat} onChange={setFlat} dim={!extract} />
+      </View>
+      {all ? (
+        <View className="gap-2">
+          <View className="flex-row items-center gap-3">
+            <View className="flex-1"><Text className="font-semi text-body text-mist">{t(`${picked.size} de ${item.files.length} arquivos marcados`)}</Text></View>
+            <Button small outline label={picked.size === item.files.length ? 'Desmarcar todos' : 'Marcar todos'} onPress={markAll} />
           </View>
-        </View>
-      </View>
-      {/* Ações em cima: dá para baixar sem rolar a lista de arquivos. */}
-      {/* Quebra de linha: em inglês/alemão as três opções não cabem lado a lado. */}
-      <View className="flex-row flex-wrap gap-2">
-        <Toggle label={t('Extrair ao terminar')} value={extract} onChange={setExtract} />
-        <Toggle label={t('Apagar o compactado depois')} value={del} onChange={setDel} />
-        {extract ? <Toggle label={t('Sem subpastas')} value={flat} onChange={setFlat} /> : null}
-      </View>
-      <View className="flex-row gap-3 items-center">
-        <Button primary focusKey="sheet-go" label={item.ready ? `Baixar ${fmt(total)}` : 'Baixar quando ficar pronto'} onPress={start} />
-        <Button focusKey="sheet-cancel" label={t('Cancelar')} onPress={onClose} />
-        <View className="flex-1" />
-        {/* Apagar do TorBox pede um segundo toque para confirmar. */}
-        <Button danger focusKey="sheet-delete" label={armed === 'busy' ? 'Apagando…' : armed ? 'Confirmar exclusão' : 'Apagar da nuvem'}
-          onPress={() => {
-            if (armed === 'busy') return;
-            if (!armed) { setArmed(true); return; }
-            setArmed('busy');
-            prov.remove(item).then(() => {
-              ui.set({cloud: (ui.get().cloud || []).filter(x => !((x.provider || 'torbox') === (item.provider || 'torbox') && x.kind === item.kind && x.id === item.id))});
-              toast(`Apagado do ${prov.name}`, 'ok'); onClose();
-            }, e => { setArmed(false); toast(e.message, 'bad'); });
-          }} />
-      </View>
-      {item.ready && item.files.length > 1 ? (
-        <View className="flex-row items-center gap-3">
-          <View className="flex-1"><Text className="font-semi text-cap text-mist">{t(`${picked.size} de ${item.files.length} arquivos marcados`)}</Text></View>
-          <Button small label={picked.size === item.files.length ? 'Desmarcar todos' : 'Marcar todos'}
-            onPress={() => setPicked(picked.size === item.files.length ? new Set() : new Set(item.files.map(f => f.id)))} />
-        </View>
-      ) : null}
-      {item.ready && item.files.length > 1 ? (
-        <ScrollView className="max-h-[230px]">
-          <View className="gap-1">
-            {item.files.map(f => (
-              <View key={f.id} onPress={() => toggle(f.id)} className="flex-row items-center gap-3 px-3 h-[40px] rounded-xl border-2 border-transparent focused:border-sun">
-                <View className={picked.has(f.id) ? 'w-[22px] h-[22px] rounded-md bg-sun items-center justify-center' : 'w-[22px] h-[22px] rounded-md bg-shade border-2 border-rim'}>
-                  {picked.has(f.id) ? <Svg width={30} height={30} viewBox="0 0 26 26" style={{width: 30, height: 30}}><Path d="M6 13 L11 18 L20 8" stroke="#2b1d00" strokeWidth="3" strokeLinecap="round" fill="none" /></Svg> : null}
+          <ScrollView className="max-h-[230px]">
+            <View className="gap-1">
+              {item.files.map(f => (
+                <View key={f.id} onPress={() => toggle(f.id)} className="flex-row items-center gap-4 px-4 h-[48px] rounded-xl border-[3px] border-transparent focused:border-sun">
+                  <Check on={picked.has(f.id)} size={24} />
+                  <View className="flex-1 min-w-0"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{f.short}</Text></View>
+                  {doneIds.has(f.id) ? <Pill text={t('Já baixado')} tone="ok" /> : null}
+                  <Text className="font-semi text-cap text-mist">{fmt(f.size)}</Text>
                 </View>
-                <View className="flex-1"><Text className="font-body text-cap text-cloud" numberOfLines={1}>{f.short}</Text></View>
-                {doneIds.has(f.id) ? <Pill text={t('Já baixado')} tone="ok" /> : null}
-                <Text className="font-semi text-cap text-mist">{fmt(f.size)}</Text>
-              </View>
-            ))}
-          </View>
-        </ScrollView>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
       ) : null}
+      <View className="h-[2px] bg-rim" />
+      <View className="flex-row items-center gap-4">
+        <Button danger outline focusKey="sheet-delete" label={armed === 'busy' ? 'Apagando…' : armed ? 'Confirmar exclusão' : 'Apagar da nuvem'} onPress={del1} />
+        <View className="flex-1" />
+        <Button outline focusKey="sheet-cancel" label={t('Cancelar')} onPress={onClose} />
+        <Button primary triangle focusKey="sheet-go" label={item.ready ? t('Baixar {a}', {a: fmt(total)}) : 'Baixar quando ficar pronto'} onPress={start} />
+      </View>
     </Sheet>
   );
 }

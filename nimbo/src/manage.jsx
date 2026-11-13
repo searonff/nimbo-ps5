@@ -1,6 +1,6 @@
 // Arquivos (gerenciador) e Armazenamento (análise de espaço).
 import {useEffect, useRef, useState} from 'react';
-import {View, Text, ScrollView, FileSystem, Keyboard, Platform, useFocus, FocusScope, Svg, Path, Circle} from '@ps5-react/core';
+import {View, Text, ScrollView, VirtualList, FileSystem, Keyboard, Platform, useFocus, FocusScope, Svg, Path, Circle} from '@ps5-react/core';
 import {Bar, Button, Pill, ButtonGlyph, TypeGlyph, TYPE_COLOR, tint} from './ui.jsx';
 import {Sheet} from './sheets.jsx';
 import {drives, fsBusy, removeSafely} from './drives.js';
@@ -73,6 +73,7 @@ export function Files({pickFolder, confirm}) {
   const [selMode, setSelMode] = useState(false);
   const [actions, setActions] = useState(false);   // menu de ações da seleção (Triângulo)
   const focused = useRef(null);
+  const listRef = useRef(null);
   const toggle = e => setSel(m => {
     const n = new Map(m), full = `${path}/${e.name}`;
     if (n.has(full)) n.delete(full); else n.set(full, {name: e.name, isDirectory: e.isDirectory, size: e.size || 0});
@@ -88,8 +89,8 @@ export function Files({pickFolder, confirm}) {
   useEffect(() => {
     if (!moved.current) return;
     moved.current = false;
-    const target = entries.length ? 'frow:0' : 'files-up';
-    setTimeout(() => focus(target), 0);
+    // Primeira linha por índice: na lista virtual ela pode não estar montada ainda.
+    setTimeout(() => { if (!entries.length || !(listRef.current && listRef.current.focusIndex(0))) focus(entries.length ? 'frow:0' : 'files-up'); }, 0);
   }, [path]);
   const tasks = useStore(queue, q => q.tasks);
   const fsTick = useStore(ui, x => x.fsTick || 0);
@@ -170,7 +171,7 @@ export function Files({pickFolder, confirm}) {
         {up ? <Button small focusKey="files-up" label={t('Voltar uma pasta')} onPress={() => openDir(up)} /> : null}
         <Button small label={t(`Ordem: ${SORTS.find(x => x[0] === sort)[1]}`)} onPress={() => config.set({filesSort: SORTS[(SORTS.findIndex(x => x[0] === sort) + 1) % SORTS.length][0]})} />
         <Button small label={t(`Mostrar: ${SHOW.find(x => x[0] === show)[1]}`)} onPress={() => config.set({filesShow: SHOW[(SHOW.findIndex(x => x[0] === show) + 1) % SHOW.length][0]})} />
-        <Button small focusKey="files-select" label={selMode ? 'Sair da seleção' : 'Selecionar'} onPress={() => { if (selMode) clearSel(); else { enterSel(); if (entries.length) setTimeout(() => focus('frow:0'), 0); } }} />
+        <Button small focusKey="files-select" label={selMode ? 'Sair da seleção' : 'Selecionar'} onPress={() => { if (selMode) clearSel(); else { enterSel(); if (entries.length) setTimeout(() => { if (!(listRef.current && listRef.current.focusIndex(0))) focus('frow:0'); }, 0); } }} />
         <Button small label={t('Nova pasta')} onPress={async () => {
           const r = await Keyboard.open({title: t('Nome da nova pasta'), maxLength: 80, type: 'basic'});
           if (r.status === 'done' && r.text.trim()) { FileSystem.mkdir(`${path}/${r.text.trim().replace(/[/\\<>:"|?*]/g, '_')}`, {recursive: true}); refresh(); }
@@ -182,7 +183,9 @@ export function Files({pickFolder, confirm}) {
       <ScrollView className="flex-1">
         <View className="gap-1 pb-24">
           {!entries.length ? <Text className="font-semi text-body text-mist">{listed.length ? t('Nada deste tipo nesta pasta.') : t('Pasta vazia.')}</Text> : null}
-          {entries.slice(0, 400).map((e, i) => {
+          {/* VirtualList: só as linhas perto da tela ficam montadas. O renderizador desenha no máximo
+              128 <Svg> ao mesmo tempo; com uma linha por arquivo, os ícones sumiam no meio da lista. */}
+          <VirtualList ref={listRef} data={entries} keyExtractor={e => e.name} itemHeight={54} rowGap={4} renderItem={({item: e, index: i}) => {
             const kind = e.isDirectory ? '' : archiveKind(e.name);
             return (
               <View key={e.name} focusKey={`frow:${i}`} onFocus={() => { focused.current = e.name; }}
@@ -204,7 +207,7 @@ export function Files({pickFolder, confirm}) {
                 <Text className="font-semi text-cap text-mist">{e.isDirectory ? t('Pasta') : fmt(e.size)}</Text>
               </View>
             );
-          })}
+          }} />
         </View>
       </ScrollView>
       {selMode ? (
