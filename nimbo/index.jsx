@@ -1,12 +1,12 @@
 // Nimbo V2 — gerenciador de downloads da nuvem (TorBox, Real-Debrid, AllDebrid, Premiumize), nativo para PS5 (PS5 React).
 import {useEffect, useState, Component} from 'react';
-import {AppRegistry, View, Text, Image, FocusScope, ScrollView, Screens, Screen, useFocus, Sound, BackHandler, Keyboard, Svg, Circle, Line} from '@ps5-react/core';
+import {AppRegistry, View, Text, Image, FocusScope, ScrollView, Screens, Screen, useIsScreenActive, useFocus, Sound, BackHandler, Keyboard, Notifications, Svg, Circle, Line} from '@ps5-react/core';
 import {useRef} from 'react';
 import icon from './sce_sys/icon0.png';
 import {useInterfaceSounds} from './sounds.js';
 import {config, queue, ui, useStore, toast} from './src/store.js';
 import {Background, Speed, Hints, Ring, Bar, Pill, Button, Cover, Toast, hue, hsl, Flag} from './src/ui.jsx';
-import {ItemSheet, FolderSheet, ConnectSheet, ServicesSheet, ServiceBadge, ConfirmSheet, Sheet, LangSheet, PasswordsSheet} from './src/sheets.jsx';
+import {ItemSheet, FolderSheet, ConnectSheet, ServicesSheet, ServiceBadge, ConfirmSheet, Sheet, LangSheet, PasswordsSheet, NotesSheet} from './src/sheets.jsx';
 import {PROVIDERS, provider, linkedProviders, listAll as listClouds, jobOf, itemKey} from './src/debrid/index.js';
 import {QR} from './src/qr.jsx';
 import {Files, Storage} from './src/manage.jsx';
@@ -14,13 +14,14 @@ import {startPhone, phoneInfo} from './src/phone.js';
 import {drives} from './src/drives.js';
 import {startEngine, jobAction, taskAction, clearFinished, fmt, fmtSpeed, fmtEta, applyRateLimit, friendlyError} from './src/engine.js';
 import {BackgroundMusic, MUSIC_CREDIT} from './src/music.jsx';
-import {APP_VERSION, REPO_URL, checkUpdate, installUpdate, installDir, backupVersion, rollback} from './src/update.js';
+import {startLightBar, resetLightBar} from './src/lightbar.js';
+import {APP_VERSION, REPO_URL, checkUpdate, installUpdate, installDir, backupVersion, rollback, fetchNotes} from './src/update.js';
 import {engineBusy} from './src/engine.js';
 
 // v2.0.1: música mais baixa também para quem já tinha a configuração salva
 if (!config.get().volumeV2) config.set({musicVolume: 0.3, volumeV2: true});
 import * as torbox from './src/torbox.js';
-import {t, tn, LANGS, systemLang} from './src/i18n.js';
+import {t, tn, LANGS, systemLang, fmtDate} from './src/i18n.js';
 if (!config.get().lang) config.set({lang: systemLang()});
 
 const TABS = [['home', 'Painel'], ['cloud', 'Nuvem'], ['downloads', 'Downloads'], ['files', 'Arquivos'], ['storage', 'Armazenamento'], ['settings', 'Ajustes'], ['about', 'Sobre']];
@@ -53,7 +54,7 @@ function Hero({onOpenCloud, onConnectPhone, onConnect}) {
     const steps = isJob && job.extract ? ['Baixar', 'Extrair', 'Pronto'] : isJob ? ['Baixar', 'Pronto'] :
       task.type === 'extract' ? ['Baixado', 'Extrair', 'Pronto'] : ['Copiar', 'Pronto'];
     return (
-      <View className="flex-row gap-10 items-center rounded-3xl bg-glass px-10 py-5">
+      <View className="flex-row gap-10 items-center rounded-3xl bg-glass border-2 border-line px-10 py-5">
         <Ring size={210} value={value} color={isJob ? '#ffc857' : '#63b3ed'} thick={16}>
           <Text className="font-heavy text-hero text-cloud">{`${Math.floor(value * 100)}%`}</Text>
         </Ring>
@@ -84,7 +85,7 @@ function Hero({onOpenCloud, onConnectPhone, onConnect}) {
   }
   const done = jobs.filter(j => j.state === 'done').length;
   return (
-    <View className="flex-row gap-10 items-center rounded-3xl bg-glass px-10 py-5">
+    <View className="flex-row gap-10 items-center rounded-3xl bg-glass border-2 border-line px-10 py-5">
       <Ring size={210} value={0} thick={16}>
         <Image source={icon} style={{width: 104, height: 104, borderRadius: 24}} />
       </Ring>
@@ -108,7 +109,7 @@ function UpNext() {
   const next = jobs.filter(j => ['queued', 'paused'].includes(j.state)).slice(0, 4);
   const failed = jobs.filter(j => j.state === 'error').length + tasks.filter(t => t.state === 'error').length;
   return (
-    <View className="flex-1 gap-2 rounded-3xl bg-glass px-6 py-4">
+    <View className="flex-1 gap-2 rounded-3xl bg-glass border-2 border-line px-6 py-4">
       <View className="flex-row items-center gap-3">
         <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{t('A seguir')}</Text></View>
         {failed ? <Pill text={t(`${failed} com erro · veja em Downloads`)} tone="bad" /> : null}
@@ -128,7 +129,7 @@ function Drives() {
   const [list, setList] = useState(drives());
   useEffect(() => { const t = setInterval(() => setList(drives()), 10000); return () => clearInterval(t); }, []);
   return (
-    <View className="flex-1 gap-2 rounded-3xl bg-glass px-6 py-4">
+    <View className="flex-1 gap-2 rounded-3xl bg-glass border-2 border-line px-6 py-4">
       <Text className="font-heavy text-lead text-cloud">{t('Unidades')}</Text>
       {list.map(d => (
         <View key={d.path} className="gap-2">
@@ -219,7 +220,7 @@ const SORTS = [['recent', 'Mais recentes'], ['name', 'Nome'], ['size', 'Maiores'
 function Chip({label, on, onPress, focusKey}) {
   return (
     <View focusKey={focusKey} onPress={onPress}
-      className={on ? 'px-4 h-[38px] justify-center rounded-full bg-sun border-2 border-transparent focused:border-cloud' : 'px-4 h-[38px] justify-center rounded-full bg-glass border-2 border-transparent focused:border-sun'}>
+      className={on ? 'px-4 h-[38px] justify-center rounded-full bg-sun border-2 border-transparent focused:border-cloud' : 'px-4 h-[38px] justify-center rounded-full bg-glass border-2 border-line focused:border-sun'}>
       <Text className={on ? 'font-heavy text-cap text-night' : 'font-heavy text-cap text-cloud'}>{t(label)}</Text>
     </View>
   );
@@ -293,7 +294,7 @@ function Cloud({openItem, openConnect}) {
           const done = mine.length && mine.filter(j => j.state === 'done').length === (it.fileCount || it.files.length);
           return (
             <View key={itemKey(it)} onPress={() => openItem(it)}
-              className="flex-row items-center gap-5 rounded-2xl bg-glass px-4 py-3 border-[3px] border-transparent focused:border-sun">
+              className="flex-row items-center gap-5 rounded-2xl bg-glass px-4 py-3 border-[3px] border-line focused:border-sun">
               <Cover name={it.name} w={150} h={84} radius={10} />
               <View className="flex-1 gap-1">
                 <Text className="font-heavy text-lead text-cloud" numberOfLines={1}>{it.name}</Text>
@@ -321,7 +322,7 @@ function JobRow({j, speed}) {
   const v = j.size ? j.written / j.size : j.state === 'done' ? 1 : 0;
   const [label, tone] = STATE[j.state];
   return (
-    <View className="gap-2 rounded-2xl bg-glass px-5 py-4">
+    <View className="gap-2 rounded-2xl bg-glass border-2 border-line px-5 py-4">
       <View className="flex-row items-center gap-3">
         <View className="flex-1"><Text className="font-heavy text-lead text-cloud" numberOfLines={1}>{j.name}</Text></View>
         <Pill text={label} tone={tone} />
@@ -344,7 +345,7 @@ function TaskRow({t: tk}) {
   const [label, tone] = TSTATE[tk.state];
   const v = tk.state === 'done' ? 1 : tk.total ? tk.written / tk.total : 0;
   return (
-    <View className="gap-2 rounded-2xl bg-glass px-5 py-4">
+    <View className="gap-2 rounded-2xl bg-glass border-2 border-line px-5 py-4">
       <View className="flex-row items-center gap-3">
         <View className="flex-1"><Text className="font-heavy text-lead text-cloud" numberOfLines={1}>{`${t(TTYPE[tk.type])}: ${tk.name}`}</Text></View>
         {tk.auto ? <Pill text={t('automático')} /> : null}
@@ -398,6 +399,9 @@ function Downloads() {
   );
 }
 
+// Fecha o app gravando antes o que ainda estava esperando para ir ao disco.
+function quit() { resetLightBar(); config.flush(); queue.flush(); if (BackHandler.exitApp) BackHandler.exitApp(); }
+
 /* ---------- Sobre ---------- */
 // Procura atualização ao abrir e a cada 6 h. Com "Atualizar sozinho", instala em segundo plano
 // quando não há downloads nem extrações rodando; a versão nova vale ao reabrir o app.
@@ -412,7 +416,12 @@ function autoCheckUpdate(force) {
   (ui.get().update && pending(ui.get().update) ? Promise.resolve(ui.get().update) : checkUpdate()).then(info => {
     ui.set({update: info});
     if (!pending(info)) return done();
-    if (config.get().autoInstall === false || !installDir()) { toast(`Nimbo ${info.version} disponível. Veja em Sobre.`, 'ok'); return done(); }
+    // Avisa uma vez por versão (faixa no topo + notificação do PS5), se o aviso estiver ligado.
+    if (config.get().updateNotify !== false && config.get().updateNotified !== info.version) {
+      config.set({updateNotified: info.version});
+      try { Notifications.show(t('Atualização disponível'), t(`Nimbo ${info.version} está pronto para instalar.`)); } catch (_) { /* desktop */ }
+    }
+    if (config.get().autoInstall === false || !installDir()) return done();
     const q = queue.get();
     if (engineBusy() || q.jobs.some(j => ['queued', 'downloading'].includes(j.state)) || q.tasks.some(t => ['queued', 'running'].includes(t.state))) {
       setTimeout(() => autoCheckUpdate(true), 10 * 60 * 1000);   // fila ocupada: tenta de novo em 10 min
@@ -423,23 +432,40 @@ function autoCheckUpdate(force) {
   }, done);
 }
 
-// Faixa no topo quando uma atualização foi instalada em segundo plano.
-function UpdateBanner() {
+// Faixa no topo: versão nova disponível (com aviso ligado) ou já instalada em segundo plano.
+function UpdateBanner({onOpen}) {
   const ready = useStore(ui, s => s.updateReady || '');
-  if (!ready) return null;
+  const info = useStore(ui, s => s.update || null);
+  const notify = useStore(config, c => c.updateNotify !== false);
+  const installed = useStore(config, c => c.updateInstalled || '');
+  const dismissed = useStore(ui, s => s.updateDismissed || '');
+  const avail = info && info.available && installed !== info.version && dismissed !== info.version ? info.version : '';
+  if (!ready && !(notify && avail)) return null;
+  if (!ready) {
+    return (
+      <View className="flex-row items-center gap-4 mx-10 mb-2 rounded-2xl bg-haze2 px-5 py-2 border-2 border-sun">
+        <View className="flex-1"><Text className="font-heavy text-body text-cloud">{t(`Nimbo ${avail} disponível.`)}</Text></View>
+        <Button small primary focusKey="banner-open" label={t('Ver atualização')} onPress={onOpen} />
+        <Button small label={t('Depois')} onPress={() => ui.set({updateDismissed: avail})} />
+      </View>
+    );
+  }
   return (
     <View className="flex-row items-center gap-4 mx-10 mb-2 rounded-2xl bg-haze2 px-5 py-2 border-2 border-ok">
       <View className="flex-1"><Text className="font-heavy text-body text-cloud">{t(`Nimbo ${ready} instalado. Feche e abra o app para usar a versão nova.`)}</Text></View>
-      <Button small primary focusKey="banner-close" label={t('Fechar o app')} onPress={() => BackHandler.exitApp && BackHandler.exitApp()} />
+      <Button small primary focusKey="banner-close" label={t('Fechar o app')} onPress={() => quit()} />
       <Button small label={t('Depois')} onPress={() => ui.set({updateReady: ''})} />
     </View>
   );
 }
 
-function About() {
+function About({openNotes}) {
   const info = useStore(ui, s => s.update || null);
   const auto = useStore(config, c => c.autoUpdate !== false);
   const autoInstall = useStore(config, c => c.autoInstall !== false);
+  const checkedAt = useStore(config, c => c.updateCheckedAt || 0);
+  const notify = useStore(config, c => c.updateNotify !== false);
+  const lastError = useStore(config, c => c.updateError || '');
   const [state, setState] = useState({phase: 'idle', text: '', frac: 0});
   const phone = phoneInfo();
   const check = () => {
@@ -459,7 +485,7 @@ function About() {
   return (
     <ScrollView className="flex-1 px-10">
       <View className="flex-row gap-6 pb-24">
-        <View className="flex-1 gap-4 rounded-3xl bg-glass px-8 py-6">
+        <View className="flex-1 gap-4 rounded-3xl bg-glass border-2 border-line px-8 py-6">
           <View className="flex-row items-center gap-5">
             <Image source={icon} style={{width: 132, height: 132, borderRadius: 30}} />
             <View className="gap-1">
@@ -472,8 +498,13 @@ function About() {
           {info && info.available && state.phase !== 'done' ? (
             <View className="gap-3 rounded-2xl bg-haze2 px-5 py-4 border-2 border-sun">
               <Text className="font-heavy text-lead text-cloud">{t(`Versão ${info.version} disponível${info.asset && info.asset.size ? ` · ${fmt(info.asset.size)}` : ''}`)}</Text>
-              {info.notes ? <Text className="font-body text-body text-mist" numberOfLines={6}>{info.notes}</Text> : null}
-              {!busy ? <View className="flex-row"><Button primary focusKey="about-update" label={t(`Atualizar para ${info.version}`)} onPress={install} /></View> : null}
+              {info.notes ? <Text className="font-body text-body text-mist" numberOfLines={4}>{info.notes.replace(/[#*`_]/g, '')}</Text> : null}
+              {!busy ? (
+                <View className="flex-row gap-3">
+                  <Button primary focusKey="about-update" label={t(`Atualizar para ${info.version}`)} onPress={install} />
+                  {info.notes ? <Button label={t('O que há de novo')} onPress={() => openNotes(t(`Novidades da versão ${info.version}`), info.notes)} /> : null}
+                </View>
+              ) : null}
             </View>
           ) : null}
           {state.phase === 'installing' ? (
@@ -483,11 +514,17 @@ function About() {
               <Text className="font-semi text-cap text-mist">{t('Não feche o app até terminar.')}</Text>
             </View>
           ) : state.text ? <Text className={state.phase === 'done' ? 'font-heavy text-lead text-ok' : 'font-semi text-body text-mist'}>{t(state.text)}</Text> : null}
+          {checkedAt && !busy ? (
+            <Text className={lastError ? 'font-semi text-cap text-bad' : 'font-semi text-cap text-mist'}>
+              {t('Última procura: {d}', {d: fmtDate(checkedAt)})}{lastError && !state.text ? ` · ${t(lastError)}` : ''}
+            </Text>
+          ) : null}
           <View className="flex-row gap-3">
             {state.phase === 'done'
-              ? <Button primary focusKey="about-close" label={t('Fechar o app')} onPress={() => BackHandler.exitApp && BackHandler.exitApp()} />
+              ? <Button primary focusKey="about-close" label={t('Fechar o app')} onPress={() => quit()} />
               : <Button focusKey="about-check" label={state.phase === 'checking' ? 'Procurando…' : 'Procurar atualização'} onPress={busy ? () => {} : check} />}
             <Button label={t(`Atualizar sozinho: ${auto && autoInstall ? 'Ligado' : 'Desligado'}`)} onPress={() => config.set({autoUpdate: true, autoInstall: !(auto && autoInstall)})} />
+            <Button label={t(`Avisar versão nova: ${notify ? 'Ligado' : 'Desligado'}`)} onPress={() => config.set({updateNotify: !notify, autoUpdate: true})} />
           </View>
           {backupVersion() && backupVersion() !== APP_VERSION && !busy ? (
             <View className="flex-row"><Button label={t(`Voltar para a versão anterior (${backupVersion()})`)} onPress={() => {
@@ -498,7 +535,7 @@ function About() {
           ) : null}
           {!installDir() ? <Text className="font-semi text-cap text-mist">{t('A atualização pelo app precisa do Nimbo instalado em /data/homebrew (ShadowMount+).')}</Text> : null}
         </View>
-        <View className="w-[360px] gap-4 rounded-3xl bg-glass px-6 py-6 items-center">
+        <View className="w-[360px] gap-4 rounded-3xl bg-glass border-2 border-line px-6 py-6 items-center">
           <Text className="font-heavy text-lead text-cloud">{t('Projeto no GitHub')}</Text>
           <View className="rounded-2xl bg-cloud p-3"><QR text={REPO_URL} size={220} /></View>
           <Text className="font-semi text-cap text-mist">{t('github.com/searonff/nimbo-ps5')}</Text>
@@ -516,7 +553,7 @@ function About() {
 /* ---------- Ajustes ---------- */
 function Row({label, value, onPress, focusKey}) {
   return (
-    <View focusKey={focusKey} onPress={onPress} className="flex-row items-center justify-between rounded-2xl bg-glass px-6 h-[64px] border-[3px] border-transparent focused:border-sun">
+    <View focusKey={focusKey} onPress={onPress} className="flex-row items-center justify-between rounded-2xl bg-glass px-6 h-[64px] border-[3px] border-line focused:border-sun">
       <Text className="font-semi text-lead text-cloud">{t(label)}</Text>
       <Text className="font-heavy text-lead text-sun">{t(value)}</Text>
     </View>
@@ -526,7 +563,7 @@ function LangRow({onPress}) {
   const code = useStore(config, c => c.lang || 'pt');
   const [, name, flag] = LANGS.find(l => l[0] === code) || LANGS[0];
   return (
-    <View focusKey="set-lang" onPress={onPress} className="flex-row items-center justify-between rounded-2xl bg-glass px-6 h-[64px] border-[3px] border-transparent focused:border-sun">
+    <View focusKey="set-lang" onPress={onPress} className="flex-row items-center justify-between rounded-2xl bg-glass px-6 h-[64px] border-[3px] border-line focused:border-sun">
       <Text className="font-semi text-lead text-cloud">{t('Idioma')}</Text>
       <View className="flex-row items-center gap-3"><Flag code={flag} w={42} /><Text className="font-heavy text-lead text-sun">{name}</Text></View>
     </View>
@@ -562,10 +599,13 @@ function Settings({openConnect, pickFolder, confirm, openLang, openPasswords}) {
         <Row label={t('Limitar velocidade')} value={c.speedLimitOn ? 'Ligado' : 'Desligado'} onPress={flip('speedLimitOn')} />
         {c.speedLimitOn ? <Row label={t('Velocidade máxima')} value={t(`${c.speedLimitMB} MB/s`)} onPress={cycle('speedLimitMB', [1, 2, 5, 10, 20, 50])} /> : null}
         <Row label={t('Impedir o modo de repouso')} value={onOff(c.keepAwake)} onPress={flip('keepAwake')} />
+        <Row label={t('Luz do controle mostra o andamento')} value={onOff(c.lightBar !== false)} onPress={() => config.set({lightBar: c.lightBar === false})} />
         <Row label={t('Apagar da nuvem depois de baixar')} value={onOff(c.deleteFromCloud)} onPress={flip('deleteFromCloud')} />
         <Text className="font-heavy text-h2 text-cloud mt-3">{t('Extração')}</Text>
         <Row label={t('Extrair automaticamente')} value={onOff(c.autoExtract)} onPress={flip('autoExtract')} />
         <Row label={t('Apagar o compactado depois')} value={onOff(c.deleteArchive)} onPress={flip('deleteArchive')} />
+        <Row label={t('Extrair durante o download')} value={onOff(c.extractWhileDownloading)} onPress={flip('extractWhileDownloading')} />
+        {c.extractWhileDownloading ? <Text className="font-semi text-cap text-mist px-2">{t('A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.')}</Text> : null}
         <Row focusKey="set-passwords" label={t('Senhas de arquivos')} value={c.passwords.length ? tn(c.passwords.length, '{n} salva', '{n} salvas') : t('Adicionar')} onPress={() => openPasswords()} />
         <Text className="font-heavy text-h2 text-cloud mt-3">{t('Som')}</Text>
         <Row label={t('Música de fundo')} value={onOff(c.music)} onPress={flip('music')} />
@@ -602,6 +642,14 @@ function PhoneSheet({onClose}) {
 }
 
 /* ---------- casca do app ---------- */
+// Cada tela avisa quando está de fato no palco; a casca usa isso para detectar troca presa.
+let liveScreen = 0;
+function LiveMark({id}) {
+  const live = useIsScreenActive();
+  useEffect(() => { if (live) liveScreen = id; }, [live]);
+  return null;
+}
+
 // Deslize com direção: sai rápido para um lado, entra desacelerando pelo outro.
 const ENTER_T = {type: 'tween', duration: 0.32, ease: [0.22, 1, 0.36, 1]};
 const LEAVE_T = {type: 'tween', duration: 0.13, ease: 'easeIn'};
@@ -620,19 +668,45 @@ function App() {
     return {tab: to, dir: to > cur.tab ? 1 : -1};
   });
   const tabFocused = useRef(false);
+  // Subir do conteúdo leva o cursor para a aba que estiver geometricamente acima dele, e focar
+  // uma aba troca de tela. Por isso, vindo de fora da barra, o cursor é posto na aba atual;
+  // só goTab/voltar (que avisam em expectTab) podem cair direto em outra aba.
+  const tabBlurAt = useRef(0);
+  const expectTab = useRef(-1);
   // Contorno: a primeira troca de aba às vezes não anima até a tela ser redesenhada; um redesenho
   // logo depois da troca destrava a animação de saída.
   const [, kick] = useState(0);
-  useEffect(() => { const t = setTimeout(() => kick(k => k + 1), 40); return () => clearTimeout(t); }, [tab]);
+  // Várias trocas seguidas (R1 R1 R1) logo ao abrir deixavam a tela antiga presa: a animação de
+  // saída do <Screens> não terminava e a nova nunca entrava. A tela só segue a aba quando as trocas
+  // param por um instante, então uma rajada vira uma troca só. A barra de abas responde na hora.
+  const [shownTab, setShownTab] = useState(0);
+  useEffect(() => { const t = setTimeout(() => setShownTab(tab), 90); return () => clearTimeout(t); }, [tab]);
+  useEffect(() => { const t = setTimeout(() => kick(k => k + 1), 40); return () => clearTimeout(t); }, [shownTab]);
+  // Rede de segurança: se mesmo assim a tela nova não entrar em 1,2 s, recria o <Screens>
+  // (ele nasce já mostrando a aba certa). As outras telas perdem o estado guardado, só isso.
+  const [screensKey, setScreensKey] = useState(0);
+  useEffect(() => {
+    const t = setTimeout(() => { if (liveScreen !== shownTab) setScreensKey(k => k + 1); }, 1200);
+    return () => clearTimeout(t);
+  }, [shownTab, screensKey]);
   const [sheet, setSheet] = useState(null);
   const {focus} = useFocus();
   useInterfaceSounds();
 
   useEffect(() => {
     startEngine();
+    startLightBar();
     startPhone();
     loadCloud();
     setTimeout(autoCheckUpdate, 8000);
+    // Primeira abertura depois de atualizar: mostra as novidades desta versão (texto da release).
+    const seen = config.get().seenVersion;
+    if (seen !== APP_VERSION) {
+      config.set({seenVersion: APP_VERSION});
+      if (seen) setTimeout(() => fetchNotes(APP_VERSION).then(notes => {
+        if (notes) setSheet(cur => cur || {type: 'notes', title: t(`Novidades da versão ${APP_VERSION}`), notes});
+      }, () => {}), 2500);
+    }
     if (config.get().restoredFromBackup) setTimeout(() => toast(t("Login e ajustes restaurados da cópia de segurança"), "ok"), 1500);
     const upd = setInterval(() => autoCheckUpdate(), 6 * 3600 * 1000);
     // a chave chegou pelo celular (ou outro login): recarrega a nuvem
@@ -652,6 +726,7 @@ function App() {
   // desfazer a troca) e entra no conteúdo quando a tela nova termina de chegar.
   const goTab = to => {
     setNav(cur => (cur.tab === to ? cur : {tab: to, dir: to > cur.tab ? 1 : -1}));
+    expectTab.current = to;
     focus(`tab:${TABS[to][0]}`);
     setTimeout(() => focus('content'), 520);
   };
@@ -668,7 +743,7 @@ function App() {
     <View className="w-screen h-screen bg-night">
       <Background tint={tint} />
       <FocusScope autoFocus onAction={a => (a === 'l1' ? switchTab(-1) : a === 'r1' ? switchTab(1) : a === 'triangle' ? (loadCloud(), toast(t('Atualizando a nuvem…')), true) : a === 'square' && tab === 1 ? (searchCloud(), true) : false)}
-        onBack={() => { if (tab !== 0) { setNav({tab: 0, dir: -1}); focus(`tab:${TABS[0][0]}`); return true; } BackHandler.exitApp && BackHandler.exitApp(); return true; }}>
+        onBack={() => { if (tab !== 0) { setNav({tab: 0, dir: -1}); expectTab.current = 0; focus(`tab:${TABS[0][0]}`); return true; } quit(); return true; }}>
         <View className="flex-row items-center gap-6 px-10 h-[84px]">
           <Image source={icon} style={{width: 54, height: 54, borderRadius: 14}} />
           <Text className="font-heavy text-h2 text-cloud">{t('Nimbo')}</Text>
@@ -676,7 +751,14 @@ function App() {
             <Text className="font-heavy text-xs2 text-mist px-2 py-1 rounded-md border border-mist">{t('L1')}</Text>
             {TABS.map(([id, label], i) => (
               <View key={id} focusKey={`tab:${id}`} selected={i === tab}
-                onFocus={() => { tabFocused.current = true; setTab(i); }} onBlur={() => { tabFocused.current = false; }}
+                onFocus={() => {
+                  const fromTabs = tabFocused.current || Date.now() - tabBlurAt.current < 120;
+                  tabFocused.current = true;
+                  if (!fromTabs && i !== tab && expectTab.current !== i) { focus(`tab:${TABS[tab][0]}`); return; }
+                  expectTab.current = -1;
+                  setTab(i);
+                }}
+                onBlur={() => { tabFocused.current = false; tabBlurAt.current = Date.now(); }}
                 onPress={() => focus('content')}
                 className="px-3 h-[44px] justify-center rounded-full border-2 border-transparent focused:border-sun focused:bg-haze2">
                 <Text className={i === tab ? 'font-heavy text-lead text-cloud' : 'font-heavy text-lead text-mist'}>{t(label)}</Text>
@@ -688,17 +770,17 @@ function App() {
           <View className="flex-1" />
           <Speed />
         </View>
-        <UpdateBanner />
+        <UpdateBanner onOpen={() => goTab(6)} />
         {(
           <View className="flex-1">
-          <Screens active={tab} variants={dir > 0 ? SLIDE_RIGHT : SLIDE_LEFT} focusKey="content" onBack={() => { focus(`tab:${TABS[tab][0]}`); return true; }}>
-            <Screen id={0}><Guard><Home openItem={openItem} goCloud={() => goTab(1)} connectPhone={() => setSheet({type: 'phone'})} openConnect={openConnect} /></Guard></Screen>
-            <Screen id={1}><Guard><Cloud openItem={openItem} openConnect={openConnect} /></Guard></Screen>
-            <Screen id={2}><Guard><Downloads /></Guard></Screen>
-            <Screen id={3}><Guard><Files pickFolder={pickFolder} confirm={confirm} /></Guard></Screen>
-            <Screen id={4}><Guard><Storage confirm={confirm} /></Guard></Screen>
-            <Screen id={5}><Guard><Settings openConnect={openConnect} pickFolder={pickFolder} confirm={confirm} openLang={() => setSheet({type: 'lang'})} openPasswords={() => setSheet({type: 'passwords'})} /></Guard></Screen>
-            <Screen id={6}><Guard><About /></Guard></Screen>
+          <Screens key={screensKey} active={shownTab} variants={dir > 0 ? SLIDE_RIGHT : SLIDE_LEFT} focusKey="content" onBack={() => { focus(`tab:${TABS[tab][0]}`); return true; }}>
+            <Screen id={0}><LiveMark id={0} /><Guard><Home openItem={openItem} goCloud={() => goTab(1)} connectPhone={() => setSheet({type: 'phone'})} openConnect={openConnect} /></Guard></Screen>
+            <Screen id={1}><LiveMark id={1} /><Guard><Cloud openItem={openItem} openConnect={openConnect} /></Guard></Screen>
+            <Screen id={2}><LiveMark id={2} /><Guard><Downloads /></Guard></Screen>
+            <Screen id={3}><LiveMark id={3} /><Guard><Files pickFolder={pickFolder} confirm={confirm} /></Guard></Screen>
+            <Screen id={4}><LiveMark id={4} /><Guard><Storage confirm={confirm} /></Guard></Screen>
+            <Screen id={5}><LiveMark id={5} /><Guard><Settings openConnect={openConnect} pickFolder={pickFolder} confirm={confirm} openLang={() => setSheet({type: 'lang'})} openPasswords={() => setSheet({type: 'passwords'})} /></Guard></Screen>
+            <Screen id={6}><LiveMark id={6} /><Guard><About openNotes={(title, notes) => setSheet({type: 'notes', title, notes})} /></Guard></Screen>
           </Screens>
           </View>
         )}
@@ -717,6 +799,7 @@ function App() {
       {sheet && sheet.type === 'confirm' ? <ConfirmSheet {...sheet} onClose={close} /> : null}
       {sheet && sheet.type === 'phone' ? <PhoneSheet onClose={close} /> : null}
       {sheet && sheet.type === 'passwords' ? <PasswordsSheet onClose={() => { close(); setTimeout(() => focus('set-passwords'), 0); }} /> : null}
+      {sheet && sheet.type === 'notes' ? <NotesSheet title={sheet.title} notes={sheet.notes} onClose={close} /> : null}
       {sheet && sheet.type === 'lang' ? <LangSheet onClose={() => { close(); setTimeout(() => focus('set-lang'), 0); }} /> : null}
     </View>
   );

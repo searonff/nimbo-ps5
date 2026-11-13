@@ -157,7 +157,7 @@ export function Files({pickFolder, confirm}) {
       <View className="flex-row gap-2 items-center">
         {all.map(d => (
           <View key={d.path} focusKey={`drive:${d.label}`} selected={drive === d} onPress={() => setPath(d.path)}
-            className="px-4 py-2 rounded-xl bg-glass border-[3px] border-transparent selected:border-sky focused:border-sun">
+            className="px-4 py-2 rounded-xl bg-glass border-[3px] border-line selected:border-sky focused:border-sun">
             <Text className="font-heavy text-cap text-cloud">{t(d.label)}</Text>
             <Text className="font-semi text-xs2 text-mist">{t(`${fmt(d.free)} livres`)}</Text>
           </View>
@@ -182,7 +182,7 @@ export function Files({pickFolder, confirm}) {
             return (
               <View key={e.name} focusKey={`frow:${i}`} onFocus={() => { focused.current = e.name; }}
                 onPress={() => (selMode ? toggle(e) : e.isDirectory ? openDir(`${path}/${e.name}`) : setMenu(e))}
-                className={sel.has(`${path}/${e.name}`) ? 'flex-row items-center gap-4 rounded-xl bg-haze2 px-5 h-[54px] border-[3px] border-sky focused:border-sun' : 'flex-row items-center gap-4 rounded-xl bg-glass px-5 h-[54px] border-[3px] border-transparent focused:border-sun'}>
+                className={sel.has(`${path}/${e.name}`) ? 'flex-row items-center gap-4 rounded-xl bg-haze2 px-5 h-[54px] border-[3px] border-sky focused:border-sun' : 'flex-row items-center gap-4 rounded-xl bg-glass px-5 h-[54px] border-[3px] border-line focused:border-sun'}>
                 {selMode ? (
                   <View className={sel.has(`${path}/${e.name}`) ? 'w-[24px] h-[24px] rounded-md bg-sun items-center justify-center' : 'w-[24px] h-[24px] rounded-md bg-shade border-2 border-rim'}>
                     {sel.has(`${path}/${e.name}`) ? <Svg width={30} height={30} viewBox="0 0 26 26" style={{width: 30, height: 30}}><Path d="M6 13 L11 18 L20 8" stroke="#2b1d00" strokeWidth="3" strokeLinecap="round" fill="none" /></Svg> : null}
@@ -347,6 +347,10 @@ export function Storage({confirm}) {
   const [scan, start, stop, drop] = useScan();
   const [apps, setApps] = useState(null);
   const [deleting, setDeleting] = useState({});
+  const [detail, setDetail] = useState(null);
+  // Duas vistas no topo: unidades (análise de espaço) e jogos instalados; assim nada fica
+  // escondido no fim de uma página comprida.
+  const [view, setView] = useState('drives');
   const appsJob = useRef(null);
   useEffect(() => () => { if (appsJob.current) appsJob.current.stop = true; }, []);
   const total = scan ? scan.bytes || 1 : 1;
@@ -381,119 +385,153 @@ export function Storage({confirm}) {
     setTimeout(next, 20);
   };
   const appList = apps ? apps.list : [];
+  // Ao abrir a vista de jogos pela primeira vez, já calcula (em fatias, sem travar a tela).
+  const openApps = () => { setView('apps'); if (!apps) loadApps(); };
   return (
+    <View className="flex-1">
     <ScrollView className="flex-1 px-10">
       <View className="gap-4 pb-24">
-        <View className="flex-row flex-wrap gap-4">
-          {all.map(d => (
-            <View key={d.path} className="w-[388px] gap-2 rounded-3xl bg-glass px-6 py-4">
-              <Text className="font-heavy text-lead text-cloud">{t(d.label)}</Text>
-              <Text className="font-heavy text-h1 text-cloud">{t(`${fmt(d.free)} livres`)}</Text>
-              <Text className="font-semi text-cap text-mist">{t(`${fmt(d.total - d.free)} usados de ${fmt(d.total)}`)}</Text>
-              <Bar value={(d.total - d.free) / d.total} color={d.free / d.total < 0.1 ? 'bad' : 'sky'} h={12} />
-              <View className="flex-row mt-1"><Button small primary label={scan && scan.running && scan.root === d.path ? 'Analisando…' : 'Analisar'} onPress={() => start(d.path)} /></View>
-            </View>
-          ))}
+        <View className="flex-row gap-3">
+          <Button small primary={view === 'drives'} label={t('Unidades')} onPress={() => setView('drives')} />
+          <Button small primary={view === 'apps'} label={appList.length ? t('Jogos instalados ({n})', {n: appList.length}) : t('Jogos instalados')} onPress={openApps} />
         </View>
-        {busy ? <Text className="font-semi text-body text-sun">{t('Apagando… o disco fica ocupado até terminar.')}</Text> : null}
-        {scan ? (
-          <View className="gap-3 rounded-3xl bg-glass px-6 py-5">
-            <View className="flex-row items-center gap-3">
-              <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{t(scan.running ? 'Analisando {r}: {b} em {n} arquivos' : 'Uso de {r}: {b} em {n} arquivos', {r: scan.root, b: fmt(scan.bytes), n: scan.files})}</Text></View>
-              {scan.running ? <Button small label={t('Parar')} onPress={stop} /> : null}
-            </View>
-            <View className="flex-row w-full h-[24px] rounded-full overflow-hidden bg-shade">
-              {CATS.concat([OTHER]).filter(c => scan.cats[c[0]]).map(c => (
-                <View key={c[0]} style={{width: `${(scan.cats[c[0]] / total * 100).toFixed(2)}%`, backgroundColor: c[2]}} />
-              ))}
-            </View>
-            <View className="flex-row flex-wrap gap-5">
-              {CATS.concat([OTHER]).filter(c => scan.cats[c[0]]).map(c => (
-                <View key={c[0]} className="flex-row items-center gap-2">
-                  <View className="w-[16px] h-[16px] rounded-md" style={{backgroundColor: c[2]}} />
-                  <Text className="font-semi text-cap text-cloud">{`${t(c[1])} · ${fmt(scan.cats[c[0]])}`}</Text>
+        {view === 'drives' ? (
+          <View className="gap-4">
+            <View className="flex-row flex-wrap gap-4">
+              {all.map(d => (
+                <View key={d.path} className="w-[388px] gap-2 rounded-3xl bg-glass border-2 border-line px-6 py-4">
+                  <Text className="font-heavy text-lead text-cloud">{t(d.label)}</Text>
+                  <Text className="font-heavy text-h1 text-cloud">{t(`${fmt(d.free)} livres`)}</Text>
+                  <Text className="font-semi text-cap text-mist">{t(`${fmt(d.total - d.free)} usados de ${fmt(d.total)}`)}</Text>
+                  <Bar value={(d.total - d.free) / d.total} color={d.free / d.total < 0.1 ? 'bad' : 'sky'} h={12} />
+                  <View className="flex-row mt-1"><Button small primary label={scan && scan.running && scan.root === d.path ? 'Analisando…' : 'Analisar'} onPress={() => start(d.path)} /></View>
                 </View>
               ))}
             </View>
-          </View>
-        ) : <Text className="font-semi text-body text-mist">{t('Escolha uma unidade e aperte Analisar para ver o que está ocupando espaço.')}</Text>}
-        {scan && scan.suggestions.length ? (
-          <View className="gap-3 rounded-3xl bg-glass px-6 py-5">
-            <Text className="font-heavy text-lead text-cloud">{t(`Sugestões de limpeza · até ${fmt(scan.suggestions.reduce((a, s) => a + s.size, 0))}`)}</Text>
-            {scan.suggestions.slice(0, 12).map(s => (
-              <View key={s.path} className="flex-row items-center gap-3">
-                <View className="flex-1 gap-1">
-                  <Text className="font-semi text-body text-cloud" numberOfLines={1}>{s.name}</Text>
-                  <FileMeta item={s} extra={t(s.why)} />
+            {busy ? <Text className="font-semi text-body text-sun">{t('Apagando… o disco fica ocupado até terminar.')}</Text> : null}
+            {scan ? (
+              <View className="gap-3 rounded-3xl bg-glass border-2 border-line px-6 py-5">
+                <View className="flex-row items-center gap-3">
+                  <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{t(scan.running ? 'Analisando {r}: {b} em {n} arquivos' : 'Uso de {r}: {b} em {n} arquivos', {r: scan.root, b: fmt(scan.bytes), n: scan.files})}</Text></View>
+                  {scan.running ? <Button small label={t('Parar')} onPress={stop} /> : null}
                 </View>
-                <Text className="font-heavy text-body text-cloud">{fmt(s.size)}</Text>
-                {deleting[s.path] ? <Text className="font-semi text-cap text-sun">{t('Apagando…')}</Text>
-                  : <Button small danger label={t('Apagar')} onPress={() => remove(s)} />}
-              </View>
-            ))}
-          </View>
-        ) : null}
-        {scan && scan.top.length ? (
-          <View className="gap-3 rounded-3xl bg-glass px-6 py-5">
-            <View className="flex-row items-center gap-3">
-              <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{t('Maiores arquivos')}</Text></View>
-              <View className="flex-row items-center gap-2"><ButtonGlyph name="cross" /><Text className="font-semi text-cap text-mist">{t('para apagar')}</Text></View>
-            </View>
-            {scan.top.slice(0, 15).map(f => (
-              <View key={f.path} onPress={() => (deleting[f.path] ? null : remove(f))}
-                className="flex-row items-center gap-4 rounded-xl px-3 py-2 border-2 border-transparent focused:border-bad">
-                <View className="flex-1 gap-1">
-                  <Text className="font-semi text-body text-cloud" numberOfLines={1}>{gameTitle(f.name) || f.name}</Text>
-                  <FileMeta item={gameTitle(f.name) ? {...f, name: ''} : f} extra={gameTitle(f.name) ? f.name : (f.bucket === f.name ? '' : f.bucket)} />
+                <View className="flex-row w-full h-[24px] rounded-full overflow-hidden bg-shade">
+                  {CATS.concat([OTHER]).filter(c => scan.cats[c[0]]).map(c => (
+                    <View key={c[0]} style={{width: `${(scan.cats[c[0]] / total * 100).toFixed(2)}%`, backgroundColor: c[2]}} />
+                  ))}
                 </View>
-                <Text className="font-heavy text-body text-cloud">{deleting[f.path] ? t('Apagando…') : fmt(f.size)}</Text>
+                <View className="flex-row flex-wrap gap-5">
+                  {CATS.concat([OTHER]).filter(c => scan.cats[c[0]]).map(c => (
+                    <View key={c[0]} className="flex-row items-center gap-2">
+                      <View className="w-[16px] h-[16px] rounded-md" style={{backgroundColor: c[2]}} />
+                      <Text className="font-semi text-cap text-cloud">{`${t(c[1])} · ${fmt(scan.cats[c[0]])}`}</Text>
+                    </View>
+                  ))}
+                </View>
               </View>
-            ))}
-          </View>
-        ) : null}
-        {scan && scan.dirs.length ? (
-          <View className="gap-2 rounded-3xl bg-glass px-6 py-5">
-            <Text className="font-heavy text-lead text-cloud">{t('Maiores pastas')}</Text>
-            {scan.dirs.map(([name, size]) => (
-              <View key={name} className="gap-1">
-                <View className="flex-row justify-between gap-3">
-                  <View className="flex-1 flex-row items-center gap-3">
-                    <Text className="font-semi text-body text-cloud" numberOfLines={1}>{name}</Text>
-                    {gameTitle(name) ? <Text className="font-heavy text-cap text-sky" numberOfLines={1}>{gameTitle(name)}</Text> : null}
+            ) : <Text className="font-semi text-body text-mist">{t('Escolha uma unidade e aperte Analisar para ver o que está ocupando espaço.')}</Text>}
+            {scan && scan.suggestions.length ? (
+              <View className="gap-3 rounded-3xl bg-glass border-2 border-line px-6 py-5">
+                <Text className="font-heavy text-lead text-cloud">{t(`Sugestões de limpeza · até ${fmt(scan.suggestions.reduce((a, s) => a + s.size, 0))}`)}</Text>
+                {scan.suggestions.slice(0, 12).map(s => (
+                  <View key={s.path} className="flex-row items-center gap-3">
+                    <View className="flex-1 gap-1">
+                      <Text className="font-semi text-body text-cloud" numberOfLines={1}>{s.name}</Text>
+                      <FileMeta item={s} extra={t(s.why)} />
+                    </View>
+                    <Text className="font-heavy text-body text-cloud">{fmt(s.size)}</Text>
+                    {deleting[s.path] ? <Text className="font-semi text-cap text-sun">{t('Apagando…')}</Text>
+                      : <Button small danger label={t('Apagar')} onPress={() => remove(s)} />}
                   </View>
-                  <Text className="font-heavy text-body text-cloud">{fmt(size)}</Text>
+                ))}
+              </View>
+            ) : null}
+            {scan && scan.top.length ? (
+              <View className="gap-3 rounded-3xl bg-glass border-2 border-line px-6 py-5">
+                <View className="flex-row items-center gap-3">
+                  <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{t('Maiores arquivos')}</Text></View>
+                  <View className="flex-row items-center gap-2"><ButtonGlyph name="cross" /><Text className="font-semi text-cap text-mist">{t('para apagar')}</Text></View>
                 </View>
-                <Bar value={size / (scan.dirs[0][1] || 1)} h={8} />
+                {scan.top.slice(0, 15).map(f => (
+                  <View key={f.path} onPress={() => (deleting[f.path] ? null : remove(f))}
+                    className="flex-row items-center gap-4 rounded-xl px-3 py-2 border-2 border-transparent focused:border-bad">
+                    <View className="flex-1 gap-1">
+                      <Text className="font-semi text-body text-cloud" numberOfLines={1}>{gameTitle(f.name) || f.name}</Text>
+                      <FileMeta item={gameTitle(f.name) ? {...f, name: ''} : f} extra={gameTitle(f.name) ? f.name : (f.bucket === f.name ? '' : f.bucket)} />
+                    </View>
+                    <Text className="font-heavy text-body text-cloud">{deleting[f.path] ? t('Apagando…') : fmt(f.size)}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+            {scan && scan.dirs.length ? (
+              <View className="gap-2 rounded-3xl bg-glass border-2 border-line px-6 py-5">
+                <Text className="font-heavy text-lead text-cloud">{t('Maiores pastas')}</Text>
+                {scan.dirs.map(([name, size]) => (
+                  <View key={name} className="gap-1">
+                    <View className="flex-row justify-between gap-3">
+                      <View className="flex-1 flex-row items-center gap-3">
+                        <Text className="font-semi text-body text-cloud" numberOfLines={1}>{name}</Text>
+                        {gameTitle(name) ? <Text className="font-heavy text-cap text-sky" numberOfLines={1}>{gameTitle(name)}</Text> : null}
+                      </View>
+                      <Text className="font-heavy text-body text-cloud">{fmt(size)}</Text>
+                    </View>
+                    <Bar value={size / (scan.dirs[0][1] || 1)} h={8} />
+                  </View>
+                ))}
+              </View>
+            ) : null}
+          </View>
+        ) : (
+          <View className="gap-3 rounded-3xl bg-glass border-2 border-line px-6 py-5">
+            <View className="flex-row items-center gap-3">
+              <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{t('Jogos e apps instalados')}</Text></View>
+              <Button small label={apps && apps.loading ? t('Calculando… {a} de {b}', {a: apps.done, b: apps.total}) : apps ? 'Recalcular' : 'Calcular'} onPress={loadApps} />
+            </View>
+            <Text className="font-semi text-cap text-mist">{t('Jogo + atualizações + DLCs. Só visualização.')}</Text>
+            {apps && !apps.loading && !appList.length ? <Text className="font-semi text-body text-mist">{t('Nenhum encontrado.')}</Text> : null}
+            {appList.map(a => (
+              <View key={a.id} onPress={() => setDetail(a)}
+                className="gap-1 rounded-xl px-3 py-2 border-2 border-transparent focused:border-sun">
+                <View className="flex-row justify-between gap-3">
+                  <View className="flex-1"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{a.title}</Text></View>
+                  <Text className="font-heavy text-body text-cloud">{fmt(a.size)}</Text>
+                </View>
+                <Text className="font-semi text-cap text-mist" numberOfLines={1}>{[
+                  a.id,
+                  a.version ? t('versão {v}', {v: a.version}) : '',
+                  a.installed ? t('instalado em {d}', {d: fmtDate(a.installed)}) : '',
+                  t('jogo {a}', {a: fmt(a.app)}),
+                  a.patch ? t('atualização {a}', {a: fmt(a.patch)}) : '',
+                  a.dlc ? t('DLC {a}', {a: fmt(a.dlc)}) : '',
+                ].filter(Boolean).join(' · ')}</Text>
+                <Bar value={a.size / (appList[0].size || 1)} h={8} color="sky" />
               </View>
             ))}
           </View>
-        ) : null}
-        <View className="gap-3 rounded-3xl bg-glass px-6 py-5">
-          <View className="flex-row items-center gap-3">
-            <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{t('Jogos e apps instalados')}</Text></View>
-            <Button small label={apps && apps.loading ? t('Calculando… {a} de {b}', {a: apps.done, b: apps.total}) : 'Calcular'} onPress={loadApps} />
-          </View>
-          <Text className="font-semi text-cap text-mist">{t('Jogo + atualizações + DLCs. Só visualização.')}</Text>
-          {apps && !apps.loading && !appList.length ? <Text className="font-semi text-body text-mist">{t('Nenhum encontrado.')}</Text> : null}
-          {appList.slice(0, 40).map(a => (
-            <View key={a.id} className="gap-1">
-              <View className="flex-row justify-between gap-3">
-                <View className="flex-1"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{a.title}</Text></View>
-                <Text className="font-heavy text-body text-cloud">{fmt(a.size)}</Text>
-              </View>
-              <Text className="font-semi text-cap text-mist" numberOfLines={1}>{[
-                a.id,
-                a.version ? t('versão {v}', {v: a.version}) : '',
-                a.installed ? t('instalado em {d}', {d: fmtDate(a.installed)}) : '',
-                t('jogo {a}', {a: fmt(a.app)}),
-                a.patch ? t('atualização {a}', {a: fmt(a.patch)}) : '',
-                a.dlc ? t('DLC {a}', {a: fmt(a.dlc)}) : '',
-              ].filter(Boolean).join(' · ')}</Text>
-              <Bar value={a.size / (appList[0].size || 1)} h={8} color="sky" />
-            </View>
-          ))}
-        </View>
+        )}
       </View>
     </ScrollView>
+    {detail ? (
+      <Sheet title={detail.title} onClose={() => setDetail(null)} width={700}>
+        {[
+          ['ID', detail.id],
+          detail.version ? [t('Versão'), detail.version] : null,
+          detail.installed ? [t('Instalado em'), fmtDate(detail.installed)] : null,
+          [t('Jogo'), fmt(detail.app)],
+          [t('Atualização'), fmt(detail.patch)],
+          [t('DLC'), fmt(detail.dlc)],
+          [t('Total'), fmt(detail.size)],
+          [t('Pasta'), `${appsRoot()}/app/${detail.id}`],
+        ].filter(Boolean).map(([k, v]) => (
+          <View key={k} className="flex-row justify-between gap-4">
+            <Text className="font-semi text-body text-mist">{k}</Text>
+            <View className="flex-1 items-end"><Text className="font-heavy text-body text-cloud" numberOfLines={1}>{v}</Text></View>
+          </View>
+        ))}
+        <View className="flex-row mt-2"><Button primary label="Fechar" onPress={() => setDetail(null)} /></View>
+      </Sheet>
+    ) : null}
+    </View>
   );
 }

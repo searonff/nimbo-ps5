@@ -21,12 +21,15 @@ function load(file, fallback) {
   return fallback;
 }
 
-function writeSafe(path, text) {
-  FileSystem.writeFile(`${path}.tmp`, text, {sync: true});
+function writeSafe(path, text, sync = true) {
+  FileSystem.writeFile(`${path}.tmp`, text, {sync});
   FileSystem.rename(`${path}.tmp`, path);
 }
 
-function createStore(file, initial, persist = true) {
+// delay: espera antes de gravar (junta várias mudanças numa gravação só).
+// sync: força a gravação física no disco; desligado na fila, que muda o tempo todo e
+// não pode travar a tela (e a música) enquanto o disco está ocupado extraindo.
+function createStore(file, initial, persist = true, {delay = 400, sync = true} = {}) {
   let value = file ? load(file, initial) : initial;
   const listeners = new Set();
   let saveTimer = null;
@@ -37,15 +40,15 @@ function createStore(file, initial, persist = true) {
     const {restoredFromBackup, ...data} = value || {};
     void restoredFromBackup;
     const text = JSON.stringify(data);
-    try { writeSafe(`${FileSystem.dataDir}/${file}`, text); } catch (_) { /* sem espaço: tenta na próxima mudança */ }
-    try { FileSystem.mkdir(BACKUP_DIR, {recursive: true}); writeSafe(`${BACKUP_DIR}/${file}`, text); } catch (_) { /* cópia é só reserva */ }
+    try { writeSafe(`${FileSystem.dataDir}/${file}`, text, sync); } catch (_) { /* sem espaço: tenta na próxima mudança */ }
+    try { FileSystem.mkdir(BACKUP_DIR, {recursive: true}); writeSafe(`${BACKUP_DIR}/${file}`, text, sync); } catch (_) { /* cópia é só reserva */ }
   };
   return {
     get: () => value,
     set(patch) {
       value = typeof patch === 'function' ? patch(value) : {...value, ...patch};
       listeners.forEach(fn => fn(value));
-      if (file && persist && !saveTimer) saveTimer = setTimeout(save, 400);
+      if (file && persist && !saveTimer) saveTimer = setTimeout(save, delay);
     },
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     flush() { if (saveTimer) { clearTimeout(saveTimer); save(); } },
@@ -78,7 +81,7 @@ export const config = createStore('config.json', {
 });
 
 // fila de downloads e tarefas (extrair, copiar, mover)
-export const queue = createStore('queue.json', {jobs: [], tasks: [], watches: [], nextId: 1});
+export const queue = createStore('queue.json', {jobs: [], tasks: [], watches: [], nextId: 1}, true, {delay: 3000, sync: false});
 
 // estado volátil da interface (não persiste)
 export const ui = createStore(null, {cloud: null, cloudError: '', toast: null, speed: 0});

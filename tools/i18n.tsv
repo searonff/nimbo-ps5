@@ -438,3 +438,21 @@ Nenhuma senha salva ainda.	No passwords saved yet.	Aún no hay contraseñas guar
 {n} salva	{n} saved	{n} guardada	{n} enregistré	{n} gespeichert	{n} salvata
 {n} salvas	{n} saved	{n} guardadas	{n} enregistrés	{n} gespeichert	{n} salvate
 Adicionar	Add	Añadir	Ajouter	Hinzufügen	Aggiungi
+Versão	Version	Versión	Version	Version	Versione
+Instalado em	Installed on	Instalado el	Installé le	Installiert am	Installato il
+Jogo	Game	Juego	Jeu	Spiel	Gioco
+Atualização	Update	Actualización	Mise à jour	Update	Aggiornamento
+DLC	DLC	DLC	DLC	DLC	DLC
+Total	Total	Total	Total	Gesamt	Totale
+Jogos instalados	Installed games	Juegos instalados	Jeux installés	Installierte Spiele	Giochi installati
+Jogos instalados ({n})	Installed games ({n})	Juegos instalados ({n})	Jeux installés ({n})	Installierte Spiele ({n})	Giochi installati ({n})
+Recalcular	Recalculate	Recalcular	Recalculer	Neu berechnen	Ricalcola
+Última procura: {d}	Last check: {d}	Última búsqueda: {d}	Dernière recherche : {d}	Zuletzt gesucht: {d}	Ultima ricerca: {d}
+Atualização disponível	Update available	Actualización disponible	Mise à jour disponible	Update verfügbar	Aggiornamento disponibile
+Nimbo {1} está pronto para instalar.	Nimbo {1} is ready to install.	Nimbo {1} está listo para instalar.	Nimbo {1} est prêt à être installé.	Nimbo {1} ist bereit zur Installation.	Nimbo {1} è pronto da installare.
+Nimbo {1} disponível.	Nimbo {1} available.	Nimbo {1} disponible.	Nimbo {1} disponible.	Nimbo {1} verfügbar.	Nimbo {1} disponibile.
+Ver atualização	View update	Ver actualización	Voir la mise à jour	Update ansehen	Vedi aggiornamento
+Avisar versão nova: {1}	Notify new version: {1}	Avisar nueva versión: {1}	Signaler nouvelle version : {1}	Neue Version melden: {1}	Avvisa nuova versione: {1}
+O que há de novo	What's new	Novedades	Nouveautés	Was ist neu	Novità
+Novidades da versão {1}	What's new in version {1}	Novedades de la versión {1}	Nouveautés de la version {1}	Neu in Version {1}	Novità della versione {1}
+Esta versão não tem notas.	This version has no notes.	Esta versión no tiene notas.	Cette version n'a pas de notes.	Diese Version hat keine Hinweise.	Questa versione non ha note.

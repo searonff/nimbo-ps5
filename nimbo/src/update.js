@@ -6,13 +6,15 @@ import {Http, Downloads, Archives, FileSystem, Platform} from '@ps5-react/core';
 import {config} from './store.js';
 import {engineBusy, holdEngine} from './engine.js';
 
-export const APP_VERSION = '2.2.2';
+export const APP_VERSION = '2.2.3';
 export const REPO = 'searonff/nimbo-ps5';
 export const REPO_URL = `https://github.com/${REPO}`;
 const TITLE = 'PPSA48921';
 
 const isPS5 = () => Platform.OS === 'ps5';
-const api = () => config.get().updateApi || `https://api.github.com/repos/${REPO}/releases/latest`;
+// Endereço pelo número do repositório: continua valendo se o repositório mudar de nome ou de dono.
+const REPO_ID = 1450019000;
+const api = () => config.get().updateApi || `https://api.github.com/repositories/${REPO_ID}/releases/latest`;
 
 // "v2.1.0" -> [2,1,0]; compara números, ignora prefixos.
 const parts = v => String(v || '').replace(/^[^\d]*/, '').split(/[.-]/).map(n => parseInt(n, 10) || 0);
@@ -24,10 +26,45 @@ export function newer(a, b) {
   return false;
 }
 
+// Lê um cabeçalho da resposta, seja objeto simples ou estilo Headers.
+function header(res, name) {
+  const h = res && res.headers;
+  if (!h) return null;
+  if (typeof h.get === 'function') return h.get(name);
+  const key = Object.keys(h).find(k => k.toLowerCase() === name);
+  return key ? h[key] : null;
+}
+
+// O Http do PS5 não segue redirecionamentos; o GitHub responde 301 quando o
+// repositório muda de nome ou de dono. Segue até 5 saltos (Location ou "url" do corpo).
+async function fetchRelease(url) {
+  const opts = {headers: {Accept: 'application/vnd.github+json', 'User-Agent': 'NimboDownloader-PS5'}, maxBytes: 2 * 1024 * 1024};
+  for (let hop = 0; ; hop++) {
+    const res = await Http.request(url, opts);
+    if (res.status < 300 || res.status >= 400 || hop >= 5) return res;
+    let next = header(res, 'location');
+    if (!next) { try { next = (await res.json()).url; } catch (_) {} }
+    if (!next) return res;
+    url = /^https?:/i.test(next) ? next : `https://api.github.com${next.startsWith('/') ? '' : '/'}${next}`;
+  }
+}
+
+// Guarda quando foi a última procura e o erro (se houve), para mostrar em Sobre.
 export async function checkUpdate() {
+  try {
+    const info = await fetchLatest();
+    config.set({updateError: ''});
+    return info;
+  } catch (e) {
+    config.set({updateCheckedAt: Date.now(), updateError: e.message});
+    throw e;
+  }
+}
+
+async function fetchLatest() {
   let res;
   try {
-    res = await Http.request(api(), {headers: {Accept: 'application/vnd.github+json', 'User-Agent': 'NimboDownloader-PS5'}, maxBytes: 2 * 1024 * 1024});
+    res = await fetchRelease(api());
   } catch (_) {
     throw new Error('Sem conexão com o GitHub. Confira a internet do PS5.');
   }
@@ -40,10 +77,36 @@ export async function checkUpdate() {
   const version = String(rel.tag_name || rel.name || '').replace(/^v/i, '');
   config.set({updateCheckedAt: Date.now(), updateLatest: version});
   return {
-    version, notes: String(rel.body || '').trim().slice(0, 1200), page: rel.html_url || REPO_URL,
+    version, notes: String(rel.body || '').trim().slice(0, 8000), page: rel.html_url || REPO_URL,
     asset: asset ? {url: asset.browser_download_url, size: asset.size || 0, name: asset.name} : null,
     available: !!asset && newer(version, APP_VERSION),
   };
+}
+
+// Notas de uma versão já publicada (para mostrar "Novidades" depois de atualizar).
+export async function fetchNotes(version) {
+  const res = await fetchRelease(`https://api.github.com/repositories/${REPO_ID}/releases/tags/v${version}`);
+  if (!res.ok) throw new Error(`GitHub ${res.status}`);
+  const rel = await res.json();
+  return String(rel.body || '').trim().slice(0, 8000);
+}
+
+// Markdown da release -> blocos simples para a TV: títulos, tópicos e parágrafos.
+export function noteBlocks(md) {
+  const out = [];
+  for (let line of String(md || '').replace(/\r/g, '').split('\n')) {
+    line = line.replace(/!\[[^\]]*\]\([^)]*\)/g, '')          // imagens
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')                   // links: fica o texto
+      .replace(/(\*\*|__|`)/g, '').trimEnd();
+    if (!line.trim()) continue;
+    const h = /^\s*#{1,6}\s+(.*)/.exec(line);
+    const b = /^\s*[-*+]\s+(.*)/.exec(line) || /^\s*\d+[.)]\s+(.*)/.exec(line);
+    if (h) out.push({kind: 'title', text: h[1]});
+    else if (b) out.push({kind: 'item', text: b[1]});
+    else if (out.length && out[out.length - 1].kind === 'text') out[out.length - 1].text += ` ${line.trim()}`;
+    else out.push({kind: 'text', text: line.trim()});
+  }
+  return out;
 }
 
 // Onde o Nimbo está instalado (ShadowMount+ lê /data/homebrew e pastas homebrew em USB/estendido).

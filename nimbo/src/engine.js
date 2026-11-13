@@ -103,6 +103,25 @@ function friendly(patch) {
 function patchJob(id, patch) { patch = friendly(patch); queue.set(q => ({...q, jobs: q.jobs.map(j => (j.id === id ? {...j, ...patch} : j))})); }
 function patchTask(id, patch) { patch = friendly(patch); queue.set(q => ({...q, tasks: q.tasks.map(t => (t.id === id ? {...t, ...patch} : t))})); }
 
+// Progresso chega muitas vezes por segundo; repassar cada um redesenha o app inteiro e
+// atrasa a música. Guarda o último valor e aplica no máximo uma vez por segundo (em step).
+const live = new Map();   // id -> {kind: 'job'|'task', patch}
+let liveAt = 0;
+function liveProgress(kind, id, patch) { live.set(id, {kind, patch}); }
+function flushProgress(force) {
+  if (!live.size || (!force && Date.now() - liveAt < 1000)) return;
+  liveAt = Date.now();
+  const all = [...live.entries()];
+  live.clear();
+  queue.set(q => ({
+    ...q,
+    jobs: q.jobs.map(j => { const e = all.find(([id, x]) => id === j.id && x.kind === 'job'); return e ? {...j, ...e[1].patch} : j; }),
+    tasks: q.tasks.map(t => { const e = all.find(([id, x]) => id === t.id && x.kind === 'task'); return e ? {...t, ...e[1].patch} : t; }),
+  }));
+}
+// Ao terminar, aplica o último progresso e esquece o item (nada atrasado sobrescreve o estado final).
+function endProgress(id) { const e = live.get(id); live.delete(id); if (e) (e.kind === 'job' ? patchJob : patchTask)(id, e.patch); }
+
 export function enqueueTorbox(item, files, dest, {extract, deleteArchive}) {
   FileSystem.mkdir(dest, {recursive: true});
   let added = 0;
@@ -115,7 +134,7 @@ export function enqueueTorbox(item, files, dest, {extract, deleteArchive}) {
     fresh.push({
       id: nextId(), type: prov === 'torbox' ? 'torbox' : 'debrid', provider: prov, link: f.link || '',
       tbKind: item.kind, itemId: item.id, fileId: f.id, itemName: item.name,
-      name: basename(path), path, size: f.size || 0, written: 0, state: 'queued', error: '',
+      name: basename(path), path, root: dest, size: f.size || 0, written: 0, state: 'queued', error: '',
       extract, deleteArchive, created: Date.now(),
     });
     added++;
@@ -129,7 +148,7 @@ export function enqueueDirect(url, dest, {extract, deleteArchive}, givenName) {
   let name = givenName || (() => { try { return decodeURIComponent(url.split(/[?#]/)[0].split('/').pop() || 'download'); } catch (_) { return 'download'; } })();
   const path = unique(`${dest}/${sanitize(name)}`);
   queue.set(q => ({...q, jobs: q.jobs.concat([{
-    id: nextId(), type: 'direct', url, name: basename(path), path, size: 0, written: 0, state: 'queued', error: '',
+    id: nextId(), type: 'direct', url, name: basename(path), path, root: dest, size: 0, written: 0, state: 'queued', error: '',
     extract, deleteArchive, created: Date.now(),
   }])}));
 }
@@ -155,9 +174,13 @@ export function watchItem(kind, id, name, dest, opts, prov = 'torbox') {
 }
 
 /* ---------- execução ---------- */
-let current = null;   // {kind:'job'|'task', id, handle}
+// Duas vagas: um download (cj) e uma tarefa de disco (ct: extrair, copiar, mover). Por padrão
+// só uma roda por vez (o PS5 React recomenda não extrair enquanto baixa); com "Extrair durante
+// o download" ligado, uma extração pode rodar junto com o download seguinte.
+let cj = null;   // {id, handle, pausing?, cancelling?}
+let ct = null;   // {id, handle}
 let held = false;     // atualização do app em andamento: não começa nada novo
-export function engineBusy() { return !!current; }
+export function engineBusy() { return !!(cj || ct); }
 export function holdEngine(on) { held = on; }
 let lastWritten = 0, lastAt = 0;
 
@@ -165,12 +188,12 @@ export function jobAction(id, action) {
   const job = jobs().find(j => j.id === id);
   if (!job) return;
   if (action === 'pause') {
-    if (current && current.kind === 'job' && current.id === id) { current.pausing = true; if (current.handle) current.handle.cancel(); }
+    if (cj && cj.id === id) { cj.pausing = true; if (cj.handle) cj.handle.cancel(); }
     else if (job.state === 'queued') patchJob(id, {state: 'paused'});
   } else if (action === 'resume') {
     if (job.state === 'paused' || job.state === 'error') patchJob(id, {state: 'queued', error: ''});
   } else if (action === 'cancel') {
-    if (current && current.kind === 'job' && current.id === id) { current.cancelling = true; if (current.handle) current.handle.cancel(); return; }
+    if (cj && cj.id === id) { cj.cancelling = true; if (cj.handle) cj.handle.cancel(); return; }
     discardPartial(job);
     queue.set(q => ({...q, jobs: q.jobs.filter(j => j.id !== id)}));
   } else if (action === 'remove') {
@@ -183,7 +206,7 @@ export function jobAction(id, action) {
 export function taskAction(id, action) {
   const task = tasks().find(t => t.id === id);
   if (!task) return;
-  if (action === 'cancel' && current && current.kind === 'task' && current.id === id) { current.handle.cancel(); return; }
+  if (action === 'cancel' && ct && ct.id === id) { ct.handle.cancel(); return; }
   if (action === 'cancel' && task.state === 'queued') patchTask(id, {state: 'canceled'});
   if (action === 'retry') patchTask(id, {state: 'queued', error: ''});
   if (action === 'remove' && task.state !== 'running') queue.set(q => ({...q, tasks: q.tasks.filter(t => t.id !== id)}));
@@ -194,9 +217,27 @@ export function clearFinished() {
     tasks: q.tasks.filter(t => !['done', 'canceled'].includes(t.state))}));
 }
 
+// Apaga o pedaço baixado e, depois, as pastas que ficaram vazias por causa dele (a pasta do
+// torrent, por exemplo), subindo até a pasta de destino escolhida — que nunca é apagada.
 function discardPartial(job) {
+  const removals = [];
   for (const s of ['.part', '.resume']) {
-    try { if (FileSystem.exists(job.path + s)) removeSafely(job.path + s, {background: true}).catch(() => {}); } catch (_) { /* nada */ }
+    try { if (FileSystem.exists(job.path + s)) removals.push(removeSafely(job.path + s, {background: true}).catch(() => {})); } catch (_) { /* nada */ }
+  }
+  Promise.all(removals).then(() => pruneEmpty(dirname(job.path), job.root || config.get().defaultDest)).catch(() => {});
+}
+
+async function pruneEmpty(dir, root) {
+  root = String(root || '').replace(/\/+$/, '');
+  if (!root || root.split('/').length < 3) return;        // nunca perto da raiz da unidade
+  while (dir.startsWith(`${root}/`) && dir !== root) {
+    let entries;
+    try { entries = FileSystem.readDir(dir); } catch (_) { return; }
+    if (entries.length) return;
+    // outro item da fila ainda vai gravar aqui: deixa a pasta
+    if (jobs().some(j => j.state !== 'done' && j.path.startsWith(`${dir}/`))) return;
+    try { await removeSafely(dir); } catch (_) { return; }
+    dir = dirname(dir);
   }
 }
 
@@ -216,7 +257,12 @@ async function startJob(job) {
     job = {...job, path, name: basename(path)};
   }
   const free = (() => { try { return FileSystem.diskUsage(dirname(job.path)).free; } catch (_) { return -1; } })();
-  if (job.size > 0 && free >= 0 && free < job.size - job.written + 64 * 1024 * 1024) {
+  // Uma extração rodando junto ainda vai gravar (total - written) no disco: reserva esse espaço também.
+  const ext = ct ? tasks().find(t => t.id === ct.id && t.type === 'extract') : null;
+  const reserved = ext && ext.total > 0 ? Math.max(0, ext.total - (ext.written || 0)) : 0;
+  if (job.size > 0 && free >= 0 && free < job.size - job.written + reserved + 64 * 1024 * 1024) {
+    // com extração rodando, espera ela terminar em vez de dar erro
+    if (reserved && free >= job.size - job.written + 64 * 1024 * 1024) return;
     patchJob(job.id, {state: 'error', error: `Espaço insuficiente: precisa ${fmt(job.size)}, livre ${fmt(free)}`});
     return;
   }
@@ -224,12 +270,12 @@ async function startJob(job) {
   if (job.type === 'debrid') {
     // Real-Debrid, AllDebrid e Premiumize geram o link direto na hora (eles expiram).
     const slot = {kind: 'job', id: job.id, handle: null};
-    current = slot;
+    cj = slot;
     patchJob(job.id, {state: 'downloading', error: ''});
     let r;
-    try { r = await provider(job.provider).resolve(job); } catch (e) { current = null; throw e; }
-    if (slot.cancelling) { current = null; queue.set(q => ({...q, jobs: q.jobs.filter(j => j.id !== job.id)})); return; }
-    if (slot.pausing) { current = null; patchJob(job.id, {state: 'paused'}); return; }
+    try { r = await provider(job.provider).resolve(job); } catch (e) { cj = null; throw e; }
+    if (slot.cancelling) { cj = null; queue.set(q => ({...q, jobs: q.jobs.filter(j => j.id !== job.id)})); return; }
+    if (slot.pausing) { cj = null; patchJob(job.id, {state: 'paused'}); return; }
     url = r.url;
     if (r.size && !job.size) { job = {...job, size: r.size}; patchJob(job.id, {size: r.size}); }
   }
@@ -241,17 +287,18 @@ async function startJob(job) {
     rejectHtml: true,
     ...(job.type !== 'direct' && job.size > 0 ? {expectedBytes: job.size} : {}),
   });
-  current = {kind: 'job', id: job.id, handle};
+  cj = {kind: 'job', id: job.id, handle};
   lastWritten = job.written; lastAt = Date.now();
   patchJob(job.id, {state: 'downloading', error: '', started: Date.now()});
   const unsub = handle.subscribe(p => {
     const patch = {written: p.written || 0};
     if (p.total) patch.size = p.total;
-    patchJob(job.id, patch);
+    liveProgress('job', job.id, patch);
   });
   handle.done.then(() => {
     unsub();
-    current = null;
+    endProgress(job.id);
+    cj = null;
     patchJob(job.id, {state: 'done', finished: Date.now()});
     const fresh = jobs().find(j => j.id === job.id);
     Notifications.show('Download concluído', fresh.name);
@@ -259,7 +306,8 @@ async function startJob(job) {
     afterDownload(fresh);
   }, error => {
     unsub();
-    const c = current; current = null;
+    endProgress(job.id);
+    const c = cj; cj = null;
     if (c && c.cancelling) {
       discardPartial(job);
       queue.set(q => ({...q, jobs: q.jobs.filter(j => j.id !== job.id)}));
@@ -309,18 +357,18 @@ async function runExtract(task) {
   let lastError = '';
   for (const password of passwords) {
     const handle = Archives.extract({sources, destination: dest, maxBytes: 1024 ** 4, ...(password ? {password} : {})});
-    current = {kind: 'task', id: task.id, handle};
-    const unsub = handle.subscribe(p => patchTask(task.id, {written: p.written || 0, total: p.total || 0}));
+    ct = {kind: 'task', id: task.id, handle};
+    const unsub = handle.subscribe(p => liveProgress('task', task.id, {written: p.written || 0, total: p.total || 0}));
     try {
       await handle.done;
-      unsub(); current = null;
+      unsub(); endProgress(task.id); ct = null;
       if (task.deleteArchive) for (const s of sources) removeSafely(s, {background: true}).catch(() => {});
       patchTask(task.id, {state: 'done', result: dest, finished: Date.now()});
       Notifications.show('Extração concluída', basename(dest));
       toast(`Extraído: ${basename(dest)}`, 'ok');
       return;
     } catch (error) {
-      unsub(); current = null;
+      unsub(); endProgress(task.id); ct = null;
       lastError = String(error && error.message || error);
       if (error && error.name === 'AbortError') { patchTask(task.id, {state: 'canceled'}); return; }
       if (!passwordError(lastError)) break;
@@ -343,25 +391,26 @@ async function runCopy(task) {
     try { FileSystem.rename(task.src, target); patchTask(task.id, {state: 'done', result: target}); return; } catch (_) { /* outro disco: copia */ }
   }
   const handle = FileSystem.copyAsync(task.src, target, {verify: true, resume: true});
-  current = {kind: 'task', id: task.id, handle};
-  const unsub = handle.subscribe(p => patchTask(task.id, {written: p.written || 0, total: p.total || 0}));
+  ct = {kind: 'task', id: task.id, handle};
+  const unsub = handle.subscribe(p => liveProgress('task', task.id, {written: p.written || 0, total: p.total || 0}));
   try {
     await handle.done;
+    unsub(); endProgress(task.id);
     if (task.type === 'move') await removeSafely(task.src);
     patchTask(task.id, {state: 'done', result: target});
     toast(`${task.type === 'move' ? 'Movido' : 'Copiado'}: ${task.name}`, 'ok');
   } catch (error) {
     patchTask(task.id, {state: error && error.name === 'AbortError' ? 'canceled' : 'error', error: String(error && error.message || error)});
   } finally {
-    unsub(); current = null;
+    unsub(); endProgress(task.id); ct = null;
   }
 }
 
 /* ---------- laço principal ---------- */
 // Um erro inesperado não pode deixar o item preso em "rodando" nem travar a fila.
-function guard(promise, patch) {
+function guard(promise, patch, slot) {
   Promise.resolve(promise).catch(error => {
-    current = null;
+    if (slot === 'job') cj = null; else ct = null;
     patch({state: 'error', error: String(error && error.message || error) || 'Erro inesperado'});
   });
 }
@@ -371,9 +420,10 @@ function setAwake(on) {
 }
 
 function step() {
+  flushProgress();
   // velocidade
-  if (current && current.kind === 'job') {
-    const job = jobs().find(j => j.id === current.id);
+  if (cj) {
+    const job = jobs().find(j => j.id === cj.id);
     const now = Date.now();
     if (job && now - lastAt >= 900) {
       const inst = (job.written - lastWritten) * 1000 / (now - lastAt);
@@ -382,13 +432,18 @@ function step() {
     }
   } else if (ui.get().speed) ui.set({speed: 0});
 
-  if (current) { setAwake(true); return; }
-  if (held || fsBusy()) return;   // disco preso numa exclusão: começa depois
+  const parallel = !!config.get().extractWhileDownloading;
+  if (cj || ct) setAwake(true);
+  if (held || fsBusy()) return;   // disco preso numa exclusão (ou o app se atualizando): começa depois
+  // Paralelo: só extração anda junto com download (cópia e movimentação disputariam o disco à toa).
   const task = tasks().find(t => t.state === 'queued');
-  if (task) { setAwake(true); guard((task.type === 'extract' ? runExtract : runCopy)(task), p => patchTask(task.id, p)); return; }
+  const canTask = !ct && task && (!cj || (parallel && task.type === 'extract'));
+  if (canTask) { setAwake(true); guard((task.type === 'extract' ? runExtract : runCopy)(task), p => patchTask(task.id, p), 'task'); }
   const job = jobs().find(j => j.state === 'queued');
-  if (job) { setAwake(true); guard(startJob(job), p => patchJob(job.id, p)); return; }
-  setAwake(false);
+  const runningTask = ct ? tasks().find(t => t.id === ct.id) : canTask ? task : null;
+  const canJob = !cj && job && (!runningTask || (parallel && runningTask.type === 'extract'));
+  if (canJob) { setAwake(true); guard(startJob(job), p => patchJob(job.id, p), 'job'); }
+  if (!cj && !ct && !canTask && !canJob) setAwake(false);
 }
 
 let watchBusy = false;

@@ -2,33 +2,29 @@
 import {useEffect, useState} from 'react';
 import {View, Text, Image, Svg, Circle, Line, Path, motion} from '@ps5-react/core';
 import sky from '../assets/art/sky.png';
-import cloud1 from '../assets/art/cloud1.png';
-import cloud2 from '../assets/art/cloud2.png';
-import cloud3 from '../assets/art/cloud3.png';
 import {useStore, ui} from './store.js';
 
 const Arc = 'Arc';   // primitiva de arco do Embedded React (graus, sentido horário a partir das 12h)
 import {fmtSpeed} from './engine.js';
 import {t} from './i18n.js';
 
-/* céu com nuvens que atravessam a tela devagar (só translate: barato no renderizador) */
-const DRIFT = [
-  {src: cloud3, w: 520, h: 180, y: 120, dur: 140, from: -560, delay: 0},
-  {src: cloud1, w: 420, h: 150, y: 300, dur: 110, from: -460, delay: -60},
-  {src: cloud2, w: 300, h: 110, y: 60, dur: 95, from: -340, delay: -30},
-];
+/* Céu: as nuvens vêm pintadas no sky.png (tools/make_clouds.py). Ficam paradas de propósito:
+   o renderizador desenha na CPU e nuvem em movimento redesenharia, a cada quadro, a área dela
+   e os painéis por cima. Só as estrelas piscam (poucos pixels, quase nada de custo). */
+// Algumas estrelas que piscam devagar por cima das fixas do sky.png.
+const TWINKLE = [[210, 90, 3, 4.2], [520, 180, 2, 5.5], [880, 60, 3, 3.8], [1130, 140, 2, 6.1], [1420, 70, 3, 4.7],
+  [1700, 200, 2, 5.2], [330, 260, 2, 6.6], [1290, 300, 2, 4.4], [760, 320, 2, 5.8], [1840, 110, 3, 3.9]];
+
 export function Background({tint}) {
   return (
     <View className="absolute inset-0" pointerEvents="none">
       <Image layer source={sky} style={{position: 'absolute', left: 0, top: 0, width: 1920, height: 1080}} resizeMode="cover" />
       {tint ? <View className="absolute inset-0" style={{backgroundGradient: {type: 'linear', angle: 135, stops: [
         {color: tint, offset: 0}, {color: 'rgba(15,27,45,0)', offset: 0.7}]}}} /> : null}
-      {DRIFT.map((c, i) => (
-        <motion.View key={i} className="absolute" style={{top: c.y, left: 0, width: c.w, height: c.h}}
-          initial={{x: c.from}} animate={{x: 1960}}
-          transition={{duration: c.dur, ease: 'linear', repeat: Infinity, delay: c.delay}}>
-          <Image source={c.src} style={{width: c.w, height: c.h}} resizeMode="stretch" />
-        </motion.View>
+      {TWINKLE.map(([x, y, r, dur], i) => (
+        <motion.View key={`s${i}`} className="absolute" style={{left: x, top: y, width: r, height: r, borderRadius: r, backgroundColor: '#eef2ff'}}
+          initial={{opacity: 0.15}} animate={{opacity: 0.95}}
+          transition={{duration: dur, ease: 'easeInOut', repeat: Infinity, repeatType: 'reverse', delay: -i * 0.7}} />
       ))}
     </View>
   );

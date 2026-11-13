@@ -44,24 +44,8 @@ bg = sky(W, H)
 for y0, col, al, bl, seed in ((int(H * .80), (52, 62, 98), .85, 26, 1), (int(H * .87), (70, 78, 116), .9, 20, 2), (int(H * .94), (96, 98, 136), .95, 14, 3)):
     c, m = cloud_bank(W, H, y0, col, al, bl, 0, seed)
     bg.paste(c, (0, 0), m)
-bg.save(f'{OUT}/assets/art/sky.png', optimize=True)
-
-def puff(w, h, seed):
-    rnd = random.Random(seed)
-    m = Image.new('L', (w, h), 0); d = ImageDraw.Draw(m)
-    base = h * .62
-    for i in range(7):
-        r = rnd.randint(int(h * .18), int(h * .34))
-        cx = w * (.15 + .7 * i / 6) + rnd.randint(-12, 12)
-        d.ellipse([cx - r, base - r * 1.2, cx + r, base + r * .5], fill=255)
-    d.rounded_rectangle([w * .08, base - h * .08, w * .92, base + h * .16], radius=int(h * .12), fill=255)
-    m = m.filter(ImageFilter.GaussianBlur(10))
-    img = Image.new('RGBA', (w, h), (214, 222, 245, 0))
-    img.putalpha(m.point(lambda v: int(v * .16)))
-    return img
-
-for i, (w, h) in enumerate(((420, 150), (300, 110), (520, 180))):
-    puff(w, h, 40 + i).save(f'{OUT}/assets/art/cloud{i + 1}.png')
+# céu sem as nuvens soltas; tools/make_clouds.py pinta as nuvens e grava o assets/art/sky.png
+bg.save(os.path.join(os.path.dirname(__file__), 'sky_base.png'), optimize=True)
 
 icon = Image.open(os.path.join(os.path.dirname(__file__), '..', 'assets', 'icon0.png')).convert('RGB')
 icon.resize((512, 512)).save(f'{OUT}/sce_sys/icon0.png')

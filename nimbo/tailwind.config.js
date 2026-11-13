@@ -3,7 +3,8 @@ export default {theme: {extend: {
   colors: {
     night: '#0f1b2d', haze: '#172741', haze2: '#213656', rim: '#2d4568',
     cloud: '#f2f5f9', mist: '#93a7c3', sun: '#ffc857', sky: '#63b3ed', ok: '#57d9a3', bad: '#ff7a7a',
-    glass: 'rgba(23,39,65,0.82)', shade: 'rgba(5,10,20,0.72)',
+    // glass: vidro meio-termo, deixa o céu aparecer sem perder o contraste do texto na TV.
+    glass: 'rgba(16,28,52,0.64)', line: 'rgba(214,222,245,0.14)', shade: 'rgba(5,10,20,0.72)',
   },
   fontFamily: {
     body: './assets/Nunito-Medium.ttf',

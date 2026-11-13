@@ -9,6 +9,7 @@ import {enqueueTorbox, fmt, watchItem} from './engine.js';
 import {provider, PROVIDERS, jobOf} from './debrid/index.js';
 import {phoneInfo, refreshPhonePage} from './phone.js';
 import {t, tn, LANGS} from './i18n.js';
+import {noteBlocks} from './update.js';
 
 export function Sheet({title, onClose, children, width = 820}) {
   return (
@@ -20,6 +21,30 @@ export function Sheet({title, onClose, children, width = 820}) {
         </View>
       </View>
     </FocusScope>
+  );
+}
+
+/* novidades de uma versão (texto da release no GitHub). Cada bloco recebe o cursor,
+   assim o direcional rola o texto. */
+export function NotesSheet({title, notes, onClose}) {
+  const blocks = noteBlocks(notes);
+  return (
+    <Sheet title={title} onClose={onClose} width={1000}>
+      <ScrollView className="max-h-[440px]">
+        <View className="gap-1 pr-2">
+          {blocks.length ? blocks.map((b, i) => (
+            <View key={i} focusKey={i === 0 ? 'notes-first' : undefined} onPress={() => {}}
+              className={`flex-row gap-3 rounded-xl px-3 py-1 border-2 border-transparent focused:border-rim ${b.kind === 'title' && i ? 'mt-3' : ''}`}>
+              {b.kind === 'item' ? <Text className="font-heavy text-body text-sun">•</Text> : null}
+              <View className="flex-1">
+                <Text className={b.kind === 'title' ? 'font-heavy text-lead text-cloud' : 'font-body text-body text-cloud'}>{b.text}</Text>
+              </View>
+            </View>
+          )) : <Text className="font-semi text-body text-mist">{t('Esta versão não tem notas.')}</Text>}
+        </View>
+      </ScrollView>
+      <View className="flex-row"><Button primary label="Fechar" onPress={onClose} /></View>
+    </Sheet>
   );
 }
 
