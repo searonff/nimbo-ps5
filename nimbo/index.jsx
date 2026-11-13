@@ -729,12 +729,16 @@ function App() {
     startLightBar();
     startPhone();
     loadCloud();
-    setTimeout(autoCheckUpdate, 8000);
+    // Ao abrir, procura sempre (ignora o intervalo de 6 h): sem isso, quem abriu o app pouco
+    // antes de sair uma versão só ficava sabendo horas depois.
+    setTimeout(() => autoCheckUpdate(true), 8000);
     // Primeira abertura depois de atualizar: mostra as novidades desta versão (texto da release).
     const seen = config.get().seenVersion;
     if (seen !== APP_VERSION) {
       config.set({seenVersion: APP_VERSION});
-      if (seen) setTimeout(() => fetchNotes(APP_VERSION).then(notes => {
+      // Mostra também para quem vem de versão sem seenVersion (2.2.2 ou anterior); só não
+      // mostra numa instalação nova, sem ajustes salvos.
+      if (seen || config.get().hadSettings) setTimeout(() => fetchNotes(APP_VERSION).then(notes => {
         if (notes) setSheet(cur => cur || {type: 'notes', title: t(`Novidades da versão ${APP_VERSION}`), notes});
       }, () => {}), 2500);
     }

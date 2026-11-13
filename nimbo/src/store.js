@@ -15,9 +15,10 @@ function readJson(path) {
 
 function load(file, fallback) {
   const own = readJson(`${FileSystem.dataDir}/${file}`);
-  if (own) return {...fallback, ...own};
+  // hadSettings: já existia um arquivo (o app já tinha sido usado). Não é gravado.
+  if (own) return {...fallback, ...own, hadSettings: true};
   const saved = readJson(`${BACKUP_DIR}/${file}`);
-  if (saved) return {...fallback, ...saved, restoredFromBackup: true};
+  if (saved) return {...fallback, ...saved, restoredFromBackup: true, hadSettings: true};
   return fallback;
 }
 
@@ -37,8 +38,8 @@ function createStore(file, initial, persist = true, {delay = 400, sync = true} =
   if (file && persist) saveTimer = setTimeout(() => save(), 1500);
   const save = () => {
     saveTimer = null;
-    const {restoredFromBackup, ...data} = value || {};
-    void restoredFromBackup;
+    const {restoredFromBackup, hadSettings, ...data} = value || {};
+    void restoredFromBackup; void hadSettings;
     const text = JSON.stringify(data);
     try { writeSafe(`${FileSystem.dataDir}/${file}`, text, sync); } catch (_) { /* sem espaço: tenta na próxima mudança */ }
     try { FileSystem.mkdir(BACKUP_DIR, {recursive: true}); writeSafe(`${BACKUP_DIR}/${file}`, text, sync); } catch (_) { /* cópia é só reserva */ }
