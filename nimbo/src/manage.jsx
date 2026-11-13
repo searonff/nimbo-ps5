@@ -194,9 +194,10 @@ export function Files({pickFolder, confirm}) {
                   </View>
                 ) : null}
                 <TypeIcon entry={e} />
-                <View className="flex-1 flex-row items-center gap-3">
-                  <Text className="font-semi text-body text-cloud" numberOfLines={1}>{e.name}</Text>
-                  {gameTitle(e.name) ? <Text className="font-heavy text-cap text-sky" numberOfLines={1}>{gameTitle(e.name)}</Text> : null}
+                {/* Nome e jogo com largura limitada: sem isso um nome longo (CUSA…) passava por cima da data e do tamanho. */}
+                <View className="flex-1 min-w-0 flex-row items-center gap-3">
+                  <View className="flex-1 min-w-0"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{e.name}</Text></View>
+                  {gameTitle(e.name) ? <View className="shrink max-w-[340px]"><Text className="font-heavy text-cap text-sky" numberOfLines={1}>{gameTitle(e.name)}</Text></View> : null}
                 </View>
                 {e.isDirectory ? null : <Text className="font-semi text-cap text-mist">{fmtDate(e.modified)}</Text>}
                 {kind === 'first' ? <Pill text={t('Compactado')} tone="warn" /> : null}
@@ -492,9 +493,9 @@ export function Storage({confirm}) {
                   // Focável só para a rolagem pelo controle chegar até aqui (sem isso a seção ficava fora de alcance).
                   <View key={name} onPress={() => {}} className="gap-1 rounded-xl px-3 py-1 border-2 border-transparent focused:border-rim">
                     <View className="flex-row justify-between gap-3">
-                      <View className="flex-1 flex-row items-center gap-3">
-                        <Text className="font-semi text-body text-cloud" numberOfLines={1}>{name}</Text>
-                        {gameTitle(name) ? <Text className="font-heavy text-cap text-sky" numberOfLines={1}>{gameTitle(name)}</Text> : null}
+                      <View className="flex-1 min-w-0 flex-row items-center gap-3">
+                        <View className="flex-1 min-w-0"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{name}</Text></View>
+                        {gameTitle(name) ? <View className="shrink max-w-[340px]"><Text className="font-heavy text-cap text-sky" numberOfLines={1}>{gameTitle(name)}</Text></View> : null}
                       </View>
                       <Text className="font-heavy text-body text-cloud">{fmt(size)}</Text>
                     </View>

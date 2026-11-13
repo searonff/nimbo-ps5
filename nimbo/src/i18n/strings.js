@@ -485,7 +485,9 @@ export default {
 "Tirando os arquivos das pastas…": "Taking files out of folders…",
 "Sem subpastas": "No subfolders",
 "{n} arquivo agora solto nesta pasta": "{n} file now loose in this folder",
-"{n} arquivos agora soltos nesta pasta": "{n} files now loose in this folder"
+"{n} arquivos agora soltos nesta pasta": "{n} files now loose in this folder",
+"Há uma atualização em andamento. Espere ela terminar.": "An update is in progress. Wait for it to finish.",
+"via {k}": "via {k}"
 },
 "es": {
 "Painel": "Inicio",
@@ -972,7 +974,9 @@ export default {
 "Tirando os arquivos das pastas…": "Sacando archivos de las carpetas…",
 "Sem subpastas": "Sin subcarpetas",
 "{n} arquivo agora solto nesta pasta": "{n} archivo ahora suelto en esta carpeta",
-"{n} arquivos agora soltos nesta pasta": "{n} archivos ahora sueltos en esta carpeta"
+"{n} arquivos agora soltos nesta pasta": "{n} archivos ahora sueltos en esta carpeta",
+"Há uma atualização em andamento. Espere ela terminar.": "Hay una actualización en curso. Espera a que termine.",
+"via {k}": "vía {k}"
 },
 "fr": {
 "Painel": "Accueil",
@@ -1459,7 +1463,9 @@ export default {
 "Tirando os arquivos das pastas…": "Sortie des fichiers des dossiers…",
 "Sem subpastas": "Sans sous-dossiers",
 "{n} arquivo agora solto nesta pasta": "{n} fichier maintenant à la racine",
-"{n} arquivos agora soltos nesta pasta": "{n} fichiers maintenant à la racine"
+"{n} arquivos agora soltos nesta pasta": "{n} fichiers maintenant à la racine",
+"Há uma atualização em andamento. Espere ela terminar.": "Une mise à jour est en cours. Attendez qu'elle se termine.",
+"via {k}": "via {k}"
 },
 "de": {
 "Painel": "Start",
@@ -1946,7 +1952,9 @@ export default {
 "Tirando os arquivos das pastas…": "Dateien werden aus Ordnern geholt…",
 "Sem subpastas": "Ohne Unterordner",
 "{n} arquivo agora solto nesta pasta": "{n} Datei jetzt lose in diesem Ordner",
-"{n} arquivos agora soltos nesta pasta": "{n} Dateien jetzt lose in diesem Ordner"
+"{n} arquivos agora soltos nesta pasta": "{n} Dateien jetzt lose in diesem Ordner",
+"Há uma atualização em andamento. Espere ela terminar.": "Ein Update läuft gerade. Warte, bis es fertig ist.",
+"via {k}": "über {k}"
 },
 "it": {
 "Painel": "Home",
@@ -2433,6 +2441,8 @@ export default {
 "Tirando os arquivos das pastas…": "Estrazione dei file dalle cartelle…",
 "Sem subpastas": "Senza sottocartelle",
 "{n} arquivo agora solto nesta pasta": "{n} file ora sciolto in questa cartella",
-"{n} arquivos agora soltos nesta pasta": "{n} file ora sciolti in questa cartella"
+"{n} arquivos agora soltos nesta pasta": "{n} file ora sciolti in questa cartella",
+"Há uma atualização em andamento. Espere ela terminar.": "È in corso un aggiornamento. Attendi che finisca.",
+"via {k}": "via {k}"
 }
 };

@@ -19,11 +19,13 @@ export function Sheet({title, onClose, children, width = 820, actions = []}) {
     <FocusScope trap autoFocus onBack={() => { onClose(); return true; }}
       onAction={a => { const hit = live.find(x => x[0] === a); if (!hit) return false; hit[2](); return true; }}>
       <View className="absolute inset-0 bg-shade items-center justify-center">
-        <View style={{width}} className="max-h-[640px] rounded-3xl bg-haze2 p-7 gap-4 border-2 border-rim">
+        {/* Altura máxima com folga de 60 px em cima e embaixo da tela de 1080: os botões têm 75 px
+            e janelas com lista (download, ações) passavam dos 640 de antes e ficavam cortadas. */}
+        <View style={{width}} className="max-h-[960px] rounded-3xl bg-haze2 p-7 gap-4 border-2 border-rim">
           <View className="flex-row items-center gap-4">
-            <View className="flex-1"><Text className="font-heavy text-h2 text-cloud" numberOfLines={1}>{t(title)}</Text></View>
+            <View className="flex-1 min-w-0"><Text className="font-heavy text-h2 text-cloud" numberOfLines={1}>{t(title)}</Text></View>
             {live.concat([['circle', 'Fechar']]).map(([btn, label]) => (
-              <View key={btn} className="flex-row items-center gap-2 rounded-full bg-shade px-3 py-1">
+              <View key={btn} className="flex-none flex-row items-center gap-2 rounded-full bg-shade px-3 py-1">
                 <ButtonGlyph name={btn} />
                 <Text className="font-heavy text-cap text-cloud">{t(label)}</Text>
               </View>
@@ -111,7 +113,7 @@ export function ItemSheet({item: initial, onClose, onPickFolder}) {
   };
 
   return (
-    <Sheet title={item.name} onClose={onClose} width={900}
+    <Sheet title={item.name} onClose={onClose} width={1040}
       actions={[['triangle', item.ready ? 'Baixar' : 'Baixar quando ficar pronto', start],
         item.ready && item.files.length > 1 ? ['square', picked.size === item.files.length ? 'Desmarcar todos' : 'Marcar todos',
           () => setPicked(picked.size === item.files.length ? new Set() : new Set(item.files.map(f => f.id)))] : null]}>
@@ -124,12 +126,13 @@ export function ItemSheet({item: initial, onClose, onPickFolder}) {
           </View>
           <View onPress={() => onPickFolder(dest, setDest)} className="flex-row items-center gap-3 px-3 h-[44px] rounded-xl bg-shade border-2 border-transparent focused:border-sun">
             <Text className="font-semi text-cap text-mist">{t('Destino')}</Text>
-            <Text className="font-semi text-body text-cloud">{dest}</Text>
+            <View className="flex-1 min-w-0"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{dest}</Text></View>
           </View>
         </View>
       </View>
       {/* Ações em cima: dá para baixar sem rolar a lista de arquivos. */}
-      <View className="flex-row gap-2">
+      {/* Quebra de linha: em inglês/alemão as três opções não cabem lado a lado. */}
+      <View className="flex-row flex-wrap gap-2">
         <Toggle label={t('Extrair ao terminar')} value={extract} onChange={setExtract} />
         <Toggle label={t('Apagar o compactado depois')} value={del} onChange={setDel} />
         {extract ? <Toggle label={t('Sem subpastas')} value={flat} onChange={setFlat} /> : null}
@@ -364,7 +367,7 @@ export function ConnectSheet({providerId, onClose}) {
       setLeft(Math.max(0, remaining));
       if (remaining <= 0) { clearInterval(tick); setError('O código expirou.'); }
     }, 1000);
-    return () => { alive = false; clearTimeout(t); clearInterval(tick); };
+    return () => { alive = false; clearTimeout(tm); clearInterval(tick); };
   }, [info]);
 
   // Premiumize: chave da API, digitada aqui ou colada pelo celular.

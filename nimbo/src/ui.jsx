@@ -177,7 +177,8 @@ export function releaseInfo(name, files = []) {
   const ver = (/\bv\d+(?:\.\d+)+\b/i.exec(raw) || [''])[0];
   const year = (/\b(19[5-9]\d|20[0-4]\d)\b/.exec(raw) || [''])[0];
   // Título: tudo antes do primeiro marcador técnico, sem extensão, colchetes e grupo.
-  let base = raw.replace(/\.[a-z0-9]{2,5}$/i, '').replace(/[[(].*?[\])]/g, ' ').replace(/_+/g, ' ').replace(/\.(?!\d)|(?<!\d)\./g, ' ');
+  // Nome que começa pelo ID ("CUSA12345_Jogo…"): o ID já vira etiqueta, sai do título.
+  let base = raw.replace(/^\s*(PPSA|CUSA)\d{5}[\s._-]*/i, '').replace(/\.[a-z0-9]{2,5}$/i, '').replace(/[[(].*?[\])]/g, ' ').replace(/_+/g, ' ').replace(/\.(?!\d)|(?<!\d)\./g, ' ');
   const cutAt = base.search(/\b(S\d{1,2}(E\d{1,3})?|(2160|1080|720|480)p|v\d+(\.\d+)+|(19[5-9]\d|20[0-4]\d)|(PPSA|CUSA)\d{5}|WEB|WEBRip|BluRay|HDTV|x26[45]|H 26[45]|REPACK|PROPER|MULTi|FLAC|MP3|320kbps)\b/i);
   if (cutAt > 2) base = base.slice(0, cutAt);
   const title = base.replace(/-[A-Za-z0-9]+\s*$/, '').replace(/[\s-]+$/, '').replace(/\s+/g, ' ').trim() || raw;
@@ -202,17 +203,20 @@ export function Cover({name, files, w, h, radius = 14}) {
   if (w < 180) {
     return <View style={bg} className="items-center justify-center"><TypeGlyph kind={info.kind} size={Math.round(h * 0.5)} /></View>;
   }
+  // Capa baixa com etiquetas: título em uma linha só, senão as etiquetas vazavam para fora da capa
+  // (em cima do tamanho, no card da Nuvem). Capa estreita leva no máximo 2 etiquetas.
+  const lines = info.tags.length && h < 150 ? 1 : 2;
   return (
-    <View style={bg} className="p-3 justify-between">
+    <View style={bg} className="p-3 justify-between overflow-hidden">
       <View className="flex-row items-center gap-2">
         <TypeGlyph kind={info.kind} size={24} />
         <Text className="font-heavy text-cap" style={{color: c}}>{t(info.label)}</Text>
       </View>
       <View className="gap-1">
-        <Text className="font-heavy text-body text-cloud" numberOfLines={2}>{info.title}</Text>
+        <Text className="font-heavy text-body text-cloud" numberOfLines={lines}>{info.title}</Text>
         {info.tags.length ? (
-          <View className="flex-row gap-1">
-            {info.tags.slice(0, 3).map(x => (
+          <View className="flex-row gap-1 overflow-hidden">
+            {info.tags.slice(0, w < 260 ? 2 : 3).map(x => (
               <View key={x} className="rounded-md px-2" style={{backgroundColor: 'rgba(242,245,249,0.13)'}}>
                 <Text className="font-heavy text-xs2 text-cloud">{x}</Text>
               </View>

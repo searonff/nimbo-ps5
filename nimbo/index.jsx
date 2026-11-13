@@ -15,7 +15,7 @@ import {drives} from './src/drives.js';
 import {startEngine, jobAction, taskAction, clearFinished, fmt, fmtSpeed, fmtEta, applyRateLimit, friendlyError, enqueueTorbox} from './src/engine.js';
 import {BackgroundMusic, MUSIC_CREDIT} from './src/music.jsx';
 import {startLightBar, resetLightBar, testLightBar} from './src/lightbar.js';
-import {APP_VERSION, REPO_URL, checkUpdate, installUpdate, installDir, fetchNotes} from './src/update.js';
+import {APP_VERSION, REPO_URL, checkUpdate, installUpdate, updateRunning, installDir, fetchNotes} from './src/update.js';
 import {engineBusy} from './src/engine.js';
 
 // v2.0.1: música mais baixa também para quem já tinha a configuração salva
@@ -108,7 +108,7 @@ function Hero({onOpenCloud, onConnectPhone, onConnect, spot, onOpenItem}) {
           <Text className="font-semi text-body text-mist">{isJob ? (waiting ? t('Baixando agora · mais {n} na fila', {n: waiting}) : t('Baixando agora')) :
             t(task.type === 'extract' ? 'Extraindo agora' : 'Copiando agora')}</Text>
           <Text className="font-heavy text-h1 text-cloud" numberOfLines={2}>{name}</Text>
-          <View className="flex-row gap-6">
+          <View className="flex-row flex-wrap gap-x-6 gap-y-1">
             {isJob ? <Text className="font-heavy text-lead text-sun">{fmtSpeed(speed)}</Text> : null}
             {eta ? <Text className="font-semi text-lead text-cloud">{t('falta {a}', {a: fmtEta(eta)})}</Text> : null}
             <Text className="font-semi text-lead text-mist">{isJob ? t('{a} de {b}', {a: fmt(job.written), b: fmt(job.size)}) : (task.total ? t('{a} de {b}', {a: fmt(task.written), b: fmt(task.total)}) : task.written ? t('{a} extraídos', {a: fmt(task.written)}) : t('Lendo o arquivo…'))}</Text>
@@ -385,7 +385,7 @@ function Cloud({openItem, openConnect}) {
                 <Text className="font-heavy text-lead text-cloud" numberOfLines={1}>{it.name}</Text>
                 <View className="flex-row items-center gap-2">
                   {multi ? <ServiceBadge p={provider(it.provider)} /> : null}
-                  <Text className="font-semi text-cap text-mist">{`${t(KIND_LABEL[it.kind] || provider(it.provider).name)} · ${fmt(it.size)}${it.fileCount ? ` · ${tn(it.fileCount, '{n} arquivo', '{n} arquivos')}` : ''}`}</Text>
+                  <Text className="font-semi text-cap text-mist">{/* Tipo do conteúdo (igual à capa no Painel) e por onde chegou ao serviço: "Jogo · via Web". */}{`${t(releaseInfo(it.name, it.files).label)} · ${KIND_LABEL[it.kind] ? t('via {k}', {k: KIND_LABEL[it.kind]}) : provider(it.provider).name} · ${fmt(it.size)}${it.fileCount ? ` · ${tn(it.fileCount, '{n} arquivo', '{n} arquivos')}` : ''}`}</Text>
                 </View>
               </View>
               {done ? <Pill text={t('Já baixado')} tone="ok" /> : mine.some(j => j.state !== 'done') ? <Pill text={t('Na fila')} tone="run" /> : null}
@@ -579,6 +579,8 @@ function About({openNotes}) {
       .then(() => setState({phase: 'done', text: `Nimbo ${info.version} instalado. Feche e abra o app para usar a versão nova.`, frac: 1}),
         e => setState({phase: 'idle', text: e.message, frac: 0}));
   };
+  // Atualização automática já rodando em segundo plano: mostra o andamento dela em vez do botão.
+  useEffect(() => { if (updateRunning() && info) install(); }, []);
   const busy = state.phase === 'checking' || state.phase === 'installing';
   return (
     <ScrollView className="flex-1 px-10">
@@ -645,8 +647,9 @@ function About({openNotes}) {
 function Row({label, value, onPress, focusKey}) {
   return (
     <View focusKey={focusKey} onPress={onPress} className="flex-row items-center gap-4 rounded-2xl bg-glass px-5 h-[50px] border-[3px] border-line focused:border-sun">
-      <View className="flex-1"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{t(label)}</Text></View>
-      <Text className="font-heavy text-body text-sun" numberOfLines={1}>{t(value)}</Text>
+      <View className="flex-1 min-w-0"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{t(label)}</Text></View>
+      {/* Valor longo (pasta de destino) corta com reticências em vez de empurrar o rótulo. */}
+      <View className="shrink max-w-[480px]"><Text className="font-heavy text-body text-sun" numberOfLines={1}>{t(value)}</Text></View>
     </View>
   );
 }

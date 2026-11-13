@@ -10,7 +10,7 @@ App nativo para PS5 desbloqueado que baixa da sua nuvem (**TorBox, Real-Debrid, 
 
 | | |
 |---|---|
-| **Nuvem** | Junta TorBox, Real-Debrid, AllDebrid e Premiumize numa lista só, com busca (inclusive pelo nome dos arquivos), filtros por serviço e ordenação. Baixa só os arquivos marcados e pode apagar da nuvem depois. |
+| **Nuvem** | Junta TorBox, Real-Debrid, AllDebrid e Premiumize numa lista só, com busca (inclusive pelo nome dos arquivos), filtros por serviço e ordenação. Cada item mostra o tipo do conteúdo e por onde chegou ao serviço (ex.: "Jogo · via Web"). Baixa só os arquivos marcados e pode apagar da nuvem depois. |
 | **Login por QR code** | TorBox, Real-Debrid e AllDebrid conectam apontando o celular para a TV. Premiumize usa a chave da API, digitada no PS5 ou colada pelo celular. |
 | **Downloads** | Várias conexões por arquivo, retomada, fila salva, limite de velocidade, painel com as etapas (baixar › extrair › pronto) e a atual em destaque e "baixar quando ficar pronto" na nuvem. Cancelar apaga o pedaço baixado e a pasta que ficou vazia. O Painel destaca o próximo item pronto na nuvem (um aperto em Baixar e começa), numera a fila, avisa falhas e quando a fila não cabe no disco. As capas mostram o título limpo da release, o tipo (jogo, série, filme, compactado, música) e etiquetas como ID do jogo, versão, temporada e resolução. |
 | **Extração** | ZIP (com senha), 7z, RAR e RAR5, inclusive em várias partes. Pode extrair ao terminar, apagar o compactado e tirar os arquivos das subpastas (tudo solto na pasta escolhida). Senhas de arquivos salvas podem ser adicionadas, editadas e apagadas. |
@@ -41,6 +41,8 @@ App nativo para PS5 desbloqueado que baixa da sua nuvem (**TorBox, Real-Debrid, 
 4. Abra o Nimbo e conecte seu serviço em **Ajustes › Serviços de nuvem**.
 
 **Atualizar:** é automático (desligue em **Sobre › Atualizar sozinho**). Para forçar: **Sobre › Procurar atualização › Atualizar**. Depois, feche e abra o app. Para atualizar à mão, substitua a pasta `PPSA48921` pelo FTP; não precisa excluir o app pelo menu do PS5.
+
+> **Atualizando da 2.2.6 ou anterior?** Se aparecer "no such file or directory", feche e abra o app e atualize de novo. Acontecia quando a atualização automática e o botão Atualizar rodavam juntos; corrigido na 2.2.7.
 
 > **Vindo da 2.2.2 ou anterior?** Instale a 2.2.3 à mão uma vez: as versões antigas procuram atualização no endereço antigo do repositório. Da 2.2.3 em diante, a atualização automática funciona.
 

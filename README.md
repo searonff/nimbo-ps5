@@ -10,7 +10,7 @@ A native app for jailbroken PS5 consoles that downloads from your cloud (**TorBo
 
 | | |
 |---|---|
-| **Cloud** | Combines TorBox, Real-Debrid, AllDebrid and Premiumize in a single list, with search (including file names inside each item), per-service filters and sorting. Downloads only the files you mark and can delete them from the cloud afterwards. |
+| **Cloud** | Combines TorBox, Real-Debrid, AllDebrid and Premiumize in a single list, with search (including file names inside each item), per-service filters and sorting. Each item shows its content type and how it reached the service (e.g. "Game · via Web"). Downloads only the files you mark and can delete them from the cloud afterwards. |
 | **QR code login** | TorBox, Real-Debrid and AllDebrid connect by pointing your phone at the TV. Premiumize uses its API key, typed on the PS5 or pasted from your phone. |
 | **Downloads** | Multiple connections per file, resume, a saved queue, speed limit, a home panel showing the steps (download › extract › done) with the current one highlighted and "download when ready" for items still being prepared in the cloud. Cancelling deletes the partial file and the folder it left empty. The home panel highlights the next item ready in the cloud (one press on Download starts it), numbers the queue, flags failures and warns when the queue won't fit on the drive. Covers show the release's clean title, its type (game, series, movie, archive, music) and tags such as game ID, version, season and resolution. |
 | **Extraction** | ZIP (including password-protected), 7z, RAR and RAR5, also split into parts. Can extract when a download finishes, delete the archive afterwards and take files out of subfolders (all loose in the chosen folder). Saved archive passwords can be added, edited and deleted. |
@@ -41,6 +41,8 @@ A native app for jailbroken PS5 consoles that downloads from your cloud (**TorBo
 4. Open Nimbo and connect your service in **Settings › Cloud services**.
 
 **Update:** automatic (turn it off in **About › Auto-update**). To force it: **About › Check for updates › Update**. Then close and reopen the app. To update manually, replace the `PPSA48921` folder over FTP; there's no need to delete the app from the PS5 menu.
+
+> **Updating from 2.2.6 or older?** If you see "no such file or directory", close and reopen the app and update again. It happened when auto-update and the Update button ran at the same time; fixed in 2.2.7.
 
 > **Coming from 2.2.2 or older?** Install 2.2.3 manually once: older versions look for updates at the repository's old address. From 2.2.3 on, auto-update works.
 

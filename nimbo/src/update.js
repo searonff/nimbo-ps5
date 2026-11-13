@@ -6,7 +6,7 @@ import {Http, Downloads, Archives, FileSystem, Platform} from '@ps5-react/core';
 import {config} from './store.js';
 import {engineBusy, holdEngine} from './engine.js';
 
-export const APP_VERSION = '2.2.6';
+export const APP_VERSION = '2.2.7';
 export const REPO = 'searonff/nimbo-ps5';
 export const REPO_URL = `https://github.com/${REPO}`;
 const TITLE = 'PPSA48921';
@@ -153,6 +153,7 @@ export function backupVersion() {
   return v && FileSystem.exists(`${FileSystem.dataDir}/app-backup/eboot.bin`) ? v : '';
 }
 export async function rollback(step) {
+  if (running) throw new Error('Há uma atualização em andamento. Espere ela terminar.');
   const target = installDir();
   if (!target || !backupVersion()) throw new Error('Não há versão anterior guardada.');
   if (engineBusy()) throw new Error('Termine ou pause os downloads e extrações antes.');
@@ -164,8 +165,30 @@ export async function rollback(step) {
   } finally { holdEngine(false); }
 }
 
+// Uma instalação por vez: a automática (ao abrir o app) e o botão em Sobre usam a mesma
+// pasta de trabalho, e rodar as duas juntas apagava os arquivos uma da outra
+// ("no such file or directory"). Quem chama durante uma instalação se junta a ela.
+let running = null;
+let lastStep = null;
+const listeners = new Set();
+export const updateRunning = () => !!running;
+
 // step(texto, fração 0–1) informa o andamento na tela.
-export async function installUpdate(info, step) {
+export function installUpdate(info, step) {
+  if (step) listeners.add(step);
+  if (running) {
+    if (step && lastStep) step(lastStep[0], lastStep[1]);
+    return running;
+  }
+  lastStep = null;
+  running = doInstall(info, (text, frac) => {
+    lastStep = [text, frac];
+    listeners.forEach(fn => { try { fn(text, frac); } catch (_) { /* tela fechada */ } });
+  }).finally(() => { running = null; lastStep = null; listeners.clear(); });
+  return running;
+}
+
+async function doInstall(info, step) {
   if (!info || !info.asset) throw new Error('Esta versão não tem o arquivo do PS5 anexado.');
   if (engineBusy()) throw new Error('Termine ou pause os downloads e extrações antes de atualizar.');
   const target = installDir();
