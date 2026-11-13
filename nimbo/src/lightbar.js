@@ -6,14 +6,17 @@ import {Controller} from '@ps5-react/core';
 import {config, queue} from './store.js';
 
 const COLORS = {download: '#ffb020', disk: '#9b6bff', done: '#3ddc84', error: '#ff4a4a'};
-let shown = '';
+// null: nada aplicado ainda. O PS5 entrega a luz apagada ao app que abre o controle, então a
+// primeira chamada sempre acontece (mesmo parado, acende o azul padrão).
+let shown = null;
+let testing = false;
 let doneUntil = 0;
 let lastDone = -1;
 let errorUntil = 0;
 let lastErrors = -1;
 
 function apply(state) {
-  if (state === shown) return;
+  if (testing || state === shown) return;
   shown = state;
   try {
     if (!Controller) return;
@@ -45,6 +48,15 @@ export function startLightBar() {
   config.subscribe(update);
   setInterval(update, 3000);   // apaga o verde depois dos 15 s
   update();
+}
+
+// Teste ao ligar a opção: passa pelas cores (âmbar, roxo, verde, vermelho) e volta ao normal.
+export function testLightBar() {
+  if (!Controller) return;
+  const seq = ['download', 'disk', 'done', 'error'];
+  testing = true;
+  seq.forEach((k, i) => setTimeout(() => { try { Controller.setLightBar(COLORS[k]); } catch (_) { /* sem controle */ } }, i * 700));
+  setTimeout(() => { testing = false; shown = null; apply(compute()); }, seq.length * 700);
 }
 
 // Ao sair do app, devolve a cor do sistema.

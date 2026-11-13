@@ -12,13 +12,13 @@ App nativo para PS5 desbloqueado que baixa da sua nuvem (**TorBox, Real-Debrid, 
 |---|---|
 | **Nuvem** | Junta TorBox, Real-Debrid, AllDebrid e Premiumize numa lista só, com busca (inclusive pelo nome dos arquivos), filtros por serviço e ordenação. Baixa só os arquivos marcados e pode apagar da nuvem depois. |
 | **Login por QR code** | TorBox, Real-Debrid e AllDebrid conectam apontando o celular para a TV. Premiumize usa a chave da API, digitada no PS5 ou colada pelo celular. |
-| **Downloads** | Várias conexões por arquivo, retomada, fila salva, limite de velocidade, painel com as etapas (baixar › extrair › pronto) e a atual em destaque e "baixar quando ficar pronto" na nuvem. Cancelar apaga o pedaço baixado e a pasta que ficou vazia. |
+| **Downloads** | Várias conexões por arquivo, retomada, fila salva, limite de velocidade, painel com as etapas (baixar › extrair › pronto) e a atual em destaque e "baixar quando ficar pronto" na nuvem. Cancelar apaga o pedaço baixado e a pasta que ficou vazia. O Painel lista o que está pronto na nuvem e ainda não foi baixado, e avisa quando a fila não cabe no disco. |
 | **Extração** | ZIP (com senha), 7z, RAR e RAR5, inclusive em várias partes. Pode extrair ao terminar e apagar o compactado. Senhas de arquivos salvas podem ser adicionadas, editadas e apagadas. |
-| **Arquivos** | Navega por SSD, USB e estendido. Botão **Selecionar** (ou □) marca vários arquivos e pastas para copiar, mover, apagar, renomear e extrair. Mostra o nome do jogo ao lado de arquivos como `PPSA07784.ffpfsc`, a data de cada arquivo, ícones por tipo, ordenação e filtro por tipo (pastas, vídeos, compactados, pacotes, áudio, imagens). |
+| **Arquivos** | Navega por SSD, USB e estendido. Botão **Selecionar** (ou □) marca vários arquivos e pastas para copiar, mover, apagar, renomear e extrair. Mostra o nome do jogo ao lado de arquivos como `PPSA07784.ffpfsc`, a data de cada arquivo, ícones desenhados por tipo, ordenação e filtro por tipo (pastas, vídeos, compactados, pacotes, áudio, imagens). |
 | **Armazenamento** | Uso por tipo, maiores pastas e arquivos (com nome do jogo e data), sugestões de limpeza e, para cada jogo instalado, versão, data de instalação e tamanho do jogo, da atualização e das DLCs. Apagar roda em segundo plano, sem travar a tela. |
 | **Celular** | Página com PIN, na mesma rede, para ver a fila, colar links (magnet, hoster, direto) em qualquer serviço conectado e baixar da nuvem. |
 | **Idiomas** | Português (Brasil), English, Español, Français, Deutsch e Italiano, inclusive na página do celular. Segue o idioma do PS5 na primeira vez. |
-| **Atualização automática** | Procura novas Releases deste repositório a cada 6 h e instala sozinha quando não há downloads rodando. Guarda a versão anterior para voltar se algo der errado. Avisa quando há versão nova (faixa no topo e notificação do PS5) e mostra as novidades de cada versão em **Sobre › O que há de novo**. |
+| **Atualização automática** | Procura novas Releases deste repositório a cada 6 h e instala sozinha quando não há downloads rodando. Avisa quando há versão nova (faixa no topo e notificação do PS5) e mostra as novidades de cada versão em **Sobre › O que há de novo**. |
 | **Cópia de segurança dos ajustes** | Logins, ajustes e fila também ficam em `/data/nimbo-settings`, e voltam se você excluir o app pelo menu do PS5 e instalar de novo. |
 | **Luz do controle** | Mostra o estado da fila: âmbar baixando, roxo extraindo ou copiando, verde quando termina e vermelho se algo falhar. |
 | **Clima** | Música lo-fi (CC0) e sons da interface, com volume e opção de desligar. Painéis translúcidos sobre um céu com nuvens, e fundo próprio na tela inicial do PS5. |
@@ -40,7 +40,7 @@ App nativo para PS5 desbloqueado que baixa da sua nuvem (**TorBox, Real-Debrid, 
 3. Espere o ShadowMount+ registrar o app: o ícone aparece na tela inicial. Se não aparecer, reinicie o PS5 e rode o etaHEN de novo.
 4. Abra o Nimbo e conecte seu serviço em **Ajustes › Serviços de nuvem**.
 
-**Atualizar:** é automático (desligue em **Sobre › Atualizar sozinho**). Para forçar: **Sobre › Procurar atualização › Atualizar**. Depois, feche e abra o app. Se a versão nova der problema, **Sobre › Voltar para a versão anterior**. Para atualizar à mão, substitua a pasta `PPSA48921` pelo FTP; não precisa excluir o app pelo menu do PS5.
+**Atualizar:** é automático (desligue em **Sobre › Atualizar sozinho**). Para forçar: **Sobre › Procurar atualização › Atualizar**. Depois, feche e abra o app. Para atualizar à mão, substitua a pasta `PPSA48921` pelo FTP; não precisa excluir o app pelo menu do PS5.
 
 > **Vindo da 2.2.2 ou anterior?** Instale a 2.2.3 à mão uma vez: as versões antigas procuram atualização no endereço antigo do repositório. Da 2.2.3 em diante, a atualização automática funciona.
 
@@ -49,10 +49,12 @@ App nativo para PS5 desbloqueado que baixa da sua nuvem (**TorBox, Real-Debrid, 
 | Botão | Ação |
 |---|---|
 | ✕ | Selecionar |
-| ○ | Voltar / fechar |
-| △ | Atualizar a nuvem |
-| □ | Buscar (Nuvem) · selecionar vários (Arquivos) |
+| ○ | Voltar / fechar · pasta acima (Arquivos) |
+| △ | Atualizar a nuvem · filtrar (Arquivos) · ação principal da janela aberta (Baixar, Usar esta pasta, Adicionar senha) |
+| □ | Buscar (Nuvem) · selecionar vários (Arquivos) · ação secundária da janela (Nova pasta, Marcar todos) |
 | L1 / R1 | Trocar de aba |
+
+O touchpad fica desligado, para não mover o cursor sem querer.
 
 ## Estrutura
 

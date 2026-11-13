@@ -14,8 +14,8 @@ import {startPhone, phoneInfo} from './src/phone.js';
 import {drives} from './src/drives.js';
 import {startEngine, jobAction, taskAction, clearFinished, fmt, fmtSpeed, fmtEta, applyRateLimit, friendlyError} from './src/engine.js';
 import {BackgroundMusic, MUSIC_CREDIT} from './src/music.jsx';
-import {startLightBar, resetLightBar} from './src/lightbar.js';
-import {APP_VERSION, REPO_URL, checkUpdate, installUpdate, installDir, backupVersion, rollback, fetchNotes} from './src/update.js';
+import {startLightBar, resetLightBar, testLightBar} from './src/lightbar.js';
+import {APP_VERSION, REPO_URL, checkUpdate, installUpdate, installDir, fetchNotes} from './src/update.js';
 import {engineBusy} from './src/engine.js';
 
 // v2.0.1: música mais baixa também para quem já tinha a configuração salva
@@ -34,6 +34,11 @@ export function loadCloud() {
   listClouds().then(({items, errors}) => ui.set({cloud: items, cloudErrors: errors, cloudError: ''}), e => ui.set({cloudError: e.message}))
     .finally(() => { cloudLoading = false; });
 }
+
+// Touchpad desligado: deslizar o dedo movia o cursor sem querer. O host entrega cada toque por
+// esta função global; trocada por uma vazia, o toque é ignorado (o clique do touchpad continua
+// sendo um botão, sem uso no app).
+globalThis.__ps5ReactTouch = () => {};
 
 /* ---------- Painel ---------- */
 // Linha de etapas: bolinha numerada + nome. Feita = verde com ✓; atual = cor da tarefa, maior,
@@ -156,6 +161,10 @@ function UpNext() {
 function Drives() {
   const [list, setList] = useState(drives());
   useEffect(() => { const t = setInterval(() => setList(drives()), 10000); return () => clearInterval(t); }, []);
+  // Quanto a fila ainda vai ocupar em cada unidade (o que falta baixar), para avisar antes de faltar espaço.
+  const jobs = useStore(queue, q => q.jobs);
+  const need = d => jobs.filter(j => ['queued', 'downloading', 'paused'].includes(j.state) && (j.path === d.path || String(j.path).startsWith(`${d.path}/`)))
+    .reduce((n, j) => n + Math.max(0, (j.size || 0) - (j.written || 0)), 0);
   return (
     <View className="flex-1 gap-2 rounded-3xl bg-glass border-2 border-line px-6 py-4">
       <Text className="font-heavy text-lead text-cloud">{t('Unidades')}</Text>
@@ -165,7 +174,9 @@ function Drives() {
             <Text className="font-semi text-body text-cloud">{t(d.label)}</Text>
             <Text className="font-semi text-body text-mist">{t(`${fmt(d.free)} livres de ${fmt(d.total)}`)}</Text>
           </View>
-          <Bar value={(d.total - d.free) / d.total} color={d.free / d.total < 0.1 ? 'bad' : 'sky'} h={12} />
+          <Bar value={(d.total - d.free) / d.total} color={d.free / d.total < 0.1 || need(d) > d.free ? 'bad' : 'sky'} h={12} />
+          {need(d) ? <Text className={need(d) > d.free ? 'font-heavy text-cap text-bad' : 'font-semi text-cap text-mist'}>
+            {need(d) > d.free ? t('A fila precisa de {a} e só há {b} livres', {a: fmt(need(d)), b: fmt(d.free)}) : t('A fila ainda vai ocupar {a}', {a: fmt(need(d))})}</Text> : null}
         </View>
       ))}
     </View>
@@ -195,7 +206,9 @@ function CloudCard({item, onOpen, focusKey}) {
 
 function Home({openItem, goCloud, connectPhone, openConnect}) {
   const cloud = useStore(ui, s => s.cloud);
-  const recent = (cloud || []).slice(0, 8);
+  const jobs = useStore(queue, q => q.jobs);
+  // O que dá para fazer agora: pronto na nuvem e ainda não baixado nem na fila.
+  const todo = (cloud || []).filter(it => it.ready && !jobs.some(j => jobOf(j, it)));
   return (
     <ScrollView className="flex-1 px-10">
       <View className="gap-4 pb-24">
@@ -204,14 +217,17 @@ function Home({openItem, goCloud, connectPhone, openConnect}) {
           <UpNext />
           <Drives />
         </View>
-        {recent.length ? (
+        {todo.length ? (
           <View className="gap-3">
-            <Text className="font-heavy text-lead text-cloud">{t('Recentes na nuvem')}</Text>
+            <View className="flex-row items-center gap-4">
+              <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{tn(todo.length, '{n} pronto para baixar', '{n} prontos para baixar')}</Text></View>
+              {todo.length > 5 ? <Button small label={t('Ver na Nuvem')} onPress={goCloud} /> : null}
+            </View>
             <View className="flex-row gap-5">
-              {recent.slice(0, 5).map(it => <CloudCard key={`${it.kind}:${it.id}`} focusKey={`card:${it.kind}:${it.id}`} item={it} onOpen={openItem} />)}
+              {todo.slice(0, 5).map(it => <CloudCard key={`${it.kind}:${it.id}`} focusKey={`card:${it.kind}:${it.id}`} item={it} onOpen={openItem} />)}
             </View>
           </View>
-        ) : null}
+        ) : cloud && cloud.length ? <Text className="font-semi text-body text-mist">{t('Tudo o que está pronto na nuvem já foi baixado.')}</Text> : null}
       </View>
     </ScrollView>
   );
@@ -552,20 +568,13 @@ function About({openNotes}) {
               {t('Última procura: {d}', {d: fmtDate(checkedAt)})}{lastError && !state.text ? ` · ${t(lastError)}` : ''}
             </Text>
           ) : null}
-          <View className="flex-row gap-3">
+          <View className="flex-row flex-wrap gap-3">
             {state.phase === 'done'
               ? <Button primary focusKey="about-close" label={t('Fechar o app')} onPress={() => quit()} />
               : <Button focusKey="about-check" label={state.phase === 'checking' ? 'Procurando…' : 'Procurar atualização'} onPress={busy ? () => {} : check} />}
             <Button label={t(`Atualizar sozinho: ${auto && autoInstall ? 'Ligado' : 'Desligado'}`)} onPress={() => config.set({autoUpdate: true, autoInstall: !(auto && autoInstall)})} />
             <Button label={t(`Avisar versão nova: ${notify ? 'Ligado' : 'Desligado'}`)} onPress={() => config.set({updateNotify: !notify, autoUpdate: true})} />
           </View>
-          {backupVersion() && backupVersion() !== APP_VERSION && !busy ? (
-            <View className="flex-row"><Button label={t(`Voltar para a versão anterior (${backupVersion()})`)} onPress={() => {
-              setState({phase: 'installing', text: 'Restaurando…', frac: 0});
-              rollback((text, frac) => setState({phase: 'installing', text, frac}))
-                .then(() => setState({phase: 'done', text: 'Versão anterior restaurada. Feche e abra o app.', frac: 1}), e => setState({phase: 'idle', text: e.message, frac: 0}));
-            }} /></View>
-          ) : null}
           {!installDir() ? <Text className="font-semi text-cap text-mist">{t('A atualização pelo app precisa do Nimbo instalado em /data/homebrew (ShadowMount+).')}</Text> : null}
         </View>
         <View className="w-[360px] gap-4 rounded-3xl bg-glass border-2 border-line px-6 py-6 items-center">
@@ -632,7 +641,7 @@ function Settings({openConnect, pickFolder, confirm, openLang, openPasswords}) {
         <Row label={t('Limitar velocidade')} value={c.speedLimitOn ? 'Ligado' : 'Desligado'} onPress={flip('speedLimitOn')} />
         {c.speedLimitOn ? <Row label={t('Velocidade máxima')} value={t(`${c.speedLimitMB} MB/s`)} onPress={cycle('speedLimitMB', [1, 2, 5, 10, 20, 50])} /> : null}
         <Row label={t('Impedir o modo de repouso')} value={onOff(c.keepAwake)} onPress={flip('keepAwake')} />
-        <Row label={t('Luz do controle mostra o andamento')} value={onOff(c.lightBar !== false)} onPress={() => config.set({lightBar: c.lightBar === false})} />
+        <Row label={t('Luz do controle mostra o andamento')} value={onOff(c.lightBar !== false)} onPress={() => { const on = c.lightBar === false; config.set({lightBar: on}); if (on) testLightBar(); }} />
         <Row label={t('Apagar da nuvem depois de baixar')} value={onOff(c.deleteFromCloud)} onPress={flip('deleteFromCloud')} />
         <Text className="font-heavy text-h2 text-cloud mt-3">{t('Extração')}</Text>
         <Row label={t('Extrair automaticamente')} value={onOff(c.autoExtract)} onPress={flip('autoExtract')} />
@@ -682,16 +691,19 @@ function LiveMark({id}) {
 }
 
 // Deslize com direção: sai rápido para um lado, entra desacelerando pelo outro.
-const ENTER_T = {type: 'tween', duration: 0.32, ease: [0.22, 1, 0.36, 1]};
-const LEAVE_T = {type: 'tween', duration: 0.13, ease: 'easeIn'};
-const SLIDE_RIGHT = {hidden: {x: 120, opacity: 0}, shown: {x: 0, opacity: 1, transition: ENTER_T}, gone: {x: -120, opacity: 0, transition: LEAVE_T}};
-const SLIDE_LEFT = {hidden: {x: -120, opacity: 0}, shown: {x: 0, opacity: 1, transition: ENTER_T}, gone: {x: 120, opacity: 0, transition: LEAVE_T}};
+// Só translate (barato no renderizador de CPU; opacity na tela inteira custava quadros) e curto:
+// a saída quase some e a entrada chega rápido, então a troca responde já no primeiro quadro.
+const ENTER_T = {type: 'tween', duration: 0.2, ease: [0.22, 1, 0.36, 1]};
+const LEAVE_T = {type: 'tween', duration: 0.07, ease: 'easeIn'};
+const SLIDE_RIGHT = {hidden: {x: 56}, shown: {x: 0, transition: ENTER_T}, gone: {x: -40, transition: LEAVE_T}};
+const SLIDE_LEFT = {hidden: {x: -56}, shown: {x: 0, transition: ENTER_T}, gone: {x: 40, transition: LEAVE_T}};
 
 function App() {
   useStore(config, c => c.lang);   // trocar o idioma redesenha tudo
   const c = useStore(config);
   const [{tab, dir}, setNav] = useState({tab: 0, dir: 1});
   const filesSel = useStore(ui, s => !!s.filesSel);
+  const filesUp = useStore(ui, s => !!s.filesUp);
   // Troca de aba com direção: R1/direita entra pela direita, L1/esquerda entra pela esquerda.
   const setTab = next => setNav(cur => {
     const to = typeof next === 'function' ? next(cur.tab) : next;
@@ -711,7 +723,7 @@ function App() {
   // saída do <Screens> não terminava e a nova nunca entrava. A tela só segue a aba quando as trocas
   // param por um instante, então uma rajada vira uma troca só. A barra de abas responde na hora.
   const [shownTab, setShownTab] = useState(0);
-  useEffect(() => { const t = setTimeout(() => setShownTab(tab), 90); return () => clearTimeout(t); }, [tab]);
+  useEffect(() => { const t = setTimeout(() => setShownTab(tab), 40); return () => clearTimeout(t); }, [tab]);
   useEffect(() => { const t = setTimeout(() => kick(k => k + 1), 40); return () => clearTimeout(t); }, [shownTab]);
   // Rede de segurança: se mesmo assim a tela nova não entrar em 1,2 s, recria o <Screens>
   // (ele nasce já mostrando a aba certa). As outras telas perdem o estado guardado, só isso.
@@ -808,7 +820,7 @@ function App() {
         <UpdateBanner onOpen={() => goTab(6)} />
         {(
           <View className="flex-1">
-          <Screens key={screensKey} active={shownTab} variants={dir > 0 ? SLIDE_RIGHT : SLIDE_LEFT} focusKey="content" onBack={() => { focus(`tab:${TABS[tab][0]}`); return true; }}>
+          <Screens key={screensKey} preload active={shownTab} variants={dir > 0 ? SLIDE_RIGHT : SLIDE_LEFT} focusKey="content" onBack={() => { focus(`tab:${TABS[tab][0]}`); return true; }}>
             <Screen id={0}><LiveMark id={0} /><Guard><Home openItem={openItem} goCloud={() => goTab(1)} connectPhone={() => setSheet({type: 'phone'})} openConnect={openConnect} /></Guard></Screen>
             <Screen id={1}><LiveMark id={1} /><Guard><Cloud openItem={openItem} openConnect={openConnect} /></Guard></Screen>
             <Screen id={2}><LiveMark id={2} /><Guard><Downloads /></Guard></Screen>
@@ -823,8 +835,8 @@ function App() {
       <BackgroundMusic />
       <Hints items={[[['cross'], tab === 3 && filesSel ? 'Marcar / desmarcar' : 'Selecionar'],
         ...(tab === 1 ? [[['square'], 'Buscar']] : tab === 3 && !filesSel ? [[['square'], 'Selecionar vários']] : []),
-        ...(tab <= 1 ? [[['triangle'], 'Atualizar nuvem']] : []),
-        [['L1', 'R1'], 'Trocar aba'], [['circle'], tab === 3 && filesSel ? 'Sair da seleção' : 'Voltar']]} />
+        ...(tab <= 1 ? [[['triangle'], 'Atualizar nuvem']] : tab === 3 ? [[['triangle'], 'Filtrar']] : []),
+        [['L1', 'R1'], 'Trocar aba'], [['circle'], tab === 3 && filesSel ? 'Sair da seleção' : tab === 3 && filesUp ? 'Pasta acima' : 'Voltar']]} />
       <Toast />
       {sheet && sheet.type === 'item' ? <ItemSheet item={sheet.item} onClose={close} onPickFolder={(s, cb) => setSheet({...sheet, folder: {start: s, cb}})} /> : null}
       {sheet && sheet.folder ? <FolderSheet start={sheet.folder.start} onPick={p => sheet.folder.cb(p)} onClose={() => setSheet({...sheet, folder: null})} /> : null}

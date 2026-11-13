@@ -1,7 +1,7 @@
 // Janelas sobrepostas: item da nuvem, escolher pasta, conectar TorBox por QR, confirmar.
 import {useEffect, useState} from 'react';
 import {View, Text, FocusScope, ScrollView, FileSystem, Keyboard, Svg, Path, useFocus} from '@ps5-react/core';
-import {Button, Cover, Pill, Flag} from './ui.jsx';
+import {Button, ButtonGlyph, Cover, Pill, Flag} from './ui.jsx';
 import {QR} from './qr.jsx';
 import {config, useStore, toast, queue, ui} from './store.js';
 import {drives} from './drives.js';
@@ -11,12 +11,24 @@ import {phoneInfo, refreshPhonePage} from './phone.js';
 import {t, tn, LANGS} from './i18n.js';
 import {noteBlocks} from './update.js';
 
-export function Sheet({title, onClose, children, width = 820}) {
+// actions: atalhos por botão do controle, [['triangle' | 'square', rótulo, função], ...]. Valem de
+// qualquer ponto da janela (sem rolar até um botão) e aparecem no cabeçalho, que não rola.
+export function Sheet({title, onClose, children, width = 820, actions = []}) {
+  const live = actions.filter(Boolean);
   return (
-    <FocusScope trap autoFocus onBack={() => { onClose(); return true; }}>
+    <FocusScope trap autoFocus onBack={() => { onClose(); return true; }}
+      onAction={a => { const hit = live.find(x => x[0] === a); if (!hit) return false; hit[2](); return true; }}>
       <View className="absolute inset-0 bg-shade items-center justify-center">
         <View style={{width}} className="max-h-[640px] rounded-3xl bg-haze2 p-7 gap-4 border-2 border-rim">
-          <Text className="font-heavy text-h2 text-cloud">{t(title)}</Text>
+          <View className="flex-row items-center gap-4">
+            <View className="flex-1"><Text className="font-heavy text-h2 text-cloud" numberOfLines={1}>{t(title)}</Text></View>
+            {live.concat([['circle', 'Fechar']]).map(([btn, label]) => (
+              <View key={btn} className="flex-row items-center gap-2 rounded-full bg-shade px-3 py-1">
+                <ButtonGlyph name={btn} />
+                <Text className="font-heavy text-cap text-cloud">{t(label)}</Text>
+              </View>
+            ))}
+          </View>
           {children}
         </View>
       </View>
@@ -30,7 +42,6 @@ export function NotesSheet({title, notes, onClose}) {
   const blocks = noteBlocks(notes);
   return (
     <Sheet title={title} onClose={onClose} width={1000}>
-      <View className="flex-row"><Button primary label="Fechar" onPress={onClose} /></View>
       <ScrollView className="max-h-[440px]">
         <View className="gap-1 pr-2">
           {blocks.length ? blocks.map((b, i) => (
@@ -41,7 +52,7 @@ export function NotesSheet({title, notes, onClose}) {
                 <Text className={b.kind === 'title' ? 'font-heavy text-lead text-cloud' : 'font-body text-body text-cloud'}>{b.text}</Text>
               </View>
             </View>
-          )) : <Text className="font-semi text-body text-mist">{t('Esta versão não tem notas.')}</Text>}
+          )) : <View onPress={() => {}} className="rounded-xl px-3 py-1 border-2 border-transparent focused:border-rim"><Text className="font-semi text-body text-mist">{t('Esta versão não tem notas.')}</Text></View>}
         </View>
       </ScrollView>
     </Sheet>
@@ -99,7 +110,10 @@ export function ItemSheet({item: initial, onClose, onPickFolder}) {
   };
 
   return (
-    <Sheet title={item.name} onClose={onClose} width={900}>
+    <Sheet title={item.name} onClose={onClose} width={900}
+      actions={[['triangle', item.ready ? 'Baixar' : 'Baixar quando ficar pronto', start],
+        item.ready && item.files.length > 1 ? ['square', picked.size === item.files.length ? 'Desmarcar todos' : 'Marcar todos',
+          () => setPicked(picked.size === item.files.length ? new Set() : new Set(item.files.map(f => f.id)))] : null]}>
       <View className="flex-row gap-5">
         <Cover name={item.name} w={210} h={118} />
         <View className="flex-1 gap-2 justify-center">
@@ -180,7 +194,8 @@ export function FolderSheet({start, onPick, onClose}) {
     } catch (e) { toast(String(e.message || e), 'bad'); }
   };
   return (
-    <Sheet title={t('Escolher pasta')} onClose={onClose}>
+    <Sheet title={t('Escolher pasta')} onClose={onClose} width={900}
+      actions={[['triangle', 'Usar esta pasta', () => { onPick(path); onClose(); }], ['square', 'Nova pasta', newFolder]]}>
       <View className="flex-row gap-2 flex-wrap">
         {list.map(d => (
           <View key={d.path} onPress={() => setPath(d.path)} selected={drive === d}
@@ -190,12 +205,7 @@ export function FolderSheet({start, onPick, onClose}) {
           </View>
         ))}
       </View>
-      {/* Confirmar fica em cima, junto do caminho: não precisa rolar a lista até o fim. */}
-      <View className="flex-row items-center gap-3">
-        <View className="flex-1"><Text className="font-semi text-body text-mist" numberOfLines={1}>{path}</Text></View>
-        <Button primary small label={t('Usar esta pasta')} onPress={() => { onPick(path); onClose(); }} />
-        <Button small label={t('Nova pasta')} onPress={newFolder} />
-      </View>
+      <Text className="font-semi text-body text-mist" numberOfLines={1}>{path}</Text>
       <ScrollView className="max-h-[300px]">
         <View className="gap-1">
           {parent ? <View onPress={() => setPath(parent)} className="px-4 h-[42px] justify-center rounded-xl border-2 border-transparent focused:border-sun">
@@ -225,7 +235,6 @@ export function ServiceBadge({p, big}) {
 // Senhas de compactados: o Nimbo tenta cada uma ao extrair. Adicionar, editar, mostrar e apagar.
 export function PasswordsSheet({onClose}) {
   const list = useStore(config, c => c.passwords || []);
-  const [show, setShow] = useState(false);
   const [armed, setArmed] = useState('');          // botão "Apagar" aguardando a confirmação
   const {focus} = useFocus();
   const save = next => config.set({passwords: next.filter((x, i) => x && next.indexOf(x) === i)});
@@ -255,16 +264,13 @@ export function PasswordsSheet({onClose}) {
     setArmed(''); save([]); toast(t('Senhas apagadas'), 'ok');
     setTimeout(() => focus('pw-add'), 0);
   };
-  const mask = v => (show ? v : `${'•'.repeat(Math.min(12, Math.max(4, v.length - 2)))}${v.length > 4 ? v.slice(-2) : ''}`);
   return (
-    <Sheet title={t('Senhas de arquivos')} onClose={onClose} width={900}>
+    <Sheet title={t('Senhas de arquivos')} onClose={onClose} width={900} actions={[['triangle', 'Adicionar senha', add]]}>
       <Text className="font-semi text-body text-mist">{t('Ao extrair um compactado com senha, o Nimbo tenta cada uma destas.')}</Text>
       <View className="flex-row gap-3">
         <Button primary focusKey="pw-add" label={t('Adicionar senha')} onPress={add} />
-        {list.length ? <Button label={t(show ? 'Ocultar senhas' : 'Mostrar senhas')} onPress={() => setShow(x => !x)} /> : null}
         <View className="flex-1" />
         {list.length > 1 ? <Button danger label={t(armed === 'all' ? 'Confirmar: apagar todas' : 'Apagar todas')} onPress={delAll} /> : null}
-        <Button label={t('Fechar')} onPress={onClose} />
       </View>
       {list.length ? (
         <ScrollView className="max-h-[330px]">
@@ -272,7 +278,7 @@ export function PasswordsSheet({onClose}) {
             {list.map((v, i) => (
               <View key={`${i}:${v}`} className="flex-row items-center gap-3 rounded-2xl bg-shade px-4 py-2">
                 <Text className="font-heavy text-cap text-mist">{String(i + 1)}</Text>
-                <View className="flex-1"><Text className="font-semi text-lead text-cloud" numberOfLines={1}>{mask(v)}</Text></View>
+                <View className="flex-1"><Text className="font-semi text-lead text-cloud" numberOfLines={1}>{v}</Text></View>
                 <Button small focusKey={`pw:${i}`} label={t('Editar')} onPress={() => edit(i)} />
                 <Button small danger label={t(armed === `one:${i}` ? 'Confirmar' : 'Apagar')} onPress={() => del(i)} />
               </View>

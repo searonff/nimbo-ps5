@@ -12,13 +12,13 @@ A native app for jailbroken PS5 consoles that downloads from your cloud (**TorBo
 |---|---|
 | **Cloud** | Combines TorBox, Real-Debrid, AllDebrid and Premiumize in a single list, with search (including file names inside each item), per-service filters and sorting. Downloads only the files you mark and can delete them from the cloud afterwards. |
 | **QR code login** | TorBox, Real-Debrid and AllDebrid connect by pointing your phone at the TV. Premiumize uses its API key, typed on the PS5 or pasted from your phone. |
-| **Downloads** | Multiple connections per file, resume, a saved queue, speed limit, a home panel showing the steps (download › extract › done) with the current one highlighted and "download when ready" for items still being prepared in the cloud. Cancelling deletes the partial file and the folder it left empty. |
+| **Downloads** | Multiple connections per file, resume, a saved queue, speed limit, a home panel showing the steps (download › extract › done) with the current one highlighted and "download when ready" for items still being prepared in the cloud. Cancelling deletes the partial file and the folder it left empty. The home panel lists what is ready in the cloud but not downloaded yet, and warns when the queue won't fit on the drive. |
 | **Extraction** | ZIP (including password-protected), 7z, RAR and RAR5, also split into parts. Can extract when a download finishes and delete the archive afterwards. Saved archive passwords can be added, edited and deleted. |
-| **Files** | Browse the SSD, USB and extended storage. The **Select** button (or □) marks several files and folders to copy, move, delete, rename and extract. Shows the game name next to files like `PPSA07784.ffpfsc`, the date of each file, icons by type, sorting and a type filter (folders, videos, archives, packages, audio, images). |
+| **Files** | Browse the SSD, USB and extended storage. The **Select** button (or □) marks several files and folders to copy, move, delete, rename and extract. Shows the game name next to files like `PPSA07784.ffpfsc`, the date of each file, drawn icons by type, sorting and a type filter (folders, videos, archives, packages, audio, images). |
 | **Storage** | Usage by type, largest folders and files (with game name and date), cleanup suggestions and, for each installed game, version, install date and the size of the game, its updates and DLCs. Deleting runs in the background without freezing the screen. |
 | **Phone** | A PIN-protected page on the same network to see the queue, paste links (magnet, file hosts, direct) into any connected service and download from the cloud. |
 | **Languages** | Português (Brasil), English, Español, Français, Deutsch and Italiano, including the phone page. Follows the PS5 language on first launch. |
-| **Auto-update** | Checks this repository's Releases every 6 hours and installs new versions by itself when no downloads are running. Keeps the previous version so you can roll back. Tells you when a new version is out (a banner at the top and a PS5 notification) and shows what changed in **About › What's new**. |
+| **Auto-update** | Checks this repository's Releases every 6 hours and installs new versions by itself when no downloads are running. Tells you when a new version is out (a banner at the top and a PS5 notification) and shows what changed in **About › What's new**. |
 | **Backup of your settings** | Logins, settings and the queue are also saved to `/data/nimbo-settings`, so they come back if you delete the app from the PS5 menu and reinstall it. |
 | **Controller light** | Shows the queue state: amber while downloading, purple while extracting or copying, green when done and red if something fails. |
 | **Ambience** | Lo-fi music (CC0) and interface sounds, with volume control and an off switch. Translucent panels over a cloudy sky, and custom art on the PS5 home screen. |
@@ -40,7 +40,7 @@ A native app for jailbroken PS5 consoles that downloads from your cloud (**TorBo
 3. Wait for ShadowMount+ to register the app: its icon shows up on the home screen. If it doesn't, restart the PS5 and run etaHEN again.
 4. Open Nimbo and connect your service in **Settings › Cloud services**.
 
-**Update:** automatic (turn it off in **About › Auto-update**). To force it: **About › Check for updates › Update**. Then close and reopen the app. If the new version misbehaves, use **About › Go back to the previous version**. To update manually, replace the `PPSA48921` folder over FTP; there's no need to delete the app from the PS5 menu.
+**Update:** automatic (turn it off in **About › Auto-update**). To force it: **About › Check for updates › Update**. Then close and reopen the app. To update manually, replace the `PPSA48921` folder over FTP; there's no need to delete the app from the PS5 menu.
 
 > **Coming from 2.2.2 or older?** Install 2.2.3 manually once: older versions look for updates at the repository's old address. From 2.2.3 on, auto-update works.
 
@@ -49,10 +49,12 @@ A native app for jailbroken PS5 consoles that downloads from your cloud (**TorBo
 | Button | Action |
 |---|---|
 | ✕ | Select |
-| ○ | Back / close |
-| △ | Refresh the cloud |
-| □ | Search (Cloud) · select several (Files) |
+| ○ | Back / close · folder up (Files) |
+| △ | Refresh the cloud · filter (Files) · main action of the open window (Download, Use this folder, Add password) |
+| □ | Search (Cloud) · select several (Files) · secondary action of the window (New folder, Mark all) |
 | L1 / R1 | Switch tab |
+
+The touchpad is turned off so it doesn't move the cursor by accident.
 
 ## Project layout
 

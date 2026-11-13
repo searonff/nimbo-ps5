@@ -463,7 +463,13 @@ export default {
 "Mostrar: {1}": "Show: {1}",
 "Pastas": "Folders",
 "agora": "now",
-"Nada deste tipo nesta pasta.": "Nothing of this type in this folder."
+"Nada deste tipo nesta pasta.": "Nothing of this type in this folder.",
+"A fila precisa de {a} e só há {b} livres": "The queue needs {a} and only {b} is free",
+"A fila ainda vai ocupar {a}": "The queue will still take {a}",
+"Ver na Nuvem": "See in Cloud",
+"Tudo o que está pronto na nuvem já foi baixado.": "Everything ready in the cloud has been downloaded.",
+"{n} pronto para baixar": "{n} ready to download",
+"{n} prontos para baixar": "{n} ready to download"
 },
 "es": {
 "Painel": "Inicio",
@@ -928,7 +934,13 @@ export default {
 "Mostrar: {1}": "Mostrar: {1}",
 "Pastas": "Carpetas",
 "agora": "ahora",
-"Nada deste tipo nesta pasta.": "Nada de este tipo en esta carpeta."
+"Nada deste tipo nesta pasta.": "Nada de este tipo en esta carpeta.",
+"A fila precisa de {a} e só há {b} livres": "La cola necesita {a} y solo hay {b} libres",
+"A fila ainda vai ocupar {a}": "La cola aún ocupará {a}",
+"Ver na Nuvem": "Ver en la Nube",
+"Tudo o que está pronto na nuvem já foi baixado.": "Todo lo que está listo en la nube ya se descargó.",
+"{n} pronto para baixar": "{n} listo para descargar",
+"{n} prontos para baixar": "{n} listos para descargar"
 },
 "fr": {
 "Painel": "Accueil",
@@ -1393,7 +1405,13 @@ export default {
 "Mostrar: {1}": "Afficher : {1}",
 "Pastas": "Dossiers",
 "agora": "en cours",
-"Nada deste tipo nesta pasta.": "Rien de ce type dans ce dossier."
+"Nada deste tipo nesta pasta.": "Rien de ce type dans ce dossier.",
+"A fila precisa de {a} e só há {b} livres": "La file a besoin de {a} et il ne reste que {b}",
+"A fila ainda vai ocupar {a}": "La file occupera encore {a}",
+"Ver na Nuvem": "Voir dans le Cloud",
+"Tudo o que está pronto na nuvem já foi baixado.": "Tout ce qui est prêt dans le cloud a déjà été téléchargé.",
+"{n} pronto para baixar": "{n} prêt à télécharger",
+"{n} prontos para baixar": "{n} prêts à télécharger"
 },
 "de": {
 "Painel": "Start",
@@ -1858,7 +1876,13 @@ export default {
 "Mostrar: {1}": "Anzeigen: {1}",
 "Pastas": "Ordner",
 "agora": "jetzt",
-"Nada deste tipo nesta pasta.": "Nichts von diesem Typ in diesem Ordner."
+"Nada deste tipo nesta pasta.": "Nichts von diesem Typ in diesem Ordner.",
+"A fila precisa de {a} e só há {b} livres": "Die Warteschlange braucht {a}, frei sind nur {b}",
+"A fila ainda vai ocupar {a}": "Die Warteschlange belegt noch {a}",
+"Ver na Nuvem": "In der Cloud ansehen",
+"Tudo o que está pronto na nuvem já foi baixado.": "Alles, was in der Cloud bereit ist, wurde schon heruntergeladen.",
+"{n} pronto para baixar": "{n} bereit zum Download",
+"{n} prontos para baixar": "{n} bereit zum Download"
 },
 "it": {
 "Painel": "Home",
@@ -2323,6 +2347,12 @@ export default {
 "Mostrar: {1}": "Mostra: {1}",
 "Pastas": "Cartelle",
 "agora": "ora",
-"Nada deste tipo nesta pasta.": "Niente di questo tipo in questa cartella."
+"Nada deste tipo nesta pasta.": "Niente di questo tipo in questa cartella.",
+"A fila precisa de {a} e só há {b} livres": "La coda richiede {a} e ci sono solo {b} liberi",
+"A fila ainda vai ocupar {a}": "La coda occuperà ancora {a}",
+"Ver na Nuvem": "Vedi nel Cloud",
+"Tudo o que está pronto na nuvem já foi baixado.": "Tutto ciò che è pronto nel cloud è già stato scaricato.",
+"{n} pronto para baixar": "{n} pronto da scaricare",
+"{n} prontos para baixar": "{n} pronti da scaricare"
 }
 };

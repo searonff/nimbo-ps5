@@ -1,6 +1,6 @@
 // Arquivos (gerenciador) e Armazenamento (análise de espaço).
 import {useEffect, useRef, useState} from 'react';
-import {View, Text, ScrollView, FileSystem, Keyboard, Platform, useFocus, FocusScope, Svg, Path} from '@ps5-react/core';
+import {View, Text, ScrollView, FileSystem, Keyboard, Platform, useFocus, FocusScope, Svg, Path, Circle} from '@ps5-react/core';
 import {Bar, Button, Pill, ButtonGlyph} from './ui.jsx';
 import {Sheet} from './sheets.jsx';
 import {drives, fsBusy, removeSafely} from './drives.js';
@@ -28,24 +28,36 @@ const SHOW = [['all', 'Todos'], ['dir', 'Pastas'], ['video', 'Vídeos'], ['archi
   ['package', 'Pacotes e imagens'], ['audio', 'Áudio'], ['image', 'Imagens'], ['other', 'Outros']];
 function shows(e, f) { return f === 'all' || (f === 'dir' ? e.isDirectory : !e.isDirectory && category(e.name) === f); }
 
-// Ícone por tipo: cor + sigla curta, legível de longe na TV.
-const TYPE_BADGE = {
-  video: ['VÍD', '#63b3ed'], archive: ['ZIP', '#ffc857'], package: ['PKG', '#e58bd8'], audio: ['SOM', '#57d9a3'],
-  image: ['IMG', '#9be7ff'], partial: ['...', '#ff7a7a'], other: ['ARQ', '#6f84a3'],
-};
-function TypeIcon({entry}) {
-  if (entry.isDirectory) {
-    return (
-      <View className="w-[34px] h-[26px] justify-end">
-        <View className="w-[16px] h-[6px] rounded-md" style={{backgroundColor: '#4f9fe0'}} />
-        <View className="w-[34px] h-[20px] rounded-md" style={{backgroundColor: '#63b3ed'}} />
-      </View>
-    );
+// Ícone por tipo: pictograma em traço sobre uma peça com o tom do tipo. Lê como objeto (filme,
+// caixa, disco, nota) de longe na TV, sem depender de ler sigla. Só linhas retas e círculos.
+const TYPE_COLOR = {dir: '#63b3ed', video: '#7cc4ff', archive: '#ffc857', package: '#e58bd8', audio: '#57d9a3',
+  image: '#9be7ff', partial: '#ff7a7a', other: '#93a7c3'};
+function tint(hex, a) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`;
+}
+function glyph(kind, c) {
+  const line = {stroke: c, strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', fill: 'none'};
+  switch (kind) {
+    case 'dir': return [<Path key="a" d="M3 6.5 H9.5 L11.5 8.5 H21 V18.5 H3 Z" {...line} fill={tint(c, 0.28)} />];
+    case 'video': return [<Path key="a" d="M3 6 H21 V18 H3 Z" {...line} />, <Path key="b" d="M10 9.2 L15.2 12 L10 14.8 Z" {...line} fill={c} />];
+    case 'archive': return [<Path key="a" d="M3.5 4.5 H20.5 V8 H3.5 Z" {...line} />, <Path key="b" d="M5 8 V19.5 H19 V8" {...line} />,
+      <Path key="c" d="M10 11.5 H14" {...line} />];
+    case 'package': return [<Circle key="a" cx="12" cy="12" r="8.5" {...line} />, <Circle key="b" cx="12" cy="12" r="2.4" {...line} fill={c} />];
+    case 'audio': return [<Path key="a" d="M9 17 V5.5 L19 3.5 V15" {...line} />, <Circle key="b" cx="6.6" cy="17" r="2.4" {...line} fill={c} />,
+      <Circle key="c" cx="16.6" cy="15" r="2.4" {...line} fill={c} />];
+    case 'image': return [<Path key="a" d="M3 5 H21 V19 H3 Z" {...line} />, <Path key="b" d="M5.5 16.5 L10 11.5 L13.5 15 L15.5 13 L18.5 16.5" {...line} />,
+      <Circle key="c" cx="15.5" cy="8.6" r="1.5" {...line} fill={c} />];
+    case 'partial': return [<Path key="a" d="M12 4 V14 M8 10.5 L12 14.5 L16 10.5" {...line} />, <Path key="b" d="M5 19.5 H8 M10.5 19.5 H13.5 M16 19.5 H19" {...line} />];
+    default: return [<Path key="a" d="M6 3 H14 L19 8 V21 H6 Z" {...line} />, <Path key="b" d="M14 3 V8 H19" {...line} />];
   }
-  const [label, color] = TYPE_BADGE[category(entry.name)] || TYPE_BADGE.other;
+}
+function TypeIcon({entry}) {
+  const kind = entry.isDirectory ? 'dir' : category(entry.name);
+  const c = TYPE_COLOR[kind] || TYPE_COLOR.other;
   return (
-    <View className="w-[34px] h-[26px] rounded-md items-center justify-center" style={{backgroundColor: color}}>
-      <Text className="font-heavy text-xs2 text-night">{t(label)}</Text>
+    <View className="w-[38px] h-[38px] rounded-xl items-center justify-center" style={{backgroundColor: tint(c, 0.14)}}>
+      <Svg width={24} height={24} viewBox="0 0 24 24" style={{width: 24, height: 24}}>{glyph(kind, c)}</Svg>
     </View>
   );
 }
@@ -109,6 +121,7 @@ export function Files({pickFolder, confirm}) {
   const entries = show === 'all' ? listed : listed.filter(e => shows(e, show));
   const drive = all.filter(d => path === d.path || path.startsWith(`${d.path}/`)).sort((a, b) => b.path.length - a.path.length)[0];
   const up = drive && path !== drive.path ? dirname(path) : null;
+  useEffect(() => { ui.set({filesUp: !!up}); }, [up]);
   const refresh = () => setTick(t => t + 1);
   const rename = async e => {
     const r = await Keyboard.open({title: t('Novo nome'), text: e.name, maxLength: 200, type: 'basic'});
@@ -153,12 +166,19 @@ export function Files({pickFolder, confirm}) {
   });
   return (
     <FocusScope onAction={a => {
+      // △ troca o filtro de qualquer ponto da lista (sem subir até o botão).
+      if (a === 'triangle') { config.set({filesShow: SHOW[(SHOW.findIndex(x => x[0] === show) + 1) % SHOW.length][0]}); return true; }
       if (a !== 'square') return false;
       const e = entries.find(x => x.name === focused.current);
       if (!selMode) enterSel();
       if (e) toggle(e);
       return true;
-    }} onBack={() => { if (selMode) { clearSel(); return true; } return false; }}>
+    }} onBack={() => {
+      if (selMode) { clearSel(); return true; }
+      // ○ sobe uma pasta; na raiz da unidade, deixa o ○ voltar para a barra de abas.
+      if (up) { openDir(up); return true; }
+      return false;
+    }}>
     <View className="flex-1 px-10 gap-3">
       <View className="flex-row gap-2 items-center">
         {all.map(d => (
@@ -532,12 +552,11 @@ export function Storage({confirm}) {
           [t('Total'), fmt(detail.size)],
           [t('Pasta'), `${appsRoot()}/app/${detail.id}`],
         ].filter(Boolean).map(([k, v]) => (
-          <View key={k} className="flex-row justify-between gap-4">
+          <View key={k} onPress={() => {}} className="flex-row justify-between gap-4 rounded-xl px-2 border-2 border-transparent focused:border-rim">
             <Text className="font-semi text-body text-mist">{k}</Text>
             <View className="flex-1 items-end"><Text className="font-heavy text-body text-cloud" numberOfLines={1}>{v}</Text></View>
           </View>
         ))}
-        <View className="flex-row mt-2"><Button primary label="Fechar" onPress={() => setDetail(null)} /></View>
       </Sheet>
     ) : null}
     </View>
