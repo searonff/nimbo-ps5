@@ -122,7 +122,7 @@ function flushProgress(force) {
 // Ao terminar, aplica o último progresso e esquece o item (nada atrasado sobrescreve o estado final).
 function endProgress(id) { const e = live.get(id); live.delete(id); if (e) (e.kind === 'job' ? patchJob : patchTask)(id, e.patch); }
 
-export function enqueueTorbox(item, files, dest, {extract, deleteArchive}) {
+export function enqueueTorbox(item, files, dest, {extract, deleteArchive, flatten}) {
   FileSystem.mkdir(dest, {recursive: true});
   let added = 0;
   const current = jobs();
@@ -135,7 +135,7 @@ export function enqueueTorbox(item, files, dest, {extract, deleteArchive}) {
       id: nextId(), type: prov === 'torbox' ? 'torbox' : 'debrid', provider: prov, link: f.link || '',
       tbKind: item.kind, itemId: item.id, fileId: f.id, itemName: item.name,
       name: basename(path), path, root: dest, size: f.size || 0, written: 0, state: 'queued', error: '',
-      extract, deleteArchive, created: Date.now(),
+      extract, deleteArchive, flatten: !!flatten, created: Date.now(),
     });
     added++;
   }
@@ -143,22 +143,52 @@ export function enqueueTorbox(item, files, dest, {extract, deleteArchive}) {
   return added;
 }
 
-export function enqueueDirect(url, dest, {extract, deleteArchive}, givenName) {
+export function enqueueDirect(url, dest, {extract, deleteArchive, flatten}, givenName) {
   FileSystem.mkdir(dest, {recursive: true});
   let name = givenName || (() => { try { return decodeURIComponent(url.split(/[?#]/)[0].split('/').pop() || 'download'); } catch (_) { return 'download'; } })();
   const path = unique(`${dest}/${sanitize(name)}`);
   queue.set(q => ({...q, jobs: q.jobs.concat([{
     id: nextId(), type: 'direct', url, name: basename(path), path, root: dest, size: 0, written: 0, state: 'queued', error: '',
-    extract, deleteArchive, created: Date.now(),
+    extract, deleteArchive, flatten: !!flatten, created: Date.now(),
   }])}));
 }
 
-export function enqueueExtract(first, {deleteArchive, auto}) {
+export function enqueueExtract(first, {deleteArchive, auto, flatten}) {
   if (tasks().some(t => t.type === 'extract' && t.src === first && ['queued', 'running', 'done'].includes(t.state))) return;
   queue.set(q => ({...q, tasks: q.tasks.concat([{
     id: nextId(), type: 'extract', src: first, name: basename(first), dest: dirname(first), state: 'queued',
-    written: 0, total: 0, error: '', deleteArchive, auto: !!auto, created: Date.now(),
+    written: 0, total: 0, error: '', deleteArchive, auto: !!auto, flatten: !!flatten, created: Date.now(),
   }])}));
+}
+
+function fsChanged() { try { ui.set({fsTick: (ui.get().fsTick || 0) + 1}); } catch (_) { /* sem tela */ } }
+
+// Tira todos os arquivos de dentro de `dir` (em qualquer nível) e os põe soltos em `target`;
+// nome repetido ganha " (1)", nada é sobrescrito. As pastas que ficarem vazias são apagadas.
+// Cede a vez a cada 40 arquivos para não travar a tela e a música. Devolve quantos moveu.
+export async function flattenInto(dir, target) {
+  const files = [], dirs = [];
+  const walk = d => {
+    let list = [];
+    try { list = FileSystem.readDir(d); } catch (_) { return; }
+    for (const e of list) {
+      const full = `${d}/${e.name}`;
+      if (e.isDirectory) { dirs.push(full); walk(full); } else files.push(full);
+    }
+  };
+  walk(dir);
+  let moved = 0;
+  for (const f of files) {
+    if (dirname(f) === target) continue;   // já está solto no destino
+    try { FileSystem.rename(f, unique(`${target}/${basename(f)}`)); moved++; } catch (_) { /* fica onde está */ }
+    if (moved % 40 === 0) await new Promise(r => setTimeout(r, 0));
+  }
+  // Apaga de baixo para cima só as pastas vazias (a de origem também, se não for o próprio destino).
+  for (const d of dirs.reverse().concat(dir === target ? [] : [dir])) {
+    try { if (!FileSystem.readDir(d).length) await removeSafely(d); } catch (_) { /* deixa */ }
+  }
+  fsChanged();
+  return moved;
 }
 
 export function enqueueCopy(src, destDir, move) {
@@ -344,7 +374,7 @@ function afterDownload(job) {
   if (!first) return;
   const waiting = jobs().some(j => j.state !== 'done' && firstVolume(j.path) === first);
   if (waiting || !FileSystem.exists(first)) return;
-  enqueueExtract(first, {deleteArchive: job.deleteArchive, auto: true});
+  enqueueExtract(first, {deleteArchive: job.deleteArchive, auto: true, flatten: job.flatten});
 }
 
 function passwordError(m) { return /password|passphrase|decrypt|encrypt/i.test(m); }
@@ -363,7 +393,9 @@ async function runExtract(task) {
       await handle.done;
       unsub(); endProgress(task.id); ct = null;
       if (task.deleteArchive) for (const s of sources) removeSafely(s, {background: true}).catch(() => {});
-      patchTask(task.id, {state: 'done', result: dest, finished: Date.now()});
+      let result = dest;
+      if (task.flatten) { await flattenInto(dest, task.dest); result = task.dest; }   // sem subpastas: tudo solto na pasta escolhida
+      patchTask(task.id, {state: 'done', result, finished: Date.now()});
       Notifications.show('Extração concluída', basename(dest));
       toast(`Extraído: ${basename(dest)}`, 'ok');
       return;
@@ -460,7 +492,7 @@ async function checkWatches() {
         if (!item || !item.ready) continue;
         if (item.needsFiles) item = await p.details(item).catch(() => null);
         if (!item || !item.files.length) continue;
-        enqueueTorbox(item, item.files, w.dest, {extract: w.extract, deleteArchive: w.deleteArchive});
+        enqueueTorbox(item, item.files, w.dest, {extract: w.extract, deleteArchive: w.deleteArchive, flatten: w.flatten});
         queue.set(q => ({...q, watches: q.watches.filter(x => x !== w && !((x.provider || 'torbox') === pid && x.kind === w.kind && x.id === w.id))}));
         Notifications.show(`Pronto no ${p.name}`, item.name);
         toast(`Pronto no ${p.name}, baixando: ${item.name}`, 'ok');

@@ -1,11 +1,11 @@
 // Arquivos (gerenciador) e Armazenamento (análise de espaço).
 import {useEffect, useRef, useState} from 'react';
 import {View, Text, ScrollView, FileSystem, Keyboard, Platform, useFocus, FocusScope, Svg, Path, Circle} from '@ps5-react/core';
-import {Bar, Button, Pill, ButtonGlyph} from './ui.jsx';
+import {Bar, Button, Pill, ButtonGlyph, TypeGlyph, TYPE_COLOR, tint} from './ui.jsx';
 import {Sheet} from './sheets.jsx';
 import {drives, fsBusy, removeSafely} from './drives.js';
 import {config, queue, toast, ui, useStore} from './store.js';
-import {archiveKind, enqueueCopy, enqueueExtract, fmt, firstVolume, stripArchive, basename, dirname} from './engine.js';
+import {archiveKind, enqueueCopy, enqueueExtract, flattenInto, fmt, firstVolume, stripArchive, basename, dirname} from './engine.js';
 import {t, tn, lang, fmtDate} from './i18n.js';
 
 // Enquanto uma exclusão prende o disco, mostra a última listagem em vez de ler de novo.
@@ -28,36 +28,12 @@ const SHOW = [['all', 'Todos'], ['dir', 'Pastas'], ['video', 'Vídeos'], ['archi
   ['package', 'Pacotes e imagens'], ['audio', 'Áudio'], ['image', 'Imagens'], ['other', 'Outros']];
 function shows(e, f) { return f === 'all' || (f === 'dir' ? e.isDirectory : !e.isDirectory && category(e.name) === f); }
 
-// Ícone por tipo: pictograma em traço sobre uma peça com o tom do tipo. Lê como objeto (filme,
-// caixa, disco, nota) de longe na TV, sem depender de ler sigla. Só linhas retas e círculos.
-const TYPE_COLOR = {dir: '#63b3ed', video: '#7cc4ff', archive: '#ffc857', package: '#e58bd8', audio: '#57d9a3',
-  image: '#9be7ff', partial: '#ff7a7a', other: '#93a7c3'};
-function tint(hex, a) {
-  const n = parseInt(hex.slice(1), 16);
-  return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`;
-}
-function glyph(kind, c) {
-  const line = {stroke: c, strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', fill: 'none'};
-  switch (kind) {
-    case 'dir': return [<Path key="a" d="M3 6.5 H9.5 L11.5 8.5 H21 V18.5 H3 Z" {...line} fill={tint(c, 0.28)} />];
-    case 'video': return [<Path key="a" d="M3 6 H21 V18 H3 Z" {...line} />, <Path key="b" d="M10 9.2 L15.2 12 L10 14.8 Z" {...line} fill={c} />];
-    case 'archive': return [<Path key="a" d="M3.5 4.5 H20.5 V8 H3.5 Z" {...line} />, <Path key="b" d="M5 8 V19.5 H19 V8" {...line} />,
-      <Path key="c" d="M10 11.5 H14" {...line} />];
-    case 'package': return [<Circle key="a" cx="12" cy="12" r="8.5" {...line} />, <Circle key="b" cx="12" cy="12" r="2.4" {...line} fill={c} />];
-    case 'audio': return [<Path key="a" d="M9 17 V5.5 L19 3.5 V15" {...line} />, <Circle key="b" cx="6.6" cy="17" r="2.4" {...line} fill={c} />,
-      <Circle key="c" cx="16.6" cy="15" r="2.4" {...line} fill={c} />];
-    case 'image': return [<Path key="a" d="M3 5 H21 V19 H3 Z" {...line} />, <Path key="b" d="M5.5 16.5 L10 11.5 L13.5 15 L15.5 13 L18.5 16.5" {...line} />,
-      <Circle key="c" cx="15.5" cy="8.6" r="1.5" {...line} fill={c} />];
-    case 'partial': return [<Path key="a" d="M12 4 V14 M8 10.5 L12 14.5 L16 10.5" {...line} />, <Path key="b" d="M5 19.5 H8 M10.5 19.5 H13.5 M16 19.5 H19" {...line} />];
-    default: return [<Path key="a" d="M6 3 H14 L19 8 V21 H6 Z" {...line} />, <Path key="b" d="M14 3 V8 H19" {...line} />];
-  }
-}
 function TypeIcon({entry}) {
   const kind = entry.isDirectory ? 'dir' : category(entry.name);
   const c = TYPE_COLOR[kind] || TYPE_COLOR.other;
   return (
     <View className="w-[38px] h-[38px] rounded-xl items-center justify-center" style={{backgroundColor: tint(c, 0.14)}}>
-      <Svg width={24} height={24} viewBox="0 0 24 24" style={{width: 24, height: 24}}>{glyph(kind, c)}</Svg>
+      <TypeGlyph kind={kind} size={24} />
     </View>
   );
 }
@@ -95,6 +71,7 @@ export function Files({pickFolder, confirm}) {
   // Seleção múltipla: □ marca/desmarca o item com o cursor (arquivo ou pasta, em qualquer pasta).
   const [sel, setSel] = useState(() => new Map());   // caminho completo -> {name, isDirectory, size}
   const [selMode, setSelMode] = useState(false);
+  const [actions, setActions] = useState(false);   // menu de ações da seleção (Triângulo)
   const focused = useRef(null);
   const toggle = e => setSel(m => {
     const n = new Map(m), full = `${path}/${e.name}`;
@@ -155,7 +132,7 @@ export function Files({pickFolder, confirm}) {
     clearSel(); refresh();
   });
   const batchExtract = () => {
-    for (const first of pickedArchives) enqueueExtract(first, {deleteArchive: config.get().deleteArchive});
+    for (const first of pickedArchives) enqueueExtract(first, {deleteArchive: config.get().deleteArchive, flatten: config.get().flatten});
     toast(tn(pickedArchives.length, '{n} extração na fila (veja em Downloads)', '{n} extrações na fila (veja em Downloads)'), 'ok');
     clearSel();
   };
@@ -167,6 +144,7 @@ export function Files({pickFolder, confirm}) {
   return (
     <FocusScope onAction={a => {
       // △ troca o filtro de qualquer ponto da lista (sem subir até o botão).
+      if (a === 'triangle' && selMode) { if (sel.size) setActions(true); else toast(t('Marque algum item com o Quadrado'), 'info'); return true; }
       if (a === 'triangle') { config.set({filesShow: SHOW[(SHOW.findIndex(x => x[0] === show) + 1) % SHOW.length][0]}); return true; }
       if (a !== 'square') return false;
       const e = entries.find(x => x.name === focused.current);
@@ -229,18 +207,34 @@ export function Files({pickFolder, confirm}) {
         </View>
       </ScrollView>
       {selMode ? (
-        <View className="flex-row gap-2 items-center rounded-2xl bg-haze2 px-4 py-2 mb-[64px] border-2 border-sun">
+        <View className="flex-row gap-3 items-center rounded-2xl bg-haze2 px-5 py-3 mb-[64px] border-2 border-sun">
           <Text className="font-heavy text-lead text-cloud">{sel.size ? `${tn(sel.size, '{n} selecionado', '{n} selecionados')}${pickedBytes ? ` · ${fmt(pickedBytes)}` : ''}` : t('Marque os itens com')}</Text>
-          {!sel.size ? <ButtonGlyph name="cross" /> : null}
+          {!sel.size ? <ButtonGlyph name="square" /> : null}
           <View className="flex-1" />
-          {pickedArchives.length ? <Button small primary label={t('Extrair')} onPress={batchExtract} /> : null}
-          {sel.size ? <Button small label={t('Copiar para…')} onPress={() => batchCopy(false)} /> : null}
-          {sel.size ? <Button small label={t('Mover para…')} onPress={() => batchCopy(true)} /> : null}
-          {sel.size === 1 ? <Button small label={t('Renomear')} onPress={() => { const e = picked[0]; clearSel(); renameAt(e.full); }} /> : null}
-          {sel.size ? <Button small danger label={t('Apagar')} onPress={batchRemove} /> : null}
-          <Button small label={sel.size === entries.length && entries.length ? 'Desmarcar tudo' : 'Tudo aqui'} onPress={() => (sel.size === entries.length && entries.length ? setSel(new Map()) : selectAll())} />
-          <Button small label={t('Cancelar')} onPress={clearSel} />
+          {sel.size ? <View className="flex-row items-center gap-2"><ButtonGlyph name="triangle" /><Text className="font-heavy text-body text-cloud">{t('Ações')}</Text></View> : null}
+          <View className="flex-row items-center gap-2"><ButtonGlyph name="circle" /><Text className="font-semi text-body text-mist">{t('Sair da seleção')}</Text></View>
         </View>
+      ) : null}
+      {actions ? (
+        <Sheet title={tn(sel.size, '{n} selecionado', '{n} selecionados')} onClose={() => setActions(false)} width={620}>
+          <View className="gap-2">
+            {pickedArchives.length ? <Button primary label={t('Extrair')} onPress={() => { setActions(false); batchExtract(); }} /> : null}
+            {picked.some(e => e.isDirectory) ? <Button label={t('Tirar arquivos das pastas')} onPress={async () => {
+              setActions(false);
+              const dirs = picked.filter(e => e.isDirectory);
+              toast(t('Tirando os arquivos das pastas…'));
+              let n = 0;
+              for (const d of dirs) n += await flattenInto(d.full, path);
+              toast(tn(n, '{n} arquivo agora solto nesta pasta', '{n} arquivos agora soltos nesta pasta'), 'ok');
+              clearSel(); refresh();
+            }} /> : null}
+            <Button label={t('Copiar para…')} onPress={() => { setActions(false); batchCopy(false); }} />
+            <Button label={t('Mover para…')} onPress={() => { setActions(false); batchCopy(true); }} />
+            {sel.size === 1 ? <Button label={t('Renomear')} onPress={() => { const e = picked[0]; setActions(false); clearSel(); renameAt(e.full); }} /> : null}
+            <Button label={sel.size === entries.length && entries.length ? 'Desmarcar tudo' : 'Marcar tudo nesta pasta'} onPress={() => { setActions(false); if (sel.size === entries.length && entries.length) setSel(new Map()); else selectAll(); }} />
+            <Button danger label={t('Apagar')} onPress={() => { setActions(false); batchRemove(); }} />
+          </View>
+        </Sheet>
       ) : null}
       {menu ? (
         <Sheet title={menu.name} onClose={() => setMenu(null)} width={700}>
@@ -248,7 +242,7 @@ export function Files({pickFolder, confirm}) {
           <View className="gap-2">
             {archiveKind(menu.name) ? <Button primary label={t('Extrair aqui')} onPress={() => {
               const first = firstVolume(`${path}/${menu.name}`);
-              enqueueExtract(first, {deleteArchive: config.get().deleteArchive});
+              enqueueExtract(first, {deleteArchive: config.get().deleteArchive, flatten: config.get().flatten});
               toast(t('Extração na fila (veja em Downloads)'), 'ok'); setMenu(null);
             }} /> : null}
             <Button label={t('Copiar para…')} onPress={() => { const src = `${path}/${menu.name}`; setMenu(null);

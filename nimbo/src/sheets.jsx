@@ -91,20 +91,21 @@ export function ItemSheet({item: initial, onClose, onPickFolder}) {
   const [dest, setDest] = useState(cfg.defaultDest);
   const [extract, setExtract] = useState(cfg.autoExtract);
   const [del, setDel] = useState(cfg.deleteArchive);
+  const [flat, setFlat] = useState(!!cfg.flatten);
   const files = item.files.filter(f => picked.has(f.id));
   const total = files.reduce((a, f) => a + f.size, 0);
   const toggle = id => setPicked(s => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
 
   const start = () => {
     if (!item.ready) {
-      watchItem(item.kind, item.id, item.name, dest, {extract, deleteArchive: del}, item.provider || 'torbox');
+      watchItem(item.kind, item.id, item.name, dest, {extract, deleteArchive: del, flatten: flat}, item.provider || 'torbox');
       toast(`Vou baixar assim que ficar pronto no ${prov.name}`, 'ok');
       onClose();
       return;
     }
     if (item.needsFiles) { toast(loadErr || 'Ainda carregando a lista de arquivos…', loadErr ? 'bad' : 'info'); return; }
     if (!files.length) { toast(t('Marque pelo menos um arquivo'), 'bad'); return; }
-    const n = enqueueTorbox(item, files, dest, {extract, deleteArchive: del});
+    const n = enqueueTorbox(item, files, dest, {extract, deleteArchive: del, flatten: flat});
     toast(n ? tn(n, '{n} arquivo na fila', '{n} arquivos na fila') : t('Esses arquivos já estão na fila'), n ? 'ok' : 'info');
     onClose();
   };
@@ -115,7 +116,7 @@ export function ItemSheet({item: initial, onClose, onPickFolder}) {
         item.ready && item.files.length > 1 ? ['square', picked.size === item.files.length ? 'Desmarcar todos' : 'Marcar todos',
           () => setPicked(picked.size === item.files.length ? new Set() : new Set(item.files.map(f => f.id)))] : null]}>
       <View className="flex-row gap-5">
-        <Cover name={item.name} w={210} h={118} />
+        <Cover name={item.name} files={item.files} w={210} h={118} />
         <View className="flex-1 gap-2 justify-center">
           <View className="flex-row gap-3 items-center">
             <Text className="font-semi text-body text-mist">{item.needsFiles ? (item.ready ? `${fmt(item.size)} · ${t(loadErr || 'carregando arquivos…')}` : fmt(item.size)) : `${fmt(item.size)} · ${tn(item.files.length, '{n} arquivo', '{n} arquivos')}`}</Text>
@@ -131,6 +132,7 @@ export function ItemSheet({item: initial, onClose, onPickFolder}) {
       <View className="flex-row gap-2">
         <Toggle label={t('Extrair ao terminar')} value={extract} onChange={setExtract} />
         <Toggle label={t('Apagar o compactado depois')} value={del} onChange={setDel} />
+        {extract ? <Toggle label={t('Sem subpastas')} value={flat} onChange={setFlat} /> : null}
       </View>
       <View className="flex-row gap-3 items-center">
         <Button primary focusKey="sheet-go" label={item.ready ? `Baixar ${fmt(total)}` : 'Baixar quando ficar pronto'} onPress={start} />

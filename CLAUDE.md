@@ -41,4 +41,5 @@ O texto em português é a chave. Edite `tools/i18n.tsv` (pt, en, es, fr, de, it
 **Sempre, a cada release** (pedido do usuário):
 - Atualizar **os dois READMEs** (`README.md` em inglês e `README.pt-BR.md`): tabela "O que ele faz" com os recursos novos, avisos de instalação/atualização e o que mais tiver mudado. Os dois devem dizer a mesma coisa.
 - Rodar `i18n.py build` antes de compilar e só seguir com "0 faltando".
+- Notas da release aparecem no app ("Novidades") com a fonte Nunito, que **não tem △ □ ○ ✕ ›**: viram "?". Escrever Triângulo, Quadrado, Círculo, X. O mesmo vale para qualquer texto exibido no app (use `ButtonGlyph` para desenhar botões).
 - Antes do push, `git fetch` (o usuário às vezes commita README e prints direto no GitHub).

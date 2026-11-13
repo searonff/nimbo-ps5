@@ -112,7 +112,7 @@ function serve() {
         if (!item) { reply(r.id, {error: 'Item não encontrado'}); continue; }
         const c = config.get();
         const p = provider(item.provider);
-        const opts = {extract: c.autoExtract, deleteArchive: c.deleteArchive};
+        const opts = {extract: c.autoExtract, deleteArchive: c.deleteArchive, flatten: c.flatten};
         if (item.ready) {
           const id = r.id;
           (item.needsFiles ? p.details(item) : Promise.resolve(item)).then(full => {
@@ -128,7 +128,7 @@ function serve() {
         const c = config.get();
         const link = body.link.trim().slice(0, 4000);
         if (body.direct && /^https?:\/\//i.test(link)) {
-          enqueueDirect(link, c.defaultDest, {extract: c.autoExtract, deleteArchive: c.deleteArchive});
+          enqueueDirect(link, c.defaultDest, {extract: c.autoExtract, deleteArchive: c.deleteArchive, flatten: c.flatten});
           toast('Celular: link direto na fila', 'ok');
           reply(r.id, {message: 'Na fila do PS5'});
           continue;
@@ -138,7 +138,7 @@ function serve() {
         const once = (obj) => { if (!answered) { answered = true; reply(id, obj); } };
         const p = provider(body.service || (linkedProviders()[0] || {}).id);
         if (!p.linked()) { reply(id, {error: 'Conecte um serviço no PS5 (Ajustes > Serviços de nuvem) ou escolha Link direto.'}); continue; }
-        const opts = {extract: c.autoExtract, deleteArchive: c.deleteArchive};
+        const opts = {extract: c.autoExtract, deleteArchive: c.deleteArchive, flatten: c.flatten};
         setTimeout(() => once({message: `Enviando ao ${p.name}… confira a fila em instantes`}), 4000);
         p.add(link).then(res => {
           if (res.direct) {   // link de site (hoster) liberado pelo serviço: baixa direto

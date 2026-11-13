@@ -12,9 +12,9 @@ A native app for jailbroken PS5 consoles that downloads from your cloud (**TorBo
 |---|---|
 | **Cloud** | Combines TorBox, Real-Debrid, AllDebrid and Premiumize in a single list, with search (including file names inside each item), per-service filters and sorting. Downloads only the files you mark and can delete them from the cloud afterwards. |
 | **QR code login** | TorBox, Real-Debrid and AllDebrid connect by pointing your phone at the TV. Premiumize uses its API key, typed on the PS5 or pasted from your phone. |
-| **Downloads** | Multiple connections per file, resume, a saved queue, speed limit, a home panel showing the steps (download › extract › done) with the current one highlighted and "download when ready" for items still being prepared in the cloud. Cancelling deletes the partial file and the folder it left empty. The home panel lists what is ready in the cloud but not downloaded yet, and warns when the queue won't fit on the drive. |
-| **Extraction** | ZIP (including password-protected), 7z, RAR and RAR5, also split into parts. Can extract when a download finishes and delete the archive afterwards. Saved archive passwords can be added, edited and deleted. |
-| **Files** | Browse the SSD, USB and extended storage. The **Select** button (or □) marks several files and folders to copy, move, delete, rename and extract. Shows the game name next to files like `PPSA07784.ffpfsc`, the date of each file, drawn icons by type, sorting and a type filter (folders, videos, archives, packages, audio, images). |
+| **Downloads** | Multiple connections per file, resume, a saved queue, speed limit, a home panel showing the steps (download › extract › done) with the current one highlighted and "download when ready" for items still being prepared in the cloud. Cancelling deletes the partial file and the folder it left empty. The home panel highlights the next item ready in the cloud (one press on Download starts it), numbers the queue, flags failures and warns when the queue won't fit on the drive. Covers show the release's clean title, its type (game, series, movie, archive, music) and tags such as game ID, version, season and resolution. |
+| **Extraction** | ZIP (including password-protected), 7z, RAR and RAR5, also split into parts. Can extract when a download finishes, delete the archive afterwards and take files out of subfolders (all loose in the chosen folder). Saved archive passwords can be added, edited and deleted. |
+| **Files** | Browse the SSD, USB and extended storage. The **Select** button (or □) marks several files and folders to copy, move, delete, rename and extract. Shows the game name next to files like `PPSA07784.ffpfsc`, the date of each file, drawn icons by type, sorting and a type filter (folders, videos, archives, packages, audio, images). With items marked, Triangle opens the actions (move, copy, delete, take files out of folders) from anywhere in the list. |
 | **Storage** | Usage by type, largest folders and files (with game name and date), cleanup suggestions and, for each installed game, version, install date and the size of the game, its updates and DLCs. Deleting runs in the background without freezing the screen. |
 | **Phone** | A PIN-protected page on the same network to see the queue, paste links (magnet, file hosts, direct) into any connected service and download from the cloud. |
 | **Languages** | Português (Brasil), English, Español, Français, Deutsch and Italiano, including the phone page. Follows the PS5 language on first launch. |
@@ -50,7 +50,7 @@ A native app for jailbroken PS5 consoles that downloads from your cloud (**TorBo
 |---|---|
 | ✕ | Select |
 | ○ | Back / close · folder up (Files) |
-| △ | Refresh the cloud · filter (Files) · main action of the open window (Download, Use this folder, Add password) |
+| △ | Refresh the cloud · filter or open selection actions (Files) · main action of the open window (Download, Use this folder, Add password) |
 | □ | Search (Cloud) · select several (Files) · secondary action of the window (New folder, Mark all) |
 | L1 / R1 | Switch tab |
 

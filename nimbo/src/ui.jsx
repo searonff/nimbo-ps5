@@ -138,13 +138,88 @@ export function hsl(h, s, l, a = 1) {
   const k = n => (n + h / 30) % 12, f = n => l - s * Math.min(l, 1 - l) * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
   return `rgba(${Math.round(f(0) * 255)},${Math.round(f(8) * 255)},${Math.round(f(4) * 255)},${a})`;
 }
-export function Cover({name, w, h, radius = 14, big}) {
-  const hh = hue(name);
+/* ---------- tipo de conteúdo: pictograma e cor (Arquivos e Nuvem falam a mesma língua) ---------- */
+export const TYPE_COLOR = {dir: '#63b3ed', game: '#e58bd8', package: '#e58bd8', video: '#7cc4ff', archive: '#ffc857',
+  audio: '#57d9a3', image: '#9be7ff', partial: '#ff7a7a', other: '#93a7c3'};
+export function tint(hex, a) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`;
+}
+// Desenho em traço numa grade 24x24: só retas e círculos (barato no renderizador).
+export function TypeGlyph({kind, size = 24, color}) {
+  const c = color || TYPE_COLOR[kind] || TYPE_COLOR.other;
+  const line = {stroke: c, strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', fill: 'none'};
+  let parts;
+  switch (kind) {
+    case 'dir': parts = [<Path key="a" d="M3 6.5 H9.5 L11.5 8.5 H21 V18.5 H3 Z" {...line} fill={tint(c, 0.28)} />]; break;
+    case 'video': parts = [<Path key="a" d="M3 6 H21 V18 H3 Z" {...line} />, <Path key="b" d="M10 9.2 L15.2 12 L10 14.8 Z" {...line} fill={c} />]; break;
+    case 'archive': parts = [<Path key="a" d="M3.5 4.5 H20.5 V8 H3.5 Z" {...line} />, <Path key="b" d="M5 8 V19.5 H19 V8" {...line} />, <Path key="c" d="M10 11.5 H14" {...line} />]; break;
+    case 'game': case 'package': parts = [<Circle key="a" cx="12" cy="12" r="8.5" {...line} />, <Circle key="b" cx="12" cy="12" r="2.4" {...line} fill={c} />]; break;
+    case 'audio': parts = [<Path key="a" d="M9 17 V5.5 L19 3.5 V15" {...line} />, <Circle key="b" cx="6.6" cy="17" r="2.4" {...line} fill={c} />, <Circle key="c" cx="16.6" cy="15" r="2.4" {...line} fill={c} />]; break;
+    case 'image': parts = [<Path key="a" d="M3 5 H21 V19 H3 Z" {...line} />, <Path key="b" d="M5.5 16.5 L10 11.5 L13.5 15 L15.5 13 L18.5 16.5" {...line} />, <Circle key="c" cx="15.5" cy="8.6" r="1.5" {...line} fill={c} />]; break;
+    case 'partial': parts = [<Path key="a" d="M12 4 V14 M8 10.5 L12 14.5 L16 10.5" {...line} />, <Path key="b" d="M5 19.5 H8 M10.5 19.5 H13.5 M16 19.5 H19" {...line} />]; break;
+    default: parts = [<Path key="a" d="M6 3 H14 L19 8 V21 H6 Z" {...line} />, <Path key="b" d="M14 3 V8 H19" {...line} />];
+  }
+  return <Svg width={size} height={size} viewBox="0 0 24 24" style={{width: size, height: size}}>{parts}</Svg>;
+}
+
+// Lê um nome de release ("Jogo.Nome.v1.02-GRUPO", "Serie.S01E03.1080p.WEB") como gente lê:
+// título limpo + etiquetas (ID do jogo, temporada/episódio, resolução, versão, ano) + tipo.
+const EXT_KIND = [[/\.(pkg|ffpkg|ffpfs|ffpfsc|exfat)$/i, 'game'], [/\.(mkv|mp4|avi|m4v|mov|webm|ts|m2ts|wmv)$/i, 'video'],
+  [/\.(rar|zip|7z|tar|gz|xz|\d{3}|r\d\d)$/i, 'archive'], [/\.(mp3|flac|m4a|ogg|wav|aac)$/i, 'audio']];
+const kindOfName = n => (EXT_KIND.find(([re]) => re.test(n)) || [0, 'other'])[1];
+export function releaseInfo(name, files = []) {
+  const raw = String(name || '');
+  const id = (/(PPSA|CUSA)\d{5}/i.exec(raw) || [''])[0].toUpperCase();
+  const ep = /\bS(\d{1,2})E(\d{1,3})\b/i.exec(raw);
+  const season = ep ? null : /\bS(\d{1,2})\b/i.exec(raw);
+  const res = (/\b(2160|1080|720|480)p\b/i.exec(raw) || [''])[0].toLowerCase();
+  const ver = (/\bv\d+(?:\.\d+)+\b/i.exec(raw) || [''])[0];
+  const year = (/\b(19[5-9]\d|20[0-4]\d)\b/.exec(raw) || [''])[0];
+  // Título: tudo antes do primeiro marcador técnico, sem extensão, colchetes e grupo.
+  let base = raw.replace(/\.[a-z0-9]{2,5}$/i, '').replace(/[[(].*?[\])]/g, ' ').replace(/_+/g, ' ').replace(/\.(?!\d)|(?<!\d)\./g, ' ');
+  const cutAt = base.search(/\b(S\d{1,2}(E\d{1,3})?|(2160|1080|720|480)p|v\d+(\.\d+)+|(19[5-9]\d|20[0-4]\d)|(PPSA|CUSA)\d{5}|WEB|WEBRip|BluRay|HDTV|x26[45]|H 26[45]|REPACK|PROPER|MULTi|FLAC|MP3|320kbps)\b/i);
+  if (cutAt > 2) base = base.slice(0, cutAt);
+  const title = base.replace(/-[A-Za-z0-9]+\s*$/, '').replace(/[\s-]+$/, '').replace(/\s+/g, ' ').trim() || raw;
+  // Tipo: pela maioria dos arquivos (em bytes); ID de jogo ou temporada decidem antes.
+  const weight = {};
+  for (const f of files || []) { const k = kindOfName(f.short || f.name || ''); weight[k] = (weight[k] || 0) + (f.size || 1); }
+  let kind = Object.keys(weight).sort((x, y) => weight[y] - weight[x])[0] || kindOfName(raw);
+  if (id) kind = 'game';
+  else if (ep || season) kind = 'video';
+  const tags = [id, ep ? `T${+ep[1]} E${+ep[2]}` : season ? `T${+season[1]}` : '', res, ver, kind === 'game' ? '' : year].filter(Boolean);
+  const label = {game: 'Jogo', video: ep || season ? 'Série' : 'Vídeo', archive: 'Compactado', audio: 'Música'}[kind] || 'Arquivos';
+  return {title, tags, kind, label};
+}
+
+/* Capa de um item da nuvem: o tipo dá a cor e o pictograma; o nome da release vira título + etiquetas.
+   Pequena (lista da Nuvem): só o pictograma, sem texto miúdo. */
+export function Cover({name, files, w, h, radius = 14}) {
+  const info = releaseInfo(name, files);
+  const c = TYPE_COLOR[info.kind] || TYPE_COLOR.other;
+  const bg = {width: w, height: h, borderRadius: radius, backgroundGradient: {type: 'linear', angle: 150, stops: [
+    {color: tint(c, 0.32), offset: 0}, {color: 'rgba(14,24,44,0.92)', offset: 0.78}]}};
+  if (w < 180) {
+    return <View style={bg} className="items-center justify-center"><TypeGlyph kind={info.kind} size={Math.round(h * 0.5)} /></View>;
+  }
   return (
-    <View style={{width: w, height: h, borderRadius: radius, backgroundGradient: {type: 'linear', angle: 135, stops: [
-      {color: hsl(hh, 55, 42), offset: 0}, {color: hsl((hh + 40) % 360, 60, 22), offset: 1}]}}}
-      className="justify-end p-3">
-      <Text className={big ? 'font-heavy text-hero' : 'font-heavy text-h1'} style={{color: 'rgba(255,255,255,0.93)'}}>{initials(name)}</Text>
+    <View style={bg} className="p-3 justify-between">
+      <View className="flex-row items-center gap-2">
+        <TypeGlyph kind={info.kind} size={24} />
+        <Text className="font-heavy text-cap" style={{color: c}}>{t(info.label)}</Text>
+      </View>
+      <View className="gap-1">
+        <Text className="font-heavy text-body text-cloud" numberOfLines={2}>{info.title}</Text>
+        {info.tags.length ? (
+          <View className="flex-row gap-1">
+            {info.tags.slice(0, 3).map(x => (
+              <View key={x} className="rounded-md px-2" style={{backgroundColor: 'rgba(242,245,249,0.13)'}}>
+                <Text className="font-heavy text-xs2 text-cloud">{x}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+      </View>
     </View>
   );
 }

@@ -1,18 +1,18 @@
 // Nimbo V2 — gerenciador de downloads da nuvem (TorBox, Real-Debrid, AllDebrid, Premiumize), nativo para PS5 (PS5 React).
 import {useEffect, useState, Component} from 'react';
-import {AppRegistry, View, Text, Image, FocusScope, ScrollView, Screens, Screen, useIsScreenActive, useFocus, Sound, BackHandler, Keyboard, Notifications, Svg, Circle, Line, Path} from '@ps5-react/core';
+import {AppRegistry, View, Text, Image, FocusScope, ScrollView, Screens, Screen, useIsScreenActive, useFocus, Sound, BackHandler, Keyboard, Notifications, Svg, Circle, Line, Path, Platform, FileSystem} from '@ps5-react/core';
 import {useRef} from 'react';
 import icon from './sce_sys/icon0.png';
 import {useInterfaceSounds} from './sounds.js';
 import {config, queue, ui, useStore, toast} from './src/store.js';
-import {Background, Speed, Hints, Ring, Bar, Pill, Button, Cover, Toast, hue, hsl, Flag} from './src/ui.jsx';
+import {Background, Speed, Hints, Ring, Bar, Pill, Button, Cover, Toast, hue, hsl, Flag, releaseInfo} from './src/ui.jsx';
 import {ItemSheet, FolderSheet, ConnectSheet, ServicesSheet, ServiceBadge, ConfirmSheet, Sheet, LangSheet, PasswordsSheet, NotesSheet} from './src/sheets.jsx';
 import {PROVIDERS, provider, linkedProviders, listAll as listClouds, jobOf, itemKey} from './src/debrid/index.js';
 import {QR} from './src/qr.jsx';
 import {Files, Storage} from './src/manage.jsx';
 import {startPhone, phoneInfo} from './src/phone.js';
 import {drives} from './src/drives.js';
-import {startEngine, jobAction, taskAction, clearFinished, fmt, fmtSpeed, fmtEta, applyRateLimit, friendlyError} from './src/engine.js';
+import {startEngine, jobAction, taskAction, clearFinished, fmt, fmtSpeed, fmtEta, applyRateLimit, friendlyError, enqueueTorbox} from './src/engine.js';
 import {BackgroundMusic, MUSIC_CREDIT} from './src/music.jsx';
 import {startLightBar, resetLightBar, testLightBar} from './src/lightbar.js';
 import {APP_VERSION, REPO_URL, checkUpdate, installUpdate, installDir, fetchNotes} from './src/update.js';
@@ -29,6 +29,12 @@ const TABS = [['home', 'Painel'], ['cloud', 'Nuvem'], ['downloads', 'Downloads']
 /* ---------- dados da nuvem compartilhados entre telas ---------- */
 let cloudLoading = false;
 export function loadCloud() {
+  // Só na prévia do PC: sem conta conectada, usa fake-cloud.json da pasta de dados (para ver capas,
+  // Painel e janelas sem serviço). No PS5 nunca entra aqui.
+  if (!linkedProviders().length && Platform.OS !== 'ps5') {
+    try { const p = `${FileSystem.dataDir}/fake-cloud.json`; if (FileSystem.exists(p)) ui.set({cloud: JSON.parse(FileSystem.readFile(p))}); } catch (_) { /* sem dados de teste */ }
+    return;
+  }
   if (cloudLoading || !linkedProviders().length) return;
   cloudLoading = true;
   listClouds().then(({items, errors}) => ui.set({cloud: items, cloudErrors: errors, cloudError: ''}), e => ui.set({cloudError: e.message}))
@@ -70,7 +76,7 @@ function Steps({steps, current, color}) {
   );
 }
 
-function Hero({onOpenCloud, onConnectPhone, onConnect}) {
+function Hero({onOpenCloud, onConnectPhone, onConnect, spot, onOpenItem}) {
   const linked = useStore(config, () => linkedProviders().length > 0);
   const jobs = useStore(queue, q => q.jobs);
   const tasks = useStore(queue, q => q.tasks);
@@ -117,6 +123,31 @@ function Hero({onOpenCloud, onConnectPhone, onConnect}) {
     );
   }
   const done = jobs.filter(j => j.state === 'done').length;
+  if (spot) {
+    // Parado com algo pronto: o topo vira o próximo item, com "Baixar" já focado (um aperto e começa).
+    const info = releaseInfo(spot.name, spot.files);
+    const start = () => {
+      if (spot.needsFiles || !(spot.files || []).length) { onOpenItem(spot); return; }   // RD/AD: a lista de arquivos vem ao abrir
+      const c = config.get();
+      const n = enqueueTorbox(spot, spot.files, c.defaultDest, {extract: c.autoExtract, deleteArchive: c.deleteArchive, flatten: c.flatten});
+      toast(n ? tn(n, '{n} arquivo na fila', '{n} arquivos na fila') : t('Esses arquivos já estão na fila'), n ? 'ok' : 'info');
+    };
+    return (
+      <View className="flex-row gap-8 items-center rounded-3xl bg-glass border-2 border-line px-8 py-5">
+        <Cover name={spot.name} files={spot.files} w={300} h={170} radius={16} />
+        <View className="flex-1 gap-2">
+          <Text className="font-semi text-body text-mist">{t('Pronto para baixar')}</Text>
+          <Text className="font-heavy text-h1 text-cloud" numberOfLines={2}>{info.title}</Text>
+          <Text className="font-semi text-lead text-mist">{[fmt(spot.size), ...info.tags].join(' · ')}</Text>
+          <View className="flex-row gap-3 mt-2">
+            <Button focusKey="hero-main" primary label={t('Baixar')} onPress={start} />
+            <Button label={t('Ver detalhes')} onPress={() => onOpenItem(spot)} />
+            <Button label={t('Abrir a nuvem')} onPress={onOpenCloud} />
+          </View>
+        </View>
+      </View>
+    );
+  }
   return (
     <View className="flex-row gap-10 items-center rounded-3xl bg-glass border-2 border-line px-10 py-5">
       <Ring size={210} value={0} thick={16}>
@@ -140,15 +171,14 @@ function UpNext() {
   const jobs = useStore(queue, q => q.jobs);
   const tasks = useStore(queue, q => q.tasks);
   const next = jobs.filter(j => ['queued', 'paused'].includes(j.state)).slice(0, 4);
-  const failed = jobs.filter(j => j.state === 'error').length + tasks.filter(t => t.state === 'error').length;
   return (
     <View className="flex-1 gap-2 rounded-3xl bg-glass border-2 border-line px-6 py-4">
       <View className="flex-row items-center gap-3">
         <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{t('A seguir')}</Text></View>
-        {failed ? <Pill text={t(`${failed} com erro · veja em Downloads`)} tone="bad" /> : null}
       </View>
-      {next.length ? next.map(j => (
+      {next.length ? next.map((j, i) => (
         <View key={j.id} className="flex-row items-center gap-3">
+          <View className="w-[26px] h-[26px] rounded-full items-center justify-center bg-shade"><Text className="font-heavy text-cap text-sun">{String(i + 1)}</Text></View>
           <View className="flex-1"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{j.name}</Text></View>
           <Text className="font-semi text-cap text-mist">{fmt(j.size)}</Text>
           <Pill text={j.state === 'queued' ? 'Na fila' : 'Pausado'} tone="muted" />
@@ -191,9 +221,9 @@ function CloudCard({item, onOpen, focusKey}) {
   return (
     <View focusKey={focusKey} onPress={() => onOpen(item)}
       className="w-[220px] rounded-2xl bg-haze border-[3px] border-transparent focused:border-sun focused:scale-105 transition-transform duration-150">
-      <Cover name={item.name} w={327} h={132} radius={14} />
-      <View className="p-3 gap-1">
-        <Text className="font-heavy text-body text-cloud" numberOfLines={1}>{item.name}</Text>
+      <Cover name={item.name} files={item.files} w={214} h={132} radius={13} />
+      {/* A capa já traz o título limpo; aqui só tamanho e situação. */}
+      <View className="px-3 py-2 gap-1">
         <View className="flex-row gap-2 items-center">
           <Text className="font-semi text-cap text-mist">{fmt(item.size)}</Text>
           {done ? <Pill text={t('Já baixado')} tone="ok" /> : mine.some(j => j.state === 'downloading') ? <Pill text={t('Baixando')} tone="warn" /> : busy ? <Pill text={t('Na fila')} tone="run" /> :
@@ -204,30 +234,41 @@ function CloudCard({item, onOpen, focusKey}) {
   );
 }
 
-function Home({openItem, goCloud, connectPhone, openConnect}) {
+function Home({openItem, goCloud, goDownloads, connectPhone, openConnect}) {
   const cloud = useStore(ui, s => s.cloud);
   const jobs = useStore(queue, q => q.jobs);
+  const tasks = useStore(queue, q => q.tasks);
   // O que dá para fazer agora: pronto na nuvem e ainda não baixado nem na fila.
   const todo = (cloud || []).filter(it => it.ready && !jobs.some(j => jobOf(j, it)));
+  const working = jobs.some(j => j.state === 'downloading') || tasks.some(x => x.state === 'running');
+  const spot = !working && todo.length ? todo[0] : null;   // o mais recente vai para o destaque
+  const rest = spot ? todo.slice(1) : todo;
+  const failed = jobs.filter(j => j.state === 'error').length + tasks.filter(x => x.state === 'error').length;
   return (
     <ScrollView className="flex-1 px-10">
       <View className="gap-4 pb-24">
-        <Hero onOpenCloud={goCloud} onConnectPhone={connectPhone} onConnect={openConnect} />
+        {failed ? (
+          <View className="flex-row items-center gap-4 rounded-2xl px-5 py-3 border-2 border-bad" style={{backgroundColor: 'rgba(255,122,122,0.10)'}}>
+            <View className="flex-1"><Text className="font-heavy text-body text-cloud">{tn(failed, '{n} item precisa de atenção', '{n} itens precisam de atenção')}</Text></View>
+            <Button small label={t('Ver em Downloads')} onPress={goDownloads} />
+          </View>
+        ) : null}
+        <Hero onOpenCloud={goCloud} onConnectPhone={connectPhone} onConnect={openConnect} spot={spot} onOpenItem={openItem} />
         <View className="flex-row gap-6">
           <UpNext />
           <Drives />
         </View>
-        {todo.length ? (
+        {rest.length ? (
           <View className="gap-3">
             <View className="flex-row items-center gap-4">
-              <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{tn(todo.length, '{n} pronto para baixar', '{n} prontos para baixar')}</Text></View>
-              {todo.length > 5 ? <Button small label={t('Ver na Nuvem')} onPress={goCloud} /> : null}
+              <View className="flex-1"><Text className="font-heavy text-lead text-cloud">{spot ? tn(rest.length, 'Mais {n} pronto para baixar', 'Mais {n} prontos para baixar') : tn(rest.length, '{n} pronto para baixar', '{n} prontos para baixar')}</Text></View>
+              {rest.length > 5 ? <Button small label={t('Ver na Nuvem')} onPress={goCloud} /> : null}
             </View>
             <View className="flex-row gap-5">
-              {todo.slice(0, 5).map(it => <CloudCard key={`${it.kind}:${it.id}`} focusKey={`card:${it.kind}:${it.id}`} item={it} onOpen={openItem} />)}
+              {rest.slice(0, 5).map(it => <CloudCard key={`${it.kind}:${it.id}`} focusKey={`card:${it.kind}:${it.id}`} item={it} onOpen={openItem} />)}
             </View>
           </View>
-        ) : cloud && cloud.length ? <Text className="font-semi text-body text-mist">{t('Tudo o que está pronto na nuvem já foi baixado.')}</Text> : null}
+        ) : !spot && cloud && cloud.length ? <Text className="font-semi text-body text-mist">{t('Tudo o que está pronto na nuvem já foi baixado.')}</Text> : null}
       </View>
     </ScrollView>
   );
@@ -339,7 +380,7 @@ function Cloud({openItem, openConnect}) {
           return (
             <View key={itemKey(it)} onPress={() => openItem(it)}
               className="flex-row items-center gap-5 rounded-2xl bg-glass px-4 py-3 border-[3px] border-line focused:border-sun">
-              <Cover name={it.name} w={150} h={84} radius={10} />
+              <Cover name={it.name} files={it.files} w={150} h={84} radius={10} />
               <View className="flex-1 gap-1">
                 <Text className="font-heavy text-lead text-cloud" numberOfLines={1}>{it.name}</Text>
                 <View className="flex-row items-center gap-2">
@@ -455,6 +496,7 @@ function quit() { resetLightBar(); config.flush(); queue.flush(); if (BackHandle
 // Procura atualização ao abrir e a cada 6 h. Com "Atualizar sozinho", instala em segundo plano
 // quando não há downloads nem extrações rodando; a versão nova vale ao reabrir o app.
 let autoBusy = false;
+let updateWait = null;   // inscrição na fila enquanto espera ela esvaziar para instalar
 function autoCheckUpdate(force) {
   const c = config.get();
   if (autoBusy || c.autoUpdate === false) return;
@@ -471,9 +513,16 @@ function autoCheckUpdate(force) {
       try { Notifications.show(t('Atualização disponível'), t(`Nimbo ${info.version} está pronto para instalar.`)); } catch (_) { /* desktop */ }
     }
     if (config.get().autoInstall === false || !installDir()) return done();
-    const q = queue.get();
-    if (engineBusy() || q.jobs.some(j => ['queued', 'downloading'].includes(j.state)) || q.tasks.some(t => ['queued', 'running'].includes(t.state))) {
-      setTimeout(() => autoCheckUpdate(true), 10 * 60 * 1000);   // fila ocupada: tenta de novo em 10 min
+    const busyQueue = q => q.jobs.some(j => ['queued', 'downloading'].includes(j.state)) || q.tasks.some(t => ['queued', 'running'].includes(t.state));
+    if (engineBusy() || busyQueue(queue.get())) {
+      // Fila ocupada: espera ela esvaziar e instala logo em seguida (antes: nova tentativa a cada 10 min).
+      if (!updateWait) {
+        updateWait = queue.subscribe(q => {
+          if (busyQueue(q)) return;
+          updateWait(); updateWait = null;
+          setTimeout(() => autoCheckUpdate(true), 3000);   // folga para o motor soltar a vaga
+        });
+      }
       return done();
     }
     installUpdate(info, () => {}).then(() => { ui.set({updateReady: info.version}); done(); },
@@ -595,9 +644,9 @@ function About({openNotes}) {
 /* ---------- Ajustes ---------- */
 function Row({label, value, onPress, focusKey}) {
   return (
-    <View focusKey={focusKey} onPress={onPress} className="flex-row items-center justify-between rounded-2xl bg-glass px-6 h-[64px] border-[3px] border-line focused:border-sun">
-      <Text className="font-semi text-lead text-cloud">{t(label)}</Text>
-      <Text className="font-heavy text-lead text-sun">{t(value)}</Text>
+    <View focusKey={focusKey} onPress={onPress} className="flex-row items-center gap-4 rounded-2xl bg-glass px-5 h-[50px] border-[3px] border-line focused:border-sun">
+      <View className="flex-1"><Text className="font-semi text-body text-cloud" numberOfLines={1}>{t(label)}</Text></View>
+      <Text className="font-heavy text-body text-sun" numberOfLines={1}>{t(value)}</Text>
     </View>
   );
 }
@@ -605,9 +654,9 @@ function LangRow({onPress}) {
   const code = useStore(config, c => c.lang || 'pt');
   const [, name, flag] = LANGS.find(l => l[0] === code) || LANGS[0];
   return (
-    <View focusKey="set-lang" onPress={onPress} className="flex-row items-center justify-between rounded-2xl bg-glass px-6 h-[64px] border-[3px] border-line focused:border-sun">
-      <Text className="font-semi text-lead text-cloud">{t('Idioma')}</Text>
-      <View className="flex-row items-center gap-3"><Flag code={flag} w={42} /><Text className="font-heavy text-lead text-sun">{name}</Text></View>
+    <View focusKey="set-lang" onPress={onPress} className="flex-row items-center justify-between rounded-2xl bg-glass px-5 h-[50px] border-[3px] border-line focused:border-sun">
+      <Text className="font-semi text-body text-cloud">{t('Idioma')}</Text>
+      <View className="flex-row items-center gap-3"><Flag code={flag} w={38} /><Text className="font-heavy text-body text-sun">{name}</Text></View>
     </View>
   );
 }
@@ -624,34 +673,40 @@ function Settings({openConnect, pickFolder, confirm, openLang, openPasswords}) {
   }, [linkedIds]);
   return (
     <ScrollView className="flex-1 px-10">
-      <View className="gap-3 pb-24">
-        <Text className="font-heavy text-h2 text-cloud">{t('Geral')}</Text>
-        <LangRow onPress={openLang} />
-        <Text className="font-heavy text-h2 text-cloud mt-3">{t('Serviços de nuvem')}</Text>
-        {PROVIDERS.map(p => (
-          <Row key={p.id} label={p.linked() ? `${p.name}: ${t(accounts[p.id] || 'Conectado')}` : `${p.name}: não conectado`}
-            value={p.linked() ? 'Desconectar' : 'Conectar'}
-            onPress={() => (p.linked()
-              ? confirm(`Desconectar ${p.name}`, `Sair da conta do ${p.name} neste PS5? Os itens dele somem da Nuvem até você conectar de novo.`, 'Desconectar', () => { p.logout(); ui.set({cloud: (ui.get().cloud || []).filter(x => (x.provider || 'torbox') !== p.id)}); })
-              : openConnect(p.id))} />
-        ))}
-        <Text className="font-heavy text-h2 text-cloud mt-3">{t('Downloads')}</Text>
-        <Row label={t('Pasta padrão')} value={c.defaultDest} onPress={() => pickFolder(c.defaultDest, p => config.set({defaultDest: p}))} />
-        <Row label={t('Conexões por download')} value={String(c.connections)} onPress={cycle('connections', [4, 8, 16, 32])} />
-        <Row label={t('Limitar velocidade')} value={c.speedLimitOn ? 'Ligado' : 'Desligado'} onPress={flip('speedLimitOn')} />
-        {c.speedLimitOn ? <Row label={t('Velocidade máxima')} value={t(`${c.speedLimitMB} MB/s`)} onPress={cycle('speedLimitMB', [1, 2, 5, 10, 20, 50])} /> : null}
-        <Row label={t('Impedir o modo de repouso')} value={onOff(c.keepAwake)} onPress={flip('keepAwake')} />
-        <Row label={t('Luz do controle mostra o andamento')} value={onOff(c.lightBar !== false)} onPress={() => { const on = c.lightBar === false; config.set({lightBar: on}); if (on) testLightBar(); }} />
-        <Row label={t('Apagar da nuvem depois de baixar')} value={onOff(c.deleteFromCloud)} onPress={flip('deleteFromCloud')} />
-        <Text className="font-heavy text-h2 text-cloud mt-3">{t('Extração')}</Text>
-        <Row label={t('Extrair automaticamente')} value={onOff(c.autoExtract)} onPress={flip('autoExtract')} />
-        <Row label={t('Apagar o compactado depois')} value={onOff(c.deleteArchive)} onPress={flip('deleteArchive')} />
-        <Row focusKey="set-passwords" label={t('Senhas de arquivos')} value={c.passwords.length ? tn(c.passwords.length, '{n} salva', '{n} salvas') : t('Adicionar')} onPress={() => openPasswords()} />
-        <Text className="font-heavy text-h2 text-cloud mt-3">{t('Som')}</Text>
-        <Row label={t('Música de fundo')} value={onOff(c.music)} onPress={flip('music')} />
-        <Row label={t('Volume da música')} value={`${Math.round(c.musicVolume * 100)}%`} onPress={() => config.set({musicVolume: Math.round((c.musicVolume || 0) * 10) >= 10 ? 0.1 : (Math.round((c.musicVolume || 0) * 10) + 1) / 10})} />
-        <Row label={t('Sons da interface')} value={onOff(c.sfx)} onPress={flip('sfx')} />
-        <Text className="font-semi text-cap text-mist mt-4">{`Nimbo Downloader ${APP_VERSION} · PS5 React`}</Text>
+      {/* Duas colunas: tudo cabe na tela sem rolar. Esquerda: geral, contas e som; direita: downloads e extração. */}
+      <View className="flex-row gap-6 pb-24 items-start">
+        <View className="flex-1 gap-2">
+            <Text className="font-heavy text-lead text-cloud">{t('Geral')}</Text>
+            <LangRow onPress={openLang} />
+            <Text className="font-heavy text-lead text-cloud mt-2">{t('Serviços de nuvem')}</Text>
+            {PROVIDERS.map(p => (
+              <Row key={p.id} label={p.linked() ? `${p.name}: ${t(accounts[p.id] || 'Conectado')}` : `${p.name}: não conectado`}
+                value={p.linked() ? 'Desconectar' : 'Conectar'}
+                onPress={() => (p.linked()
+                  ? confirm(`Desconectar ${p.name}`, `Sair da conta do ${p.name} neste PS5? Os itens dele somem da Nuvem até você conectar de novo.`, 'Desconectar', () => { p.logout(); ui.set({cloud: (ui.get().cloud || []).filter(x => (x.provider || 'torbox') !== p.id)}); })
+                  : openConnect(p.id))} />
+            ))}
+            <Text className="font-heavy text-lead text-cloud mt-2">{t('Som')}</Text>
+            <Row label={t('Música de fundo')} value={onOff(c.music)} onPress={flip('music')} />
+            <Row label={t('Volume da música')} value={`${Math.round(c.musicVolume * 100)}%`} onPress={() => config.set({musicVolume: Math.round((c.musicVolume || 0) * 10) >= 10 ? 0.1 : (Math.round((c.musicVolume || 0) * 10) + 1) / 10})} />
+            <Row label={t('Sons da interface')} value={onOff(c.sfx)} onPress={flip('sfx')} />
+        </View>
+        <View className="flex-1 gap-2">
+            <Text className="font-heavy text-lead text-cloud">{t('Downloads')}</Text>
+            <Row label={t('Pasta padrão')} value={c.defaultDest} onPress={() => pickFolder(c.defaultDest, p => config.set({defaultDest: p}))} />
+            <Row label={t('Conexões por download')} value={String(c.connections)} onPress={cycle('connections', [4, 8, 16, 32])} />
+            <Row label={t('Limitar velocidade')} value={c.speedLimitOn ? 'Ligado' : 'Desligado'} onPress={flip('speedLimitOn')} />
+            {c.speedLimitOn ? <Row label={t('Velocidade máxima')} value={t(`${c.speedLimitMB} MB/s`)} onPress={cycle('speedLimitMB', [1, 2, 5, 10, 20, 50])} /> : null}
+            <Row label={t('Impedir o modo de repouso')} value={onOff(c.keepAwake)} onPress={flip('keepAwake')} />
+            <Row label={t('Luz do controle mostra o andamento')} value={onOff(c.lightBar !== false)} onPress={() => { const on = c.lightBar === false; config.set({lightBar: on}); if (on) testLightBar(); }} />
+            <Row label={t('Apagar da nuvem depois de baixar')} value={onOff(c.deleteFromCloud)} onPress={flip('deleteFromCloud')} />
+            <Text className="font-heavy text-lead text-cloud mt-2">{t('Extração')}</Text>
+            <Row label={t('Extrair automaticamente')} value={onOff(c.autoExtract)} onPress={flip('autoExtract')} />
+            <Row label={t('Apagar o compactado depois')} value={onOff(c.deleteArchive)} onPress={flip('deleteArchive')} />
+            <Row label={t('Sem subpastas (arquivos soltos na pasta)')} value={onOff(c.flatten)} onPress={flip('flatten')} />
+            <Row focusKey="set-passwords" label={t('Senhas de arquivos')} value={c.passwords.length ? tn(c.passwords.length, '{n} salva', '{n} salvas') : t('Adicionar')} onPress={() => openPasswords()} />
+          <Text className="font-semi text-cap text-mist mt-4">{`Nimbo Downloader ${APP_VERSION} · PS5 React`}</Text>
+        </View>
       </View>
     </ScrollView>
   );
@@ -669,14 +724,14 @@ function PhoneSheet({onClose}) {
           <QR text={url} size={250} />
           <View className="flex-1 gap-3">
             <Text className="font-semi text-body text-mist">{t('Aponte a câmera do celular (mesmo Wi-Fi do PS5) ou abra:')}</Text>
-            <Text className="font-heavy text-lead text-cloud">{url}</Text>
+            {/* Focável: a janela precisa de algo com o cursor para o ○ fechar. */}
+            <View onPress={() => {}} className="self-start rounded-xl px-2 border-2 border-transparent focused:border-rim"><Text className="font-heavy text-lead text-cloud">{url}</Text></View>
             <Text className="font-semi text-body text-mist">{t('PIN')}</Text>
             <Text className="font-heavy text-hero text-sun">{info.pin}</Text>
             <Text className="font-semi text-cap text-mist">{t('Pelo celular dá para mandar links, ver a fila e baixar da nuvem.')}</Text>
           </View>
         </View>
-      ) : <Text className="font-semi text-body text-mist">{info.state === 'failed' ? 'Não consegui abrir a porta do celular.' : 'Ligando o servidor do celular…'}</Text>}
-      <View className="flex-row"><Button primary label={t('Fechar')} onPress={onClose} /></View>
+      ) : <View onPress={() => {}} className="rounded-xl px-2 border-2 border-transparent focused:border-rim"><Text className="font-semi text-body text-mist">{t(info.state === 'failed' ? 'Não consegui abrir a porta do celular.' : 'Ligando o servidor do celular…')}</Text></View>}
     </Sheet>
   );
 }
@@ -821,7 +876,7 @@ function App() {
         {(
           <View className="flex-1">
           <Screens key={screensKey} preload active={shownTab} variants={dir > 0 ? SLIDE_RIGHT : SLIDE_LEFT} focusKey="content" onBack={() => { focus(`tab:${TABS[tab][0]}`); return true; }}>
-            <Screen id={0}><LiveMark id={0} /><Guard><Home openItem={openItem} goCloud={() => goTab(1)} connectPhone={() => setSheet({type: 'phone'})} openConnect={openConnect} /></Guard></Screen>
+            <Screen id={0}><LiveMark id={0} /><Guard><Home openItem={openItem} goCloud={() => goTab(1)} goDownloads={() => goTab(2)} connectPhone={() => setSheet({type: 'phone'})} openConnect={openConnect} /></Guard></Screen>
             <Screen id={1}><LiveMark id={1} /><Guard><Cloud openItem={openItem} openConnect={openConnect} /></Guard></Screen>
             <Screen id={2}><LiveMark id={2} /><Guard><Downloads /></Guard></Screen>
             <Screen id={3}><LiveMark id={3} /><Guard><Files pickFolder={pickFolder} confirm={confirm} /></Guard></Screen>
@@ -835,7 +890,7 @@ function App() {
       <BackgroundMusic />
       <Hints items={[[['cross'], tab === 3 && filesSel ? 'Marcar / desmarcar' : 'Selecionar'],
         ...(tab === 1 ? [[['square'], 'Buscar']] : tab === 3 && !filesSel ? [[['square'], 'Selecionar vários']] : []),
-        ...(tab <= 1 ? [[['triangle'], 'Atualizar nuvem']] : tab === 3 ? [[['triangle'], 'Filtrar']] : []),
+        ...(tab <= 1 ? [[['triangle'], 'Atualizar nuvem']] : tab === 3 ? [[['triangle'], filesSel ? 'Ações' : 'Filtrar']] : []),
         [['L1', 'R1'], 'Trocar aba'], [['circle'], tab === 3 && filesSel ? 'Sair da seleção' : tab === 3 && filesUp ? 'Pasta acima' : 'Voltar']]} />
       <Toast />
       {sheet && sheet.type === 'item' ? <ItemSheet item={sheet.item} onClose={close} onPickFolder={(s, cb) => setSheet({...sheet, folder: {start: s, cb}})} /> : null}

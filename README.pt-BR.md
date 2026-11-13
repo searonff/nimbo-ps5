@@ -12,9 +12,9 @@ App nativo para PS5 desbloqueado que baixa da sua nuvem (**TorBox, Real-Debrid, 
 |---|---|
 | **Nuvem** | Junta TorBox, Real-Debrid, AllDebrid e Premiumize numa lista só, com busca (inclusive pelo nome dos arquivos), filtros por serviço e ordenação. Baixa só os arquivos marcados e pode apagar da nuvem depois. |
 | **Login por QR code** | TorBox, Real-Debrid e AllDebrid conectam apontando o celular para a TV. Premiumize usa a chave da API, digitada no PS5 ou colada pelo celular. |
-| **Downloads** | Várias conexões por arquivo, retomada, fila salva, limite de velocidade, painel com as etapas (baixar › extrair › pronto) e a atual em destaque e "baixar quando ficar pronto" na nuvem. Cancelar apaga o pedaço baixado e a pasta que ficou vazia. O Painel lista o que está pronto na nuvem e ainda não foi baixado, e avisa quando a fila não cabe no disco. |
-| **Extração** | ZIP (com senha), 7z, RAR e RAR5, inclusive em várias partes. Pode extrair ao terminar e apagar o compactado. Senhas de arquivos salvas podem ser adicionadas, editadas e apagadas. |
-| **Arquivos** | Navega por SSD, USB e estendido. Botão **Selecionar** (ou □) marca vários arquivos e pastas para copiar, mover, apagar, renomear e extrair. Mostra o nome do jogo ao lado de arquivos como `PPSA07784.ffpfsc`, a data de cada arquivo, ícones desenhados por tipo, ordenação e filtro por tipo (pastas, vídeos, compactados, pacotes, áudio, imagens). |
+| **Downloads** | Várias conexões por arquivo, retomada, fila salva, limite de velocidade, painel com as etapas (baixar › extrair › pronto) e a atual em destaque e "baixar quando ficar pronto" na nuvem. Cancelar apaga o pedaço baixado e a pasta que ficou vazia. O Painel destaca o próximo item pronto na nuvem (um aperto em Baixar e começa), numera a fila, avisa falhas e quando a fila não cabe no disco. As capas mostram o título limpo da release, o tipo (jogo, série, filme, compactado, música) e etiquetas como ID do jogo, versão, temporada e resolução. |
+| **Extração** | ZIP (com senha), 7z, RAR e RAR5, inclusive em várias partes. Pode extrair ao terminar, apagar o compactado e tirar os arquivos das subpastas (tudo solto na pasta escolhida). Senhas de arquivos salvas podem ser adicionadas, editadas e apagadas. |
+| **Arquivos** | Navega por SSD, USB e estendido. Botão **Selecionar** (ou □) marca vários arquivos e pastas para copiar, mover, apagar, renomear e extrair. Mostra o nome do jogo ao lado de arquivos como `PPSA07784.ffpfsc`, a data de cada arquivo, ícones desenhados por tipo, ordenação e filtro por tipo (pastas, vídeos, compactados, pacotes, áudio, imagens). Com itens marcados, o Triângulo abre as ações (mover, copiar, apagar, tirar arquivos das pastas) de qualquer ponto da lista. |
 | **Armazenamento** | Uso por tipo, maiores pastas e arquivos (com nome do jogo e data), sugestões de limpeza e, para cada jogo instalado, versão, data de instalação e tamanho do jogo, da atualização e das DLCs. Apagar roda em segundo plano, sem travar a tela. |
 | **Celular** | Página com PIN, na mesma rede, para ver a fila, colar links (magnet, hoster, direto) em qualquer serviço conectado e baixar da nuvem. |
 | **Idiomas** | Português (Brasil), English, Español, Français, Deutsch e Italiano, inclusive na página do celular. Segue o idioma do PS5 na primeira vez. |
@@ -50,7 +50,7 @@ App nativo para PS5 desbloqueado que baixa da sua nuvem (**TorBox, Real-Debrid, 
 |---|---|
 | ✕ | Selecionar |
 | ○ | Voltar / fechar · pasta acima (Arquivos) |
-| △ | Atualizar a nuvem · filtrar (Arquivos) · ação principal da janela aberta (Baixar, Usar esta pasta, Adicionar senha) |
+| △ | Atualizar a nuvem · filtrar ou abrir ações da seleção (Arquivos) · ação principal da janela aberta (Baixar, Usar esta pasta, Adicionar senha) |
 | □ | Buscar (Nuvem) · selecionar vários (Arquivos) · ação secundária da janela (Nova pasta, Marcar todos) |
 | L1 / R1 | Trocar de aba |
 
