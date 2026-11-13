@@ -457,7 +457,9 @@ O que há de novo	What's new	Novedades	Nouveautés	Was ist neu	Novità
 Novidades da versão {1}	What's new in version {1}	Novedades de la versión {1}	Nouveautés de la version {1}	Neu in Version {1}	Novità della versione {1}
 Esta versão não tem notas.	This version has no notes.	Esta versión no tiene notas.	Cette version n'a pas de notes.	Diese Version hat keine Hinweise.	Questa versione non ha note.
 Luz do controle mostra o andamento	Controller light shows progress	La luz del mando muestra el progreso	La lumière de la manette indique la progression	Controller-Licht zeigt den Fortschritt	La luce del controller mostra l'avanzamento
-Extrair durante o download	Extract while downloading	Extraer durante la descarga	Extraire pendant le téléchargement	Während des Downloads entpacken	Estrai durante il download
-A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.	Extraction runs alongside the next download. Both get a bit slower, and the drive needs room for both.	La extracción se ejecuta junto con la siguiente descarga. Ambas van un poco más lentas y el disco necesita espacio para las dos.	L'extraction s'exécute en même temps que le téléchargement suivant. Les deux sont un peu plus lents et le disque doit avoir de la place pour les deux.	Das Entpacken läuft parallel zum nächsten Download. Beides wird etwas langsamer, und das Laufwerk braucht Platz für beides.	L'estrazione avviene insieme al download successivo. Entrambi rallentano un po' e il disco deve avere spazio per tutti e due.
 Remover	Remove	Quitar	Retirer	Entfernen	Rimuovi
 Limpar falhas	Clear failed	Borrar fallidos	Effacer les échecs	Fehlgeschlagene löschen	Cancella falliti
+Mostrar: {1}	Show: {1}	Mostrar: {1}	Afficher : {1}	Anzeigen: {1}	Mostra: {1}
+Pastas	Folders	Carpetas	Dossiers	Ordner	Cartelle
+agora	now	ahora	en cours	jetzt	ora
+Nada deste tipo nesta pasta.	Nothing of this type in this folder.	Nada de este tipo en esta carpeta.	Rien de ce type dans ce dossier.	Nichts von diesem Typ in diesem Ordner.	Niente di questo tipo in questa cartella.

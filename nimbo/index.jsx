@@ -1,6 +1,6 @@
 // Nimbo V2 — gerenciador de downloads da nuvem (TorBox, Real-Debrid, AllDebrid, Premiumize), nativo para PS5 (PS5 React).
 import {useEffect, useState, Component} from 'react';
-import {AppRegistry, View, Text, Image, FocusScope, ScrollView, Screens, Screen, useIsScreenActive, useFocus, Sound, BackHandler, Keyboard, Notifications, Svg, Circle, Line} from '@ps5-react/core';
+import {AppRegistry, View, Text, Image, FocusScope, ScrollView, Screens, Screen, useIsScreenActive, useFocus, Sound, BackHandler, Keyboard, Notifications, Svg, Circle, Line, Path} from '@ps5-react/core';
 import {useRef} from 'react';
 import icon from './sce_sys/icon0.png';
 import {useInterfaceSounds} from './sounds.js';
@@ -36,6 +36,35 @@ export function loadCloud() {
 }
 
 /* ---------- Painel ---------- */
+// Linha de etapas: bolinha numerada + nome. Feita = verde com ✓; atual = cor da tarefa, maior,
+// com "agora"; futura = apagada. Traço entre elas fica verde quando a etapa anterior terminou.
+function Steps({steps, current, color}) {
+  return (
+    <View className="flex-row items-center gap-3">
+      {steps.map((s, i) => {
+        const done = i < current, now = i === current;
+        const dot = now ? 34 : 28;
+        return (
+          <View key={s} className="flex-row items-center gap-3">
+            <View className="flex-row items-center gap-2">
+              <View className="items-center justify-center" style={{width: dot, height: dot, borderRadius: dot / 2,
+                backgroundColor: done ? '#57d9a3' : now ? color : 'transparent', borderWidth: done || now ? 0 : 2, borderColor: '#4a5f80'}}>
+                {done ? <Svg width={18} height={18} viewBox="0 0 26 26" style={{width: 18, height: 18}}><Path d="M6 13 L11 18 L20 8" stroke="#0b2a1c" strokeWidth="3.4" strokeLinecap="round" fill="none" /></Svg>
+                  : <Text className="font-heavy text-cap" style={{color: now ? '#1a1300' : '#6f84a3'}}>{String(i + 1)}</Text>}
+              </View>
+              <View>
+                <Text className={now ? 'font-heavy text-lead text-cloud' : done ? 'font-semi text-body text-ok' : 'font-semi text-body text-mist'}>{t(s)}</Text>
+                {now ? <Text className="font-heavy text-xs2" style={{color}}>{t('agora')}</Text> : null}
+              </View>
+            </View>
+            {i < steps.length - 1 ? <View style={{width: 36, height: 3, borderRadius: 2, backgroundColor: done ? '#57d9a3' : '#33476a'}} /> : null}
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
 function Hero({onOpenCloud, onConnectPhone, onConnect}) {
   const linked = useStore(config, () => linkedProviders().length > 0);
   const jobs = useStore(queue, q => q.jobs);
@@ -49,14 +78,20 @@ function Hero({onOpenCloud, onConnectPhone, onConnect}) {
     const isJob = !!job;
     const value = isJob ? (job.size ? job.written / job.size : 0) : (task.total ? task.written / task.total : 0);
     const name = isJob ? job.name : task.name;
-    const step = isJob ? 0 : task.type === 'extract' ? 1 : 1;
     const eta = isJob && speed > 0 && job.size ? (job.size - job.written) / speed : 0;
+    // Etapas: a atual em destaque; as anteriores marcadas como feitas.
     const steps = isJob && job.extract ? ['Baixar', 'Extrair', 'Pronto'] : isJob ? ['Baixar', 'Pronto'] :
-      task.type === 'extract' ? ['Baixado', 'Extrair', 'Pronto'] : ['Copiar', 'Pronto'];
+      task.type === 'extract' ? ['Baixar', 'Extrair', 'Pronto'] : [task.type === 'move' ? 'Mover' : 'Copiar', 'Pronto'];
+    const step = isJob ? 0 : task.type === 'extract' ? 1 : 0;
+    const pct = Math.floor(value * 100);
     return (
       <View className="flex-row gap-10 items-center rounded-3xl bg-glass border-2 border-line px-10 py-5">
         <Ring size={210} value={value} color={isJob ? '#ffc857' : '#63b3ed'} thick={16}>
-          <Text className="font-heavy text-hero text-cloud">{`${Math.floor(value * 100)}%`}</Text>
+          {/* Número grande e "%" menor ao lado: cabe folgado mesmo em 100. */}
+          <View className="flex-row items-end">
+            <Text className="font-heavy text-cloud" style={{fontSize: pct >= 100 ? 50 : 58, lineHeight: 64}}>{String(pct)}</Text>
+            <Text className="font-heavy text-h2 text-mist" style={{marginBottom: 8, marginLeft: 2}}>%</Text>
+          </View>
         </Ring>
         <View className="flex-1 gap-3">
           <Text className="font-semi text-body text-mist">{isJob ? (waiting ? t('Baixando agora · mais {n} na fila', {n: waiting}) : t('Baixando agora')) :
@@ -67,14 +102,7 @@ function Hero({onOpenCloud, onConnectPhone, onConnect}) {
             {eta ? <Text className="font-semi text-lead text-cloud">{t('falta {a}', {a: fmtEta(eta)})}</Text> : null}
             <Text className="font-semi text-lead text-mist">{isJob ? t('{a} de {b}', {a: fmt(job.written), b: fmt(job.size)}) : (task.total ? t('{a} de {b}', {a: fmt(task.written), b: fmt(task.total)}) : task.written ? t('{a} extraídos', {a: fmt(task.written)}) : t('Lendo o arquivo…'))}</Text>
           </View>
-          <View className="flex-row gap-2 items-center">
-            {steps.map((s, i) => (
-              <View key={s} className="flex-row items-center gap-2">
-                <Pill text={s} tone={i < step ? 'ok' : i === step ? (isJob ? 'warn' : 'run') : 'muted'} />
-                {i < steps.length - 1 ? <Text className="font-heavy text-body text-mist">›</Text> : null}
-              </View>
-            ))}
-          </View>
+          <Steps steps={steps} current={step} color={isJob ? '#ffc857' : '#63b3ed'} />
           <View className="flex-row gap-3 mt-2">
             {isJob ? <Button focusKey="hero-main" small label={t('Pausar')} onPress={() => jobAction(job.id, 'pause')} /> :
               <Button focusKey="hero-main" small label={t('Cancelar')} onPress={() => taskAction(task.id, 'cancel')} />}
@@ -609,8 +637,6 @@ function Settings({openConnect, pickFolder, confirm, openLang, openPasswords}) {
         <Text className="font-heavy text-h2 text-cloud mt-3">{t('Extração')}</Text>
         <Row label={t('Extrair automaticamente')} value={onOff(c.autoExtract)} onPress={flip('autoExtract')} />
         <Row label={t('Apagar o compactado depois')} value={onOff(c.deleteArchive)} onPress={flip('deleteArchive')} />
-        <Row label={t('Extrair durante o download')} value={onOff(c.extractWhileDownloading)} onPress={flip('extractWhileDownloading')} />
-        {c.extractWhileDownloading ? <Text className="font-semi text-cap text-mist px-2">{t('A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.')}</Text> : null}
         <Row focusKey="set-passwords" label={t('Senhas de arquivos')} value={c.passwords.length ? tn(c.passwords.length, '{n} salva', '{n} salvas') : t('Adicionar')} onPress={() => openPasswords()} />
         <Text className="font-heavy text-h2 text-cloud mt-3">{t('Som')}</Text>
         <Row label={t('Música de fundo')} value={onOff(c.music)} onPress={flip('music')} />

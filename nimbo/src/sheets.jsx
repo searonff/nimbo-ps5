@@ -30,6 +30,7 @@ export function NotesSheet({title, notes, onClose}) {
   const blocks = noteBlocks(notes);
   return (
     <Sheet title={title} onClose={onClose} width={1000}>
+      <View className="flex-row"><Button primary label="Fechar" onPress={onClose} /></View>
       <ScrollView className="max-h-[440px]">
         <View className="gap-1 pr-2">
           {blocks.length ? blocks.map((b, i) => (
@@ -43,7 +44,6 @@ export function NotesSheet({title, notes, onClose}) {
           )) : <Text className="font-semi text-body text-mist">{t('Esta versão não tem notas.')}</Text>}
         </View>
       </ScrollView>
-      <View className="flex-row"><Button primary label="Fechar" onPress={onClose} /></View>
     </Sheet>
   );
 }
@@ -62,6 +62,9 @@ function Toggle({label, value, onChange}) {
 /* item da nuvem: escolher arquivos, destino e extração */
 export function ItemSheet({item: initial, onClose, onPickFolder}) {
   const [armed, setArmed] = useState(false);
+  // O cursor já começa em "Baixar": o caso comum é só confirmar.
+  const {focus} = useFocus();
+  useEffect(() => { const tm = setTimeout(() => focus('sheet-go'), 0); return () => clearTimeout(tm); }, []);
   // Real-Debrid e AllDebrid só mandam a lista de arquivos quando o item é aberto.
   const [item, setItem] = useState(initial);
   const [loadErr, setLoadErr] = useState('');
@@ -110,6 +113,27 @@ export function ItemSheet({item: initial, onClose, onPickFolder}) {
           </View>
         </View>
       </View>
+      {/* Ações em cima: dá para baixar sem rolar a lista de arquivos. */}
+      <View className="flex-row gap-2">
+        <Toggle label={t('Extrair ao terminar')} value={extract} onChange={setExtract} />
+        <Toggle label={t('Apagar o compactado depois')} value={del} onChange={setDel} />
+      </View>
+      <View className="flex-row gap-3 items-center">
+        <Button primary focusKey="sheet-go" label={item.ready ? `Baixar ${fmt(total)}` : 'Baixar quando ficar pronto'} onPress={start} />
+        <Button focusKey="sheet-cancel" label={t('Cancelar')} onPress={onClose} />
+        <View className="flex-1" />
+        {/* Apagar do TorBox pede um segundo toque para confirmar. */}
+        <Button danger focusKey="sheet-delete" label={armed === 'busy' ? 'Apagando…' : armed ? 'Confirmar exclusão' : 'Apagar da nuvem'}
+          onPress={() => {
+            if (armed === 'busy') return;
+            if (!armed) { setArmed(true); return; }
+            setArmed('busy');
+            prov.remove(item).then(() => {
+              ui.set({cloud: (ui.get().cloud || []).filter(x => !((x.provider || 'torbox') === (item.provider || 'torbox') && x.kind === item.kind && x.id === item.id))});
+              toast(`Apagado do ${prov.name}`, 'ok'); onClose();
+            }, e => { setArmed(false); toast(e.message, 'bad'); });
+          }} />
+      </View>
       {item.ready && item.files.length > 1 ? (
         <View className="flex-row items-center gap-3">
           <View className="flex-1"><Text className="font-semi text-cap text-mist">{t(`${picked.size} de ${item.files.length} arquivos marcados`)}</Text></View>
@@ -133,26 +157,6 @@ export function ItemSheet({item: initial, onClose, onPickFolder}) {
           </View>
         </ScrollView>
       ) : null}
-      <View className="flex-row gap-2">
-        <Toggle label={t('Extrair ao terminar')} value={extract} onChange={setExtract} />
-        <Toggle label={t('Apagar o compactado depois')} value={del} onChange={setDel} />
-      </View>
-      <View className="flex-row gap-3 items-center">
-        <Button primary focusKey="sheet-go" label={item.ready ? `Baixar ${fmt(total)}` : 'Baixar quando ficar pronto'} onPress={start} />
-        <Button focusKey="sheet-cancel" label={t('Cancelar')} onPress={onClose} />
-        <View className="flex-1" />
-        {/* Apagar do TorBox pede um segundo toque para confirmar. */}
-        <Button danger focusKey="sheet-delete" label={armed === 'busy' ? 'Apagando…' : armed ? 'Confirmar exclusão' : 'Apagar da nuvem'}
-          onPress={() => {
-            if (armed === 'busy') return;
-            if (!armed) { setArmed(true); return; }
-            setArmed('busy');
-            prov.remove(item).then(() => {
-              ui.set({cloud: (ui.get().cloud || []).filter(x => !((x.provider || 'torbox') === (item.provider || 'torbox') && x.kind === item.kind && x.id === item.id))});
-              toast(`Apagado do ${prov.name}`, 'ok'); onClose();
-            }, e => { setArmed(false); toast(e.message, 'bad'); });
-          }} />
-      </View>
     </Sheet>
   );
 }
@@ -186,7 +190,12 @@ export function FolderSheet({start, onPick, onClose}) {
           </View>
         ))}
       </View>
-      <Text className="font-semi text-body text-mist">{path}</Text>
+      {/* Confirmar fica em cima, junto do caminho: não precisa rolar a lista até o fim. */}
+      <View className="flex-row items-center gap-3">
+        <View className="flex-1"><Text className="font-semi text-body text-mist" numberOfLines={1}>{path}</Text></View>
+        <Button primary small label={t('Usar esta pasta')} onPress={() => { onPick(path); onClose(); }} />
+        <Button small label={t('Nova pasta')} onPress={newFolder} />
+      </View>
       <ScrollView className="max-h-[300px]">
         <View className="gap-1">
           {parent ? <View onPress={() => setPath(parent)} className="px-4 h-[42px] justify-center rounded-xl border-2 border-transparent focused:border-sun">
@@ -199,10 +208,6 @@ export function FolderSheet({start, onPick, onClose}) {
           {!entries.length ? <Text className="font-body text-cap text-mist px-4">{t('Nenhuma subpasta')}</Text> : null}
         </View>
       </ScrollView>
-      <View className="flex-row gap-3">
-        <Button primary label={t('Usar esta pasta')} onPress={() => { onPick(path); onClose(); }} />
-        <Button label={t('Nova pasta')} onPress={newFolder} />
-      </View>
     </Sheet>
   );
 }
@@ -257,6 +262,9 @@ export function PasswordsSheet({onClose}) {
       <View className="flex-row gap-3">
         <Button primary focusKey="pw-add" label={t('Adicionar senha')} onPress={add} />
         {list.length ? <Button label={t(show ? 'Ocultar senhas' : 'Mostrar senhas')} onPress={() => setShow(x => !x)} /> : null}
+        <View className="flex-1" />
+        {list.length > 1 ? <Button danger label={t(armed === 'all' ? 'Confirmar: apagar todas' : 'Apagar todas')} onPress={delAll} /> : null}
+        <Button label={t('Fechar')} onPress={onClose} />
       </View>
       {list.length ? (
         <ScrollView className="max-h-[330px]">
@@ -272,10 +280,6 @@ export function PasswordsSheet({onClose}) {
           </View>
         </ScrollView>
       ) : <Text className="font-semi text-body text-mist">{t('Nenhuma senha salva ainda.')}</Text>}
-      <View className="flex-row gap-3">
-        <Button label={t('Fechar')} onPress={onClose} />
-        {list.length > 1 ? <Button danger label={t(armed === 'all' ? 'Confirmar: apagar todas' : 'Apagar todas')} onPress={delAll} /> : null}
-      </View>
     </Sheet>
   );
 }

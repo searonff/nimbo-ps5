@@ -23,6 +23,10 @@ function list(path, sort = 'name') {
   } catch (_) { return null; }
 }
 const SORTS = [['name', 'Nome'], ['date', 'Mais novos'], ['size', 'Maiores']];
+// Filtro por tipo (usa as mesmas categorias do Armazenamento). Pastas aparecem em "Todos" e "Pastas".
+const SHOW = [['all', 'Todos'], ['dir', 'Pastas'], ['video', 'Vídeos'], ['archive', 'Compactados'],
+  ['package', 'Pacotes e imagens'], ['audio', 'Áudio'], ['image', 'Imagens'], ['other', 'Outros']];
+function shows(e, f) { return f === 'all' || (f === 'dir' ? e.isDirectory : !e.isDirectory && category(e.name) === f); }
 
 // Ícone por tipo: cor + sigla curta, legível de longe na TV.
 const TYPE_BADGE = {
@@ -75,6 +79,7 @@ export function Files({pickFolder, confirm}) {
   const [tick, setTick] = useState(0);
   const [menu, setMenu] = useState(null);
   const sort = useStore(config, c => c.filesSort || 'name');
+  const show = useStore(config, c => (SHOW.some(x => x[0] === c.filesShow) ? c.filesShow : 'all'));
   // Seleção múltipla: □ marca/desmarca o item com o cursor (arquivo ou pasta, em qualquer pasta).
   const [sel, setSel] = useState(() => new Map());   // caminho completo -> {name, isDirectory, size}
   const [selMode, setSelMode] = useState(false);
@@ -100,7 +105,8 @@ export function Files({pickFolder, confirm}) {
   const tasks = useStore(queue, q => q.tasks);
   const fsTick = useStore(ui, x => x.fsTick || 0);
   useEffect(() => setTick(n => n + 1), [tasks.length, fsTick]);
-  const entries = list(path, sort) || [];
+  const listed = list(path, sort) || [];
+  const entries = show === 'all' ? listed : listed.filter(e => shows(e, show));
   const drive = all.filter(d => path === d.path || path.startsWith(`${d.path}/`)).sort((a, b) => b.path.length - a.path.length)[0];
   const up = drive && path !== drive.path ? dirname(path) : null;
   const refresh = () => setTick(t => t + 1);
@@ -165,6 +171,7 @@ export function Files({pickFolder, confirm}) {
         <View className="flex-1" />
         {up ? <Button small focusKey="files-up" label={t('Voltar uma pasta')} onPress={() => openDir(up)} /> : null}
         <Button small label={t(`Ordem: ${SORTS.find(x => x[0] === sort)[1]}`)} onPress={() => config.set({filesSort: SORTS[(SORTS.findIndex(x => x[0] === sort) + 1) % SORTS.length][0]})} />
+        <Button small label={t(`Mostrar: ${SHOW.find(x => x[0] === show)[1]}`)} onPress={() => config.set({filesShow: SHOW[(SHOW.findIndex(x => x[0] === show) + 1) % SHOW.length][0]})} />
         <Button small focusKey="files-select" label={selMode ? 'Sair da seleção' : 'Selecionar'} onPress={() => { if (selMode) clearSel(); else { enterSel(); if (entries.length) setTimeout(() => focus('frow:0'), 0); } }} />
         <Button small label={t('Nova pasta')} onPress={async () => {
           const r = await Keyboard.open({title: t('Nome da nova pasta'), maxLength: 80, type: 'basic'});
@@ -176,7 +183,7 @@ export function Files({pickFolder, confirm}) {
       </View>
       <ScrollView className="flex-1">
         <View className="gap-1 pb-24">
-          {!entries.length ? <Text className="font-semi text-body text-mist">{t('Pasta vazia.')}</Text> : null}
+          {!entries.length ? <Text className="font-semi text-body text-mist">{listed.length ? t('Nada deste tipo nesta pasta.') : t('Pasta vazia.')}</Text> : null}
           {entries.slice(0, 400).map((e, i) => {
             const kind = e.isDirectory ? '' : archiveKind(e.name);
             return (
@@ -468,7 +475,8 @@ export function Storage({confirm}) {
               <View className="gap-2 rounded-3xl bg-glass border-2 border-line px-6 py-5">
                 <Text className="font-heavy text-lead text-cloud">{t('Maiores pastas')}</Text>
                 {scan.dirs.map(([name, size]) => (
-                  <View key={name} className="gap-1">
+                  // Focável só para a rolagem pelo controle chegar até aqui (sem isso a seção ficava fora de alcance).
+                  <View key={name} onPress={() => {}} className="gap-1 rounded-xl px-3 py-1 border-2 border-transparent focused:border-rim">
                     <View className="flex-row justify-between gap-3">
                       <View className="flex-1 flex-row items-center gap-3">
                         <Text className="font-semi text-body text-cloud" numberOfLines={1}>{name}</Text>

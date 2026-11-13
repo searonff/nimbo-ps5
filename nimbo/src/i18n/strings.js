@@ -458,10 +458,12 @@ export default {
 "Novidades da versão {1}": "What's new in version {1}",
 "Esta versão não tem notas.": "This version has no notes.",
 "Luz do controle mostra o andamento": "Controller light shows progress",
-"Extrair durante o download": "Extract while downloading",
-"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "Extraction runs alongside the next download. Both get a bit slower, and the drive needs room for both.",
 "Remover": "Remove",
-"Limpar falhas": "Clear failed"
+"Limpar falhas": "Clear failed",
+"Mostrar: {1}": "Show: {1}",
+"Pastas": "Folders",
+"agora": "now",
+"Nada deste tipo nesta pasta.": "Nothing of this type in this folder."
 },
 "es": {
 "Painel": "Inicio",
@@ -921,10 +923,12 @@ export default {
 "Novidades da versão {1}": "Novedades de la versión {1}",
 "Esta versão não tem notas.": "Esta versión no tiene notas.",
 "Luz do controle mostra o andamento": "La luz del mando muestra el progreso",
-"Extrair durante o download": "Extraer durante la descarga",
-"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "La extracción se ejecuta junto con la siguiente descarga. Ambas van un poco más lentas y el disco necesita espacio para las dos.",
 "Remover": "Quitar",
-"Limpar falhas": "Borrar fallidos"
+"Limpar falhas": "Borrar fallidos",
+"Mostrar: {1}": "Mostrar: {1}",
+"Pastas": "Carpetas",
+"agora": "ahora",
+"Nada deste tipo nesta pasta.": "Nada de este tipo en esta carpeta."
 },
 "fr": {
 "Painel": "Accueil",
@@ -1384,10 +1388,12 @@ export default {
 "Novidades da versão {1}": "Nouveautés de la version {1}",
 "Esta versão não tem notas.": "Cette version n'a pas de notes.",
 "Luz do controle mostra o andamento": "La lumière de la manette indique la progression",
-"Extrair durante o download": "Extraire pendant le téléchargement",
-"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "L'extraction s'exécute en même temps que le téléchargement suivant. Les deux sont un peu plus lents et le disque doit avoir de la place pour les deux.",
 "Remover": "Retirer",
-"Limpar falhas": "Effacer les échecs"
+"Limpar falhas": "Effacer les échecs",
+"Mostrar: {1}": "Afficher : {1}",
+"Pastas": "Dossiers",
+"agora": "en cours",
+"Nada deste tipo nesta pasta.": "Rien de ce type dans ce dossier."
 },
 "de": {
 "Painel": "Start",
@@ -1847,10 +1853,12 @@ export default {
 "Novidades da versão {1}": "Neu in Version {1}",
 "Esta versão não tem notas.": "Diese Version hat keine Hinweise.",
 "Luz do controle mostra o andamento": "Controller-Licht zeigt den Fortschritt",
-"Extrair durante o download": "Während des Downloads entpacken",
-"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "Das Entpacken läuft parallel zum nächsten Download. Beides wird etwas langsamer, und das Laufwerk braucht Platz für beides.",
 "Remover": "Entfernen",
-"Limpar falhas": "Fehlgeschlagene löschen"
+"Limpar falhas": "Fehlgeschlagene löschen",
+"Mostrar: {1}": "Anzeigen: {1}",
+"Pastas": "Ordner",
+"agora": "jetzt",
+"Nada deste tipo nesta pasta.": "Nichts von diesem Typ in diesem Ordner."
 },
 "it": {
 "Painel": "Home",
@@ -2310,9 +2318,11 @@ export default {
 "Novidades da versão {1}": "Novità della versione {1}",
 "Esta versão não tem notas.": "Questa versione non ha note.",
 "Luz do controle mostra o andamento": "La luce del controller mostra l'avanzamento",
-"Extrair durante o download": "Estrai durante il download",
-"A extração roda junto com o próximo download. Os dois ficam um pouco mais lentos, e o disco precisa de espaço para os dois.": "L'estrazione avviene insieme al download successivo. Entrambi rallentano un po' e il disco deve avere spazio per tutti e due.",
 "Remover": "Rimuovi",
-"Limpar falhas": "Cancella falliti"
+"Limpar falhas": "Cancella falliti",
+"Mostrar: {1}": "Mostra: {1}",
+"Pastas": "Cartelle",
+"agora": "ora",
+"Nada deste tipo nesta pasta.": "Niente di questo tipo in questa cartella."
 }
 };

@@ -432,18 +432,15 @@ function step() {
     }
   } else if (ui.get().speed) ui.set({speed: 0});
 
-  const parallel = !!config.get().extractWhileDownloading;
-  if (cj || ct) setAwake(true);
+  if (cj || ct) { setAwake(true); return; }
   if (held || fsBusy()) return;   // disco preso numa exclusão (ou o app se atualizando): começa depois
-  // Paralelo: só extração anda junto com download (cópia e movimentação disputariam o disco à toa).
+  // Uma coisa por vez. O SDK pede para não extrair durante download: o limite de memória do
+  // descompactador (64 MiB) supõe que nada grande roda junto.
   const task = tasks().find(t => t.state === 'queued');
-  const canTask = !ct && task && (!cj || (parallel && task.type === 'extract'));
-  if (canTask) { setAwake(true); guard((task.type === 'extract' ? runExtract : runCopy)(task), p => patchTask(task.id, p), 'task'); }
+  if (task) { setAwake(true); guard((task.type === 'extract' ? runExtract : runCopy)(task), p => patchTask(task.id, p), 'task'); return; }
   const job = jobs().find(j => j.state === 'queued');
-  const runningTask = ct ? tasks().find(t => t.id === ct.id) : canTask ? task : null;
-  const canJob = !cj && job && (!runningTask || (parallel && runningTask.type === 'extract'));
-  if (canJob) { setAwake(true); guard(startJob(job), p => patchJob(job.id, p), 'job'); }
-  if (!cj && !ct && !canTask && !canJob) setAwake(false);
+  if (job) { setAwake(true); guard(startJob(job), p => patchJob(job.id, p), 'job'); return; }
+  setAwake(false);
 }
 
 let watchBusy = false;
